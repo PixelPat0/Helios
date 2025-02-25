@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  
+<div class="container">
+<br/><br/>
+    <div class="card mb-3">
+        <div class="row g-0">
+          <div class="col-md-4">
+            <img src="{{ product.image.url }}" class="img-fluid rounded-start" alt="...">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+                <center>
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="card-text">{{ product.description }}</p>
+
+              {% if product.is_sale %}
+
+              <div class="d-flex justify-content-center small text-warning mb-2">
+                <div class="bi-star-fill"></div>
+                &nbsp;&nbsp;Sale!!&nbsp;&nbsp;
+                <div class="bi-star-fill"></div>
+                </div>
+                <!-- Product price-->
+                <strike>
+                ${{ product.price }}
+                </strike>
+                &nbsp;
+                ${{ product.sale_price }}
+
+              {% else %}
+                <!-- Product price-->
+                ${{ product.price }}
+                <br/>ID: {{product.id}}
+              {% endif %}
+
+                <br/><br/>
+                
+              <a href="{% url 'home' %}" class="btn btn-secondary">Home</a>
+              <button type="button"  value="{{ product.id }}" class="btn btn-secondary" id="add-cart">Add to Cart</button>
+                </center>
+            </div>
+          </div>
+        </div>
+      </div>
+</div> 
+</br></br></br></br></br></br></br></br>
+
+<script>
+  // Check if the button is pressed
+  $(document).on('click', '#add-cart', function(e){
+      e.preventDefault();
+      console.log('Add to Cart button clicked'); // Debugging step
+      $.ajax({
+          type: 'POST',
+          url: '{% url 'cart_add' %}',
+          data: {
+            product_id: $(this).val(),
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+          },
+          success: function(json){
+              console.log("AJAX Response:", json); // Log the response to the console
+              if (json.qty !== undefined) {
+                  // Update the cart count in the navbar
+                  document.getElementById("cart_quantity").textContent = json.qty;
+                  alert('Product added to cart'); // Notify the user
+              } else {
+                  console.error("Invalid response: qty is undefined");
+              }
+          },
+          error: function(xhr, errmsg, err){
+              console.log(xhr.status + ": " + xhr.responseText);  // Log any errors
+          }
+      });
+  });
+  </script>
+
+{% endblock %}
