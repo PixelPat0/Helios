@@ -1,81 +1,92 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-  
-<div class="container">
-<br/><br/>
-    <div class="card mb-3">
-        <div class="row g-0">
-          <div class="col-md-4">
-            <img src="{{ product.image.url }}" class="img-fluid rounded-start" alt="...">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-                <center>
-              <h5 class="card-title">{{ product.name }}</h5>
-              <p class="card-text">{{ product.description }}</p>
-
-              {% if product.is_sale %}
-
-              <div class="d-flex justify-content-center small text-warning mb-2">
-                <div class="bi-star-fill"></div>
-                &nbsp;&nbsp;Sale!!&nbsp;&nbsp;
-                <div class="bi-star-fill"></div>
+    <div class="container mt-5 mb-5">
+        <div class="card shadow">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ product.image.url }}" class="img-fluid rounded-start" alt="Product Image">
                 </div>
-                <!-- Product price-->
-                <strike>
-                ${{ product.price }}
-                </strike>
-                &nbsp;
-                ${{ product.sale_price }}
-
-              {% else %}
-                <!-- Product price-->
-                ${{ product.price }}
-                <br/>ID: {{product.id}}
-              {% endif %}
-
-                <br/><br/>
-                
-              <a href="{% url 'home' %}" class="btn btn-secondary">Home</a>
-              <button type="button"  value="{{ product.id }}" class="btn btn-secondary" id="add-cart">Add to Cart</button>
-                </center>
+                <div class="col-md-8">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                        </div>
+                        <p class="card-text">{{ product.description }}</p>
+                        
+                        {% if product.is_sale %}
+                            <div class="d-flex justify-content-center small text-warning mb-3">
+                                <div class="bi-star-fill me-1"></div>
+                                <span class="fs-5 fw-bold">Sale!!!</span>
+                                <div class="bi-star-fill ms-1"></div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <strike class="text-muted me-3">$ {{ product.price }}</strike>
+                                <span class="text-danger fw-bold">$ {{ product.sale_price }}</span>
+                            </div>
+                        {% else %}
+                            <div class="d-flex justify-content-center mt-3">
+                                <span class="text-muted fw-medium">$ {{ product.price }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-center mt-4">
+                            <select class="form-select form-select-sm w-25 mx-2" id="qty-cart">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex justify-content-center mt-4">
+                            <div class="gap-3">
+                                <a href="{% url 'home' %}" class="btn btn-outline-dark">
+                                    <i class="bi bi-house-door me-2"></i>Home
+                                </a>
+                                <button type="button" value="{{ product.id }}" class="btn btn-primary" id="add-cart">
+                                    <i class="bi bi-cart-plus-fill me-2"></i>Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-</div> 
-</br></br></br></br></br></br></br></br>
+    </div>
 
-<script>
-  // Check if the button is pressed
-  $(document).on('click', '#add-cart', function(e){
-      e.preventDefault();
-      console.log('Add to Cart button clicked'); // Debugging step
-      $.ajax({
-          type: 'POST',
-          url: '{% url 'cart_add' %}',
-          data: {
-            product_id: $(this).val(),
+    <script>
+        $(document).on('click', '#add-cart', function(e) {
+            e.preventDefault();
+            const productId = $(this).val();
+            console.log('Add to Cart button clicked for product:', productId);
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'cart_add' %}',
+                data: {
+            product_id: $('#add-cart').val(),
+            product_qty: $('#qty-cart option:selected').text(),
             csrfmiddlewaretoken: '{{ csrf_token }}',
             action: 'post'
-          },
-          success: function(json){
-              console.log("AJAX Response:", json); // Log the response to the console
-              if (json.qty !== undefined) {
-                  // Update the cart count in the navbar
-                  document.getElementById("cart_quantity").textContent = json.qty;
-                  alert('Product added to cart'); // Notify the user
-              } else {
-                  console.error("Invalid response: qty is undefined");
-              }
-          },
-          error: function(xhr, errmsg, err){
-              console.log(xhr.status + ": " + xhr.responseText);  // Log any errors
-          }
-      });
-  });
-  </script>
+                },
+                success: function(response) {
+                    console.log('AJAX Response:', response);
+                    if (response.qty !== undefined) {
+                        document.getElementById("cart_quantity").textContent = response.qty;
+                        alert('Product added to cart');
+                    } else {
+                        console.error('Invalid response: qty is undefined');
+                        alert('Error adding product to cart. Please try again.');
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    console.error('AJAX Error:', textStatus, errorThrown);
+                    alert('Error adding product to cart. Please try again.');
+                }
+            });
+        });
+    </script>
 
 {% endblock %}
