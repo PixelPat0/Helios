@@ -11,7 +11,7 @@ def cart_summary(request):
     cart = Cart(request)
     #get the products
     cart_products = cart.get_prods()
-    quantities = cart.get_quants
+    quantities = cart.get_quants()
     return render(request, 'cart_summary.html', {"cart_products": cart_products, "quantities":quantities})
 
 
@@ -40,7 +40,41 @@ def cart_add(request):
         return JsonResponse({'Error': 'Invalid request'}, status=400)
 
 def cart_delete(request):
-    pass
+    cart = Cart(request)
+    # Test for POST request
+    if request.POST.get('action') == 'post':
+        # Extract product_id from POST data
+        product_id = int(request.POST.get('product_id'))
+        # call delete function in Cart
+        cart.delete(product=product_id)
+        response = JsonResponse({'product': product_id})
+        return response
+    
 
 def cart_update(request):
-    pass
+    cart = Cart(request)
+    # Debugging: Print the current cart session
+    print("Current cart session before update:", cart.cart)
+
+    # Test for POST request
+    if request.POST.get('action') == 'post':
+        # Extract product_id from POST data
+        product_id = int(request.POST.get('product_id'))
+        product_qty = int(request.POST.get('product_qty'))
+
+        # Debugging: Print the received product_id and product_qty
+        print("Received product_id:", product_id)
+        print("Received product_qty:", product_qty)
+
+        # Update the cart
+        cart.update(product=product_id, quantity=product_qty)
+
+        # Debugging: Print the updated cart session
+        print("Updated cart session:", cart.cart)
+
+        # Return a JSON response
+        response = JsonResponse({'qty': product_qty})
+        return response
+    else:
+        # If it's not a POST request, return an error
+        return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -32,12 +32,51 @@ class Cart():
         product_ids = self.cart.keys()
         #use ids to lookuo products in the database model
         products = Product.objects.filter(id__in=product_ids)
-
         #return the looked up products
         return products
     
     def get_quants(self):
-        quantities = self.cart #get the quantities
+        # Get the quantities
+        quantities = self.cart
         return quantities
+    
+    def update(self, product, quantity):
+        product_id = str(product)
+        product_qty = int(quantity)
+        # Debugging: Print the product_id and product_qty
+        print("Updating product:", product_id, "with quantity:", product_qty)
+        # Update the cart
+        self.cart[product_id] = product_qty
+        # Debugging: Print the updated cart
+        print("Updated cart:", self.cart)
+        # Update the session
+        self.session.modified = True
+        return self.cart
+    
+    def delete(self, product):
+        product_id = str(product)
+        #delete from dictionary/cart
+        if product_id in self.cart:
+            del self.cart[product_id]
+            self.session.modified = True
+    
+
+
+
+
+
+
+        #product_id = str(product)
+        #product_qty = int(quantity)
+        #logic
+        #outcart = self.cart
+        #update dictionary/cart
+        #outcart[product_id] = product_qty
+        #update session 
+        #self.session.modified = True
+        #thing = self.cart
+        #return thing
+       # self.cart[product_id] = product_qty
+        #self.session.modified = True
 
 

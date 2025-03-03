@@ -1,23 +1,34 @@
-def cart_add(request):
-    cart = Cart(request)
-    # Test for POST request
-    if request.POST.get('action') == 'post':
-        # Extract product_id from POST data
-        product_id = int(request.POST.get('product_id'))
-        # Look up the product in the database
-        product = get_object_or_404(Product, id=product_id)
-        # Add the product to the cart
-        cart.add(product=product)
-        # Debugging: Print the product and cart session
-        print("Product added to cart:", product.name)
-        print("Cart session:", cart.cart)
-        # Get Cart Count
-        cart_quantity = cart.__len__()
-        # Debugging: Print the cart quantity
-        print("Cart quantity:", cart_quantity)
-        # Return a JSON response
-        response = JsonResponse({'qty': cart_quantity})
-        return response
-    else:
-        # If it's not a POST request, return an error
-        return JsonResponse({'Error': 'Invalid request'}, status=400)
+
+{% comment %} <script>
+
+  $(document).on('click', '.update-cart', function(e) {
+    e.preventDefault();
+    // Grab the product ID
+    var productId = $(this).data('index');
+    console.log('Update Cart button clicked for product:', productId);
+
+    // Get the selected quantity
+    var productQty = $('#qty-' + productId).val();
+    console.log('Selected quantity:', productQty);
+
+    $.ajax({
+        type: 'POST',
+        url: '{% url 'cart_update' %}',
+        data: {
+            product_id: productId,
+            product_qty: productQty,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(response) {
+            console.log('Cart updated:', response);
+            // Optionally, update the UI dynamically instead of reloading the page
+            location.reload(); // Reload the page to reflect the updated cart
+        },
+        error: function(xhr, errmsg, err) {
+            console.log('Error:', xhr.status + ": " + xhr.responseText); // Log any errors
+        }
+    });
+});
+
+</script>  
