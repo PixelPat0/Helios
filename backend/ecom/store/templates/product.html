@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
     <div class="container mt-5 mb-5">
@@ -21,12 +22,12 @@
                                 <div class="bi-star-fill ms-1"></div>
                             </div>
                             <div class="d-flex justify-content-center">
-                                <strike class="text-muted me-3">$ {{ product.price }}</strike>
-                                <span class="text-danger fw-bold">$ {{ product.sale_price }}</span>
+                                <strike class="text-muted me-3">ZMK {{ product.price|floatformat:2|intcomma }}</strike>
+                                <span class="text-danger fw-bold">ZMK {{ product.sale_price|floatformat:2|intcomma }}</span>
                             </div>
                         {% else %}
                             <div class="d-flex justify-content-center mt-3">
-                                <span class="text-muted fw-medium">$ {{ product.price }}</span>
+                                <span class="text-muted fw-medium">ZMK {{ product.price|floatformat:2|intcomma }}</span>
                             </div>
                         {% endif %}
                         

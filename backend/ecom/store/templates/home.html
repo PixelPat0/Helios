@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
 
@@ -45,10 +46,10 @@
                                         </div>
                                         <!-- Product price-->
                                         <strike>
-                                        ${{ product.price }}
+                                        ZMK {{ product.price|floatformat:2|intcomma }}
                                         </strike>
                                         &nbsp;
-                                        ${{ product.sale_price }}
+                                        ZMK {{ product.sale_price|floatformat:2|intcomma }}
                                         <!-- Product description-->
                                     </div>
                                 </div>
@@ -71,7 +72,7 @@
                                     <!-- Product name-->
                                     <h5 class="fw-bolder">{{ product.name }}</h5>
                                     <!-- Product price-->
-                                    ${{ product.price }}
+                                    ZMK{{ product.price|floatformat:2|intcomma }}
                                     <!-- Product description-->
                                 </div>
                             </div>

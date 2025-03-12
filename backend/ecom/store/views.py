@@ -8,6 +8,12 @@ from .forms import SignUpForm
 from django import forms
 
 
+def category_summary(request):
+    categories = Category.objects.all()
+    return render(request, 'category_summary.html', {"categories": categories})
+
+
+
 def category(request, foo):
     # Replace Hyphens with Spaces
     foo = foo.replace('-', ' ')
