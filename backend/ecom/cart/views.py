@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from .cart import Cart
 from store.models import Product
 from django.http import JsonResponse
+from django.contrib import messages
 
 # Create your views here.
 
@@ -35,6 +36,7 @@ def cart_add(request):
         cart_quantity = cart.__len__()
         # Return a JSON response
         response = JsonResponse({'qty': cart_quantity})
+        messages.success(request, "Product added successfully")
         return response
     else:
         # If it's not a POST request, return an error
@@ -55,26 +57,20 @@ def cart_delete(request):
 def cart_update(request):
     cart = Cart(request)
     # Debugging: Print the current cart session
-    print("Current cart session before update:", cart.cart)
+    #print("Current cart session before update:", cart.cart)
 
     # Test for POST request
     if request.POST.get('action') == 'post':
         # Extract product_id from POST data
         product_id = int(request.POST.get('product_id'))
         product_qty = int(request.POST.get('product_qty'))
-
-        # Debugging: Print the received product_id and product_qty
-        print("Received product_id:", product_id)
-        print("Received product_qty:", product_qty)
-
         # Update the cart
         cart.update(product=product_id, quantity=product_qty)
-
         # Debugging: Print the updated cart session
-        print("Updated cart session:", cart.cart)
-
+        #print("Updated cart session:", cart.cart)
         # Return a JSON response
         response = JsonResponse({'qty': product_qty})
+        messages.success(request, "Your cart has been updated successfully!")
         return response
     else:
         # If it's not a POST request, return an error

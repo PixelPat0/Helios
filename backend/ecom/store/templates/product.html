@@ -76,15 +76,17 @@
                     console.log('AJAX Response:', response);
                     if (response.qty !== undefined) {
                         document.getElementById("cart_quantity").textContent = response.qty;
-                        alert('Product added to cart');
+                        console.log('Product added to cart');
+                        location.reload();
                     } else {
                         console.error('Invalid response: qty is undefined');
-                        alert('Error adding product to cart. Please try again.');
+                        console.log('Error adding product to cart. Please try again.');
+                        location.reload();
                     }
                 },
                 error: function(xhr, textStatus, errorThrown) {
                     console.error('AJAX Error:', textStatus, errorThrown);
-                    alert('Error adding product to cart. Please try again.');
+                    console.log('Error adding product to cart. Please try again.');
                 }
             });
         });
