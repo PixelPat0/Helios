@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <!-- Header-->
+    <header class="bg-dark py-5">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="text-center text-white">
+                <h1 class="display-4 fw-bolder">Update User Information</h1>
+                <p class="lead fw-normal text-white-50 mb-0">Update your User Information</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                </br></br>
+                <form method="POST" action="{% url 'update_info' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    </br></br>
+                    <button type="submit" class="btn btn-secondary">Update Profile</button>
+                </form>
+                </br></br>
+            </div>
+            <div class="col-md-6">
+                <!-- Placeholder for the image -->
+                <img src="path/to/your/image.jpg" class="img-fluid" alt="Responsive image">
+            </div>
+        </div>
+    </div>
+    </br></br>
+
+{% endblock %}
