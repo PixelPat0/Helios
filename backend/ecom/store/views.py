@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Product, Category, Profile
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
@@ -9,9 +9,29 @@ from django import forms
 from django.db.models import Q
 import json
 from cart.cart import Cart
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from .tokens import account_activation_token
 
 
+def activate(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
 
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Your account has been activated successfully!')
+        return redirect('login')
+    else:
+        messages.error(request, 'Activation link is invalid!')
+        return redirect('home')
 
 def search(request):
      #determine if the user has filled out the form
@@ -160,18 +180,35 @@ def logout_user(request):
 
 # Register view to create a new user
 def register_user(request):
-    form = SignUpForm()
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
+            # Save user but don't activate yet
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+
+            # Get username and email from the form
             username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-            # Authenticate and log in the user after registration
-            user = authenticate(username=username, password=password)
-            login(request, user)
-            messages.success(request, "User Created Successfully - Please Fill out your profile")
-            return redirect('update_info')
+            email = form.cleaned_data.get('email')
+
+            # Send activation email
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = account_activation_token.make_token(user)
+            activation_link = request.build_absolute_uri(
+                reverse('activate', kwargs={'uidb64': uid, 'token': token})
+            )
+            send_mail(
+                'Activate your account',
+                f'Click the link to activate your account: {activation_link}',
+                'noreply@yourdomain.com',
+                [email],
+                fail_silently=False,
+            )
+            messages.success(request, "Check your email to activate your account.")
+            return redirect('login')
         else:
             messages.error(request, "Registration failed. Please correct the errors below.")
+    else:
+        form = SignUpForm()
     return render(request, 'register.html', {'form': form})
