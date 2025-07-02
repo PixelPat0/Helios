@@ -2,34 +2,51 @@
 
 {% block content %}
 
-    <!-- Header-->
-    <header class="bg-dark py-5">
-        <div class="container px-4 px-lg-5 my-5">
-            <div class="text-center text-white">
-                <h1 class="display-4 fw-bolder">Update User Information</h1>
-                <p class="lead fw-normal text-white-50 mb-0">Update your User Information</p>
-            </div>
+<!-- Header -->
+<header class="bg-dark py-5 mb-4">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder">Update User Information</h1>
+            <p class="lead fw-normal text-white-50 mb-0">Keep your profile up to date for a better experience</p>
         </div>
-    </header>
+    </div>
+</header>
 
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                </br></br>
-                <form method="POST" action="{% url 'update_info' %}">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    </br></br>
-                    <button type="submit" class="btn btn-secondary">Update Profile</button>
-                </form>
-                </br></br>
-            </div>
-            <div class="col-md-6">
-                <!-- Placeholder for the image -->
-                <img src="path/to/your/image.jpg" class="img-fluid" alt="Responsive image">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0 rounded-lg mb-5">
+                <div class="card-header bg-secondary text-white text-center">
+                    <h3 class="font-weight-light my-2">Profile Details</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'update_info' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="text-center mb-4">
+                            {% if form.instance.profile_picture %}
+                                <img src="{{ form.instance.profile_picture.url }}" alt="Profile Picture" width="120" height="120" class="rounded-circle border border-3 border-secondary shadow-sm"/>
+                            {% else %}
+                                <img src="/media/profile_pics/default.jpg" alt="Default Profile Picture" width="120" height="120" class="rounded-circle border border-3 border-secondary shadow-sm"/>
+                            {% endif %}
+                        </div>
+                        <strong>Billing Information</strong>
+                        <hr class="my-3"/>
+                        {{ form.as_p }}
+
+                        <hr class="my-4"/>
+
+                        <strong>Shipping Information</strong>
+                        <hr class="my-3"/>
+                        {{ shipping_form.as_p }}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-    </br></br>
+</div>
 
 {% endblock %}

@@ -5,10 +5,28 @@ from django.db.models.signals import post_save
 
 
 
+
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return f'profile_pics/user_{instance.user.id}/{filename}'
 #customer profile
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     date_modified = models.DateTimeField(User, auto_now=True)
+    profile_picture = models.ImageField(upload_to=user_directory_path, default='profile_pics/default.jpg', blank=True)
+    national_id = models.CharField(max_length=50, blank=True)
+    gender = models.CharField(null=True, max_length=10, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    occupation = models.CharField(max_length=100, blank=True)
+    marital_status = models.CharField(max_length=20, choices=[
+        ('single', 'Single'),
+        ('married', 'Married'),
+        ('divorced', 'Divorced'),
+        ('widowed', 'Widowed'),
+        ('separated', 'Separated'),
+
+    ], blank = True)
+    
     phone = models.CharField(max_length=30, blank=True)
     address = models.CharField(max_length=200, blank=True)
     city = models.CharField(max_length=200, blank=True)

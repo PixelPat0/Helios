@@ -81,7 +81,10 @@
               </div></br>
 
              {% endfor %}
+             <div align="right">
              <h3>Total: ZMK{{ total|floatformat:2|intcomma }}</h3>
+             <a href="{% url 'checkout' %}" class="btn btn-success">Checkout</a>
+             </div>
              {% else %}
              Your cart is empty...
             </br></br></br></br></br></br>
@@ -185,43 +188,3 @@
   </script>
 
   {% endblock %}
-
-
-
-
-
-
-
-
-{% comment %} <script>
-  $(document).on('click', '.update-cart', function(e){
-      e.preventDefault();
-      //grab the product id
-      var productid = $(this).data('index');
-      console.log('Update button clicked for product:', productid);
-  
-      // Get the selected quantity
-      var productQty = $('#select' + productid + ' option:selected').text();
-  
-      $.ajax({
-          type: 'POST',
-          url: '{% url 'cart_update' %}',
-          data: {
-              product_id: productid,
-              product_qty: productQty,
-              csrfmiddlewaretoken: '{{ csrf_token }}',
-              action: 'post'
-          },
-          success: function(json) {
-              location.reload();
-          },
-          error: function(xhr, errmsg, err) {
-              console.error('AJAX Error:', errmsg);
-          }
-      });
-  });
-  </script>
-
-{% endblock %} {% endcomment %}
-
-

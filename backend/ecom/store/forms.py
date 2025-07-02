@@ -5,7 +5,7 @@ from .models import Profile
 
 
 class UserInfoForm(forms.ModelForm):
-    phone = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}), required=False)
+    phone = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Phone Number'}), required=False)
     address = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address'}), required=False)
     city = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}), required=False)
     province = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Province'}), required=False)
@@ -13,7 +13,14 @@ class UserInfoForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('phone', 'address', 'city', 'province', 'country',)
+        fields = (
+            'profile_picture', 'national_id', 'gender', 'date_of_birth', 'occupation',
+            'marital_status', 'phone', 'address', 'city', 'province', 'country'
+        )
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+        }
+        
 
 
 class ChangePasswordForm(SetPasswordForm):
