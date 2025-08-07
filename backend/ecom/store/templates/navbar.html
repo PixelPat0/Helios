@@ -44,9 +44,28 @@
                                 <li>
                                     <a class="dropdown-item" href="{% url 'update_info' %}">User Information</a>
                                 </li>
+                            </ul>
+
+                    {% if user.is_superuser %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Orders</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <!-- All Products Link -->
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'shipped_dash' %}">Shipped Orders</a>
+                                </li>
+                                <!-- Divider -->
+                                <li><hr class="dropdown-divider" /></li>
+                                <!-- Category Links -->
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'not_shipped_dash' %}">Unshipped Orders</a>
+                                </li>
                                 
                             </ul>
                         </li>
+                    {% endif %}
+
+
                     <!-- Logout Link (Visible if User is Logged In) -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Logout</a>

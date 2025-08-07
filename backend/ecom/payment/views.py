@@ -5,10 +5,29 @@ from payment.forms import ShippingForm, PaymentForm
 from payment.models import ShippingAddress, Order, OrderItem
 from django.contrib.auth.models import User
 from django.contrib import messages as message
+from store.models import Product
+
+
+def not_shipped_dash(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        orders = Order.objects.filter(shipped=False).order_by('date_ordered')
+        return render(request, 'payment/not_shipped_dash.html', {"orders": orders})
+    else:    
+        message.success(request, "Order Placed Successfully")
+        return redirect('home')
+
+def shipped_dash(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        orders = Order.objects.filter(shipped=True).order_by('date_ordered')
+        return render(request, 'payment/shipped_dash.html', {"orders": orders})
+    else:
+        message.success(request, "Access Denied")
+        return redirect('home')
+
 
 
 def process_order(request):
-    if request.POST:
+    if request.method == "POST":
         cart = Cart(request)
         cart_products = cart.get_prods()
         quantities = cart.get_quants()
@@ -37,8 +56,27 @@ def process_order(request):
             #Add Order Items
             # Get the order ID
             order_id = create_order.pk
+            #get product info
+            for product in cart_products:
+                product_id = product.id
+                # Get product price
+                if product.sale_price:
+                        price = product.sale_price
+                else:
+                        price = product.price
 
+                # Get product quantity
+                for key, value in quantities.items():
+                    if int(key) == product_id:
+                        # create order item
+                        create_order_item = OrderItem(order_id=order_id, product=product, user=user, quantity=value, price=price)
+                        create_order_item.save()
 
+            #delete our cart
+            for key in list(request.session.keys()):
+                 if key == "session_key":
+                      #delete the key
+                    del request.session[key]
 
             message.success(request, "Order Placed Successfully")
             return redirect('home')
@@ -46,6 +84,30 @@ def process_order(request):
             # If the user is not logged in
             create_order = Order(full_name=full_name, email=email, shipping_address=shipping_address, amount_paid=amount_paid  )
             create_order.save()
+
+            order_id = create_order.pk
+            #get product info
+            for product in cart_products:
+                product_id = product.id
+                # Get product price
+                if product.sale_price:
+                        price = product.sale_price
+                else:
+                        price = product.price
+
+                # Get product quantity
+                for key, value in quantities.items():
+                    if int(key) == product_id:
+                        # create order item
+                        create_order_item = OrderItem(order_id=order_id, product=product, quantity=value, price=price)
+                        create_order_item.save()
+
+            #delete our cart
+            for key in list(request.session.keys()):
+                 if key == "session_key":
+                      #delete the key
+                    del request.session[key]
+
 
             message.success(request, "Order Placed Successfully")
             return redirect('home')
