@@ -49,14 +49,14 @@ class Order(models.Model):
     def __str__(self):
         return f'Order - {str(self.id)}'
 
- # Need a mechanism that will add the date automatically when the order is shipped     
+# Need a mechanism that will add the date automatically when the order is shipped     
 @receiver(pre_save, sender=Order)
 def set_shipped_date_on_update(sender, instance, **kwargs):
     if instance.pk:
         now = datetime.datetime.now()
         obj = sender.objects.get(pk=instance.pk)
         if instance.shipped and not obj.shipped:
-            instance.date_shippied = now
+            instance.date_shipped = now
             
 
 
@@ -69,5 +69,5 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
 
 
-    def __str__(self):
+    def __str__(self): 
         return f'Order Item - {str(self.id)}'

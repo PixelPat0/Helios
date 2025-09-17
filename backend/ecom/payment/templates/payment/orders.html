@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+</br></br>
+    <div class="container">
+        <div class="row">
+            <center>
+                <div class="card">
+  <div class="card-header">
+    Order {{ order.id}} - ZMK{{ order.amount_paid }}
+  </div>
+  <div class="card-body">
+   Email: {{ order.email }}<br/>
+   {% if order.date_shipped %}
+        Date Shipped: {{ order.date_shipped }}
+    {% else %}
+        Date Ordered: {{ order.date_ordered }}
+    {% endif %}
+   <br>
+   {{ order.full_name }}<br/><br/><br/>
+   <pre>{{ order.shipping_address }}<pre>
+
+    {% for item in items %}
+        {{ item.product }} - {{ item.quantity }} - ZMK{{ item.price }}<br/>
+
+    {% endfor %}
+    <br/>
+
+    {% if not order.shipped %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="shipping_status" value="true">
+        <button type="submit "class="btn btn-success">Mark as Shipped</button> 
+    </form>
+    {% else %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="shipping_status" value="false">
+        <button type="submit "class="btn btn-danger">Mark as Not Shipped</button> 
+    </form>
+
+    {% endif %}
+
+  </div>
+</div>
+
+<br/><br/>
+                
+                
+            </center>  
+        </div>
+    </div>
+</br></br>
+
+
+
+
+{% endblock %}

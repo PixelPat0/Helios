@@ -5,20 +5,71 @@ from payment.forms import ShippingForm, PaymentForm
 from payment.models import ShippingAddress, Order, OrderItem
 from django.contrib.auth.models import User
 from django.contrib import messages as message
-from store.models import Product
+from store.models import Product, Profile
+import datetime 
 
+
+def orders(request, pk):
+    if request.user.is_authenticated and request.user.is_superuser:
+        # Get the order
+        order = Order.objects.get(id=pk)
+        # Get the order items
+        items = OrderItem.objects.filter(order=pk)
+        
+        if request.POST:
+            status = request.POST['shipping_status']
+            #check if true of false
+            if status == 'true':
+                order = Order.objects.filter(id=pk)
+                #Update the status
+                now = datetime.datetime.now()
+                order.update(shipped=True, date_shipped = now)
+            else:
+                # Get the order
+                order = Order.objects.filter(id=pk)
+                #Update the status
+                order.update(shipped=False)
+            message.success(request, "Shipping Status Updated Succesfully")
+            return redirect('orders', pk=pk)
+            return redirect('home')
+        return render(request, 'payment/orders.html', {"order":order, "items": items})
+    else:
+        message.success(request, "Access Denied")
+        return redirect('home')
 
 def not_shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped=False).order_by('date_ordered')
+        if request.POST:
+            status = request.POST['shipping_status']
+            num = request.POST['num']
+            # grab the specific order
+            order = Order.objects.get(id=num)
+            now = datetime.datetime.now()
+            # update only this order
+            order.shipped = True
+            order.date_shipped = now
+            order.save()
+            message.success(request, "Shipping Status Updated Successfully")
+            return redirect('home')
         return render(request, 'payment/not_shipped_dash.html', {"orders": orders})
     else:    
-        message.success(request, "Order Placed Successfully")
-        return redirect('home')
+            message.success(request, "Order Placed Successfully")
+            return redirect('home')
 
 def shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped=True).order_by('date_ordered')
+        if request.POST:
+            status = request.POST['shipping_status']
+            num = request.POST['num']
+            # grab the specific order
+            order = Order.objects.get(id=num)
+            # update only this order
+            order.shipped = False
+            order.save()
+            message.success(request, "Shipping Status Updated Successfully")
+            return redirect('home')
         return render(request, 'payment/shipped_dash.html', {"orders": orders})
     else:
         message.success(request, "Access Denied")
@@ -107,6 +158,13 @@ def process_order(request):
                  if key == "session_key":
                       #delete the key
                     del request.session[key]
+
+
+            # Delete Cart from database (old_cart)
+            current_user = Profile.objects.filter(user__id=request.user.id)
+            # Delete shopping cart in database(old_cart field)
+            current_user.update(old_cart="")
+
 
 
             message.success(request, "Order Placed Successfully")
