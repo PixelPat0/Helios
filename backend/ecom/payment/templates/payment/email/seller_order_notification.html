@@ -1,0 +1,40 @@
+{% load payment_extras %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .notification { padding: 20px; }
+        .items-list { margin: 20px 0; }
+        .total-section { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="notification">
+        <h2>New Order Received</h2>
+        <p>Order #{{ order_id }} has been placed containing your products.</p>
+        
+        <div class="items-list">
+            <h3>Items Ordered:</h3>
+            <ul>
+            {% for item in items %}
+                <li>
+                    {{ item.product.name }}
+                    <br>
+                    Quantity: {{ item.quantity }}
+                    <br>
+                    Price per unit: ZMK {{ item.price }}
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+
+        <div class="total-section">
+            <p>Your Items Total: ZMK {{ total_amount }}</p>
+            <p>Platform Fee: ZMK {{ commission }}</p>
+            <p>Net Amount: ZMK {{ net_amount }}</p>
+        </div>
+
+        <p>Please wait for further instructions from the admin regarding order fulfillment.</p>
+    </div>
+</body>
+</html>

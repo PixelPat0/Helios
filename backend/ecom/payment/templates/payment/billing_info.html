@@ -2,97 +2,128 @@
 {% load humanize %}
 
 {% block content %}
-
-<!-- Header-->
-<header class="bg-dark py-5">
-    <div class="container px-4 px-lg-5 my-5">
-        <div class="text-center text-white">
-            <h1 class="display-4 fw-bolder">Billing Information</h1>
-            <p class="lead fw-normal text-white-50 mb-0">Enter your Payment Information</p>
-        </div>
-    </div>
-</header>
-<br/><br/>
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card">
-                <div class="card-header">
-                    Order Summary
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Select Payment Method</h3>
                 </div>
                 <div class="card-body">
-                    {% for product in cart_products %}
-                        {{ product.name }}:
-                        {% if product.is_sale %}
-                            ZMK {{ product.sale_price }}
-                        {% else %}
-                            ZMK {{ product.price }}
-                        {% endif %}
+                    <!-- Order Summary -->
+                    <div class="mb-4">
+                        <h4>Order Summary</h4>
+                        <p class="text-muted mb-2">Total Amount: ZMK {{ total|floatformat:2|intcomma }}</p>
+                    </div>
 
+                    <!-- Payment Methods -->
+                    <div class="row g-3">
+                        <!-- MTN Mobile Money -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-phone"></i> MTN Mobile Money
+                                    </h5>
+                                    <form method="POST" action="{% url 'process_order' %}" class="payment-form" id="mtnForm" style="display: none;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="payment_method" value="mtn">
+                                        <div class="mb-3">
+                                            <label class="form-label">Phone Number</label>
+                                            <input type="tel" name="phone_number" class="form-control" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Pay with MTN Money</button>
+                                    </form>
+                                    <button class="btn btn-outline-primary w-100 select-payment" data-form="mtnForm">
+                                        Select MTN Money
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 
-                        <br/><br/>
-                        <small>Quantity:
-                        {% for key, value in quantities.items %}
-                            {% if key == product.id|slugify %}
-                                {{ value }}
-                            {% endif %}
-                        {% endfor %}</small>
-                        <br/><br/>
-                        
-                    {% endfor %}
-                    <strong>Total:  ZMK{{ total }} </strong>
-                    <br/><br/>
-                    <a href="{% url 'cart_summary' %}" class="btn btn-sm btm-outline-secondary">Update Items</a>
-                    
+                        <!-- Airtel Money -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-phone-fill"></i> Airtel Money
+                                    </h5>
+                                    <form method="POST" action="{% url 'process_order' %}" class="payment-form" id="airtelForm" style="display: none;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="payment_method" value="airtel">
+                                        <div class="mb-3">
+                                            <label class="form-label">Phone Number</label>
+                                            <input type="tel" name="phone_number" class="form-control" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Pay with Airtel Money</button>
+                                    </form>
+                                    <button class="btn btn-outline-primary w-100 select-payment" data-form="airtelForm">
+                                        Select Airtel Money
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Card -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-credit-card"></i> Bank Card
+                                    </h5>
+                                    <form method="POST" action="{% url 'process_order' %}" class="payment-form" id="cardForm" style="display: none;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="payment_method" value="card">
+                                        <div class="mb-3">
+                                            <label class="form-label">Card Number</label>
+                                            <input type="text" name="card_number" class="form-control" required>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6 mb-3">
+                                                <label class="form-label">Expiry Date</label>
+                                                <input type="text" name="card_expiry" class="form-control" placeholder="MM/YY" required>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <label class="form-label">CVV</label>
+                                                <input type="text" name="card_cvv" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Pay with Card</button>
+                                    </form>
+                                    <button class="btn btn-outline-primary w-100 select-payment" data-form="cardForm">
+                                        Select Card Payment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <br/><br/><br/>
-
-<div class="card">
-  <div class="card-header">
-    Shipping Information
-  </div>
-  <div class="card-body">
-    
-   Name:  {{ shipping_info.shipping_full_name }} <br/>
-   Email:  {{ shipping_info.shipping_email }} <br/>
-   Address 1:  {{ shipping_info.shipping_address1 }} <br/>
-   Address 2:  {{ shipping_info.shipping_address2 }} <br/>
-   City:  {{ shipping_info.shipping_city }} <br/>
-   Province:  {{ shipping_info.shipping_province }} <br/>
-   Postal Code:  {{ shipping_info.shipping_postal_code }} <br/>
-   Country:  {{ shipping_info.shipping_country }} <br/>
-    <br/>
-    <a href="{% url 'checkout' %}" class="btn btn-outline-secondary">Edit Shipping Information</a>
-    <br/><br/>
-</div>
-</div>
-
-</br>
-
-
-<div class="card">
-  <div class="card-header">
-    Billing Information
-  </div>
-  <div class="card-body">
-    <form method="post" action="{% url 'process_order' %}">
-    {% csrf_token %}
-    {{ billing_form.as_p }}
-</div>
-</div>
-
-</br>
-
-<button type="submit" class= "btn btn-secondary">
-    Pay Now
-</button>
-</form>
- </br></br> </br></br>
         </div>
-       
-        
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Hide all payment forms initially
+    const paymentForms = document.querySelectorAll('.payment-form');
+    paymentForms.forEach(form => form.style.display = 'none');
+
+    // Add click handlers to all select payment buttons
+    const selectButtons = document.querySelectorAll('.select-payment');
+    selectButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Hide all forms and show all select buttons
+            paymentForms.forEach(form => form.style.display = 'none');
+            selectButtons.forEach(btn => btn.style.display = 'block');
+            
+            // Show selected form and hide its button
+            const formId = this.dataset.form;
+            const form = document.getElementById(formId);
+            form.style.display = 'block';
+            this.style.display = 'none';
+        });
+    });
+});
+</script>
 {% endblock %}

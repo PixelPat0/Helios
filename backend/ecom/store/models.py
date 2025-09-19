@@ -2,6 +2,7 @@ from django.db import models
 import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.conf import settings
 
 
 
@@ -33,6 +34,15 @@ class Profile(models.Model):
     province = models.CharField(max_length=200, blank=True)
     country = models.CharField(max_length=200, blank=True)
     old_cart = models.CharField(max_length=200, blank=True, null=True)
+    business_email = models.EmailField(max_length=254, blank=True, null=True)
+    # For testing, we'll use this default test email
+    TEST_SELLER_EMAIL = 'test.seller@example.com'
+
+    def get_business_email(self):
+        """Returns business email or test email for development"""
+        if settings.DEBUG:
+            return self.TEST_SELLER_EMAIL
+        return self.business_email or self.user.email
 
     def __str__(self):
         return self.user.username
@@ -75,6 +85,12 @@ class Product(models.Model):
     # For product sale
     is_sale = models.BooleanField(default=False)
     sale_price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
+    seller = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='products'
+    )
     
     def __str__(self):
         return self.name

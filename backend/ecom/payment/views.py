@@ -1,81 +1,168 @@
 from django.shortcuts import render, redirect
-from cart.cart import Cart
-
-from payment.forms import ShippingForm, PaymentForm
-from payment.models import ShippingAddress, Order, OrderItem
-from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.contrib import messages as message
+from django.utils import timezone  # Add this import
+from cart.cart import Cart
+from .forms import ShippingForm, PaymentForm
+from .models import ShippingAddress, Order, OrderItem
 from store.models import Product, Profile
+from django.contrib.auth.models import User
 import datetime 
+from decimal import Decimal
+from .email_utils import send_order_notifications
+from django.urls import reverse
 
 
 def orders(request, pk):
     if request.user.is_authenticated and request.user.is_superuser:
-        # Get the order
         order = Order.objects.get(id=pk)
-        # Get the order items
         items = OrderItem.objects.filter(order=pk)
         
-        if request.POST:
-            status = request.POST['shipping_status']
-            #check if true of false
+        if request.method == "POST":
+            status = request.POST.get('shipping_status')
             if status == 'true':
-                order = Order.objects.filter(id=pk)
-                #Update the status
-                now = datetime.datetime.now()
-                order.update(shipped=True, date_shipped = now)
+                order.update_status('shipped')
+                message.success(request, "Order marked as shipped successfully")
             else:
-                # Get the order
-                order = Order.objects.filter(id=pk)
-                #Update the status
-                order.update(shipped=False)
-            message.success(request, "Shipping Status Updated Succesfully")
+                order.update_status('processing')
+                message.success(request, "Order returned to processing")
             return redirect('orders', pk=pk)
-            return redirect('home')
-        return render(request, 'payment/orders.html', {"order":order, "items": items})
+        return render(request, 'payment/orders.html', {"order": order, "items": items})
     else:
-        message.success(request, "Access Denied")
+        message.warning(request, "Access Denied")
         return redirect('home')
+
+# payments/views.py
 
 def not_shipped_dash(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        orders = Order.objects.filter(shipped=False).order_by('date_ordered')
-        if request.POST:
-            status = request.POST['shipping_status']
-            num = request.POST['num']
-            # grab the specific order
-            order = Order.objects.get(id=num)
-            now = datetime.datetime.now()
-            # update only this order
-            order.shipped = True
-            order.date_shipped = now
-            order.save()
-            message.success(request, "Shipping Status Updated Successfully")
-            return redirect('home')
-        return render(request, 'payment/not_shipped_dash.html', {"orders": orders})
-    else:    
-            message.success(request, "Order Placed Successfully")
-            return redirect('home')
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        message.warning(request, "Access Denied")
+        return redirect('home')
+    
+    # Handle POST requests (button actions)
+    if request.method == "POST":
+        order_id = request.POST.get('num')
+        action = request.POST.get('action')
+        
+        try:
+            order = Order.objects.get(id=order_id)
+            
+            if action == 'ship':
+                order.status = 'shipped'
+                order.date_shipped = timezone.now()
+                order.save()
+                message.success(request, f"Order #{order_id} marked as shipped")
+                
+            elif action == 'cancel':
+                reason = request.POST.get('reason', 'No reason provided')
+                order.status = 'cancelled'
+                # If you have a cancellation_notes field, add it here
+                # order.cancellation_notes = reason
+                order.save()
+                message.success(request, f"Order #{order_id} has been cancelled")
+                
+        except Order.DoesNotExist:
+            message.error(request, "Order not found")
+        
+        # Redirect back to the same page with current filters
+        status_filter = request.GET.get('status', 'active')
+        search_query = request.GET.get('search', '')
+        redirect_url = f"{reverse('not_shipped_dash')}?status={status_filter}&search={search_query}"
+        return redirect(redirect_url)
+    
+    # Get filter parameters from URL (GET request handling remains the same)
+    status_filter = request.GET.get('status', 'active')
+    search_query = request.GET.get('search', '')
+    
+    # Base queryset
+    if status_filter == 'cancelled':
+        orders = Order.objects.filter(status='cancelled')
+    elif status_filter == 'all':
+        orders = Order.objects.exclude(status__in=['shipped', 'delivered'])
+    else:  # active orders
+        orders = Order.objects.filter(status__in=['paid', 'processing'])
+    
+    # Apply search if provided
+    if search_query:
+        orders = orders.filter(
+            full_name__icontains=search_query
+        ) | orders.filter(
+            id__icontains=search_query
+        ) | orders.filter(
+            email__icontains=search_query
+        )
+    
+    # Final ordering
+    orders = orders.select_related('user').order_by('-date_ordered')
+    
+    return render(request, 'payment/not_shipped_dash.html', {
+        "orders": orders,
+        "current_filter": status_filter,
+        "search_query": search_query
+    })
 
 def shipped_dash(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        orders = Order.objects.filter(shipped=True).order_by('date_ordered')
-        if request.POST:
-            status = request.POST['shipping_status']
-            num = request.POST['num']
-            # grab the specific order
-            order = Order.objects.get(id=num)
-            # update only this order
-            order.shipped = False
-            order.save()
-            message.success(request, "Shipping Status Updated Successfully")
-            return redirect('home')
-        return render(request, 'payment/shipped_dash.html', {"orders": orders})
-    else:
-        message.success(request, "Access Denied")
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        message.warning(request, "Access Denied")
         return redirect('home')
-
-
+    
+    # Handle POST requests (button actions)
+    if request.method == "POST":
+        order_id = request.POST.get('num')
+        action = request.POST.get('action')
+        
+        try:
+            order = Order.objects.get(id=order_id)
+            
+            if action == 'deliver':
+                order.status = 'delivered'
+                order.save()
+                message.success(request, f"Order #{order_id} marked as delivered")
+                
+            elif action == 'process':
+                order.status = 'processing'
+                order.save()
+                message.success(request, f"Order #{order_id} returned to processing")
+                
+        except Order.DoesNotExist:
+            message.error(request, "Order not found")
+        
+        # Redirect back to the same page with current filters
+        status_filter = request.GET.get('status', 'all')
+        search_query = request.GET.get('search', '')
+        redirect_url = f"{reverse('shipped_dash')}?status={status_filter}&search={search_query}"
+        return redirect(redirect_url)
+    
+    # Get filter parameters (GET request handling remains the same)
+    status_filter = request.GET.get('status', 'all')
+    search_query = request.GET.get('search', '')
+    
+    # Base queryset
+    if status_filter == 'delivered':
+        orders = Order.objects.filter(status='delivered')
+    elif status_filter == 'shipped':
+        orders = Order.objects.filter(status='shipped')
+    else:  # all shipped/delivered orders
+        orders = Order.objects.filter(status__in=['shipped', 'delivered'])
+    
+    # Apply search if provided
+    if search_query:
+        orders = orders.filter(
+            full_name__icontains=search_query
+        ) | orders.filter(
+            id__icontains=search_query
+        ) | orders.filter(
+            email__icontains=search_query
+        )
+    
+    # Final ordering
+    orders = orders.select_related('user').order_by('-date_shipped')
+    
+    return render(request, 'payment/shipped_dash.html', {
+        "orders": orders,
+        "current_filter": status_filter,
+        "search_query": search_query
+    })
 
 def process_order(request):
     if request.method == "POST":
@@ -88,7 +175,6 @@ def process_order(request):
         # Get Shipping Session Data
         my_shipping = request.session.get('my_shipping')
 
-
         # gather order information
         full_name = my_shipping['shipping_full_name']
         email = my_shipping['shipping_email']
@@ -96,84 +182,115 @@ def process_order(request):
         shipping_address = f"{my_shipping['shipping_address1']}\n{my_shipping['shipping_address2']}\n{my_shipping['shipping_city']}\n{my_shipping['shipping_province']}\n{my_shipping['shipping_postal_code']}\n{my_shipping['shipping_country']}"
         amount_paid = total
 
+        # Get payment method
+        payment_method = request.POST.get('payment_method')
 
         # Create Order
         if request.user.is_authenticated:
-
-            user = request.user
-            create_order = Order(user = user, full_name=full_name, email=email, shipping_address=shipping_address, amount_paid=amount_paid  )
+            create_order = Order(
+                user=request.user,
+                full_name=full_name,
+                email=email,
+                shipping_address=shipping_address,
+                amount_paid=amount_paid,
+                status='paid',
+                payment_method=payment_method
+            )
             create_order.save()
 
-            #Add Order Items
-            # Get the order ID
+            # Add Order Items
             order_id = create_order.pk
-            #get product info
+            order_items = []  # To store items for email notification
+            
             for product in cart_products:
                 product_id = product.id
                 # Get product price
                 if product.sale_price:
-                        price = product.sale_price
+                    price = product.sale_price
                 else:
-                        price = product.price
+                    price = product.price
 
                 # Get product quantity
                 for key, value in quantities.items():
                     if int(key) == product_id:
                         # create order item
-                        create_order_item = OrderItem(order_id=order_id, product=product, user=user, quantity=value, price=price)
+                        create_order_item = OrderItem(
+                            order_id=order_id,
+                            product=product,
+                            user=request.user,
+                            quantity=value,
+                            price=price,
+                            commission_rate=Decimal('0.15')
+                        )
                         create_order_item.save()
+                        order_items.append(create_order_item)
 
-            #delete our cart
+            # Send email notifications
+            try:
+                send_order_notifications(create_order, order_items)
+            except Exception as e:
+                print(f"Error sending notifications: {e}")
+
+            # Delete cart and redirect
             for key in list(request.session.keys()):
-                 if key == "session_key":
-                      #delete the key
+                if key == "session_key":
                     del request.session[key]
 
             message.success(request, "Order Placed Successfully")
             return redirect('home')
         else:
-            # If the user is not logged in
-            create_order = Order(full_name=full_name, email=email, shipping_address=shipping_address, amount_paid=amount_paid  )
+            # Guest checkout
+            create_order = Order(
+                full_name=full_name,
+                email=email,
+                shipping_address=shipping_address,
+                amount_paid=amount_paid,
+                status='paid',
+                payment_method=payment_method
+            )
             create_order.save()
 
             order_id = create_order.pk
-            #get product info
+            order_items = []  # To store items for email notification
+            
             for product in cart_products:
                 product_id = product.id
                 # Get product price
                 if product.sale_price:
-                        price = product.sale_price
+                    price = product.sale_price
                 else:
-                        price = product.price
+                    price = product.price
 
                 # Get product quantity
                 for key, value in quantities.items():
                     if int(key) == product_id:
                         # create order item
-                        create_order_item = OrderItem(order_id=order_id, product=product, quantity=value, price=price)
+                        create_order_item = OrderItem(
+                            order_id=order_id,
+                            product=product,
+                            quantity=value,
+                            price=price,
+                            commission_rate=Decimal('0.15')
+                        )
                         create_order_item.save()
+                        order_items.append(create_order_item)
 
-            #delete our cart
+            # Send email notifications
+            try:
+                send_order_notifications(create_order, order_items)
+            except Exception as e:
+                print(f"Error sending notifications: {e}")
+
+            # Delete cart
             for key in list(request.session.keys()):
-                 if key == "session_key":
-                      #delete the key
+                if key == "session_key":
                     del request.session[key]
-
-
-            # Delete Cart from database (old_cart)
-            current_user = Profile.objects.filter(user__id=request.user.id)
-            # Delete shopping cart in database(old_cart field)
-            current_user.update(old_cart="")
-
-
 
             message.success(request, "Order Placed Successfully")
             return redirect('home')
-
     else:
         message.success(request, "Access Denied")
         return redirect('home')
-
 
 
 
@@ -185,43 +302,22 @@ def billing_info(request):
         quantities = cart.get_quants()
         total = cart.cart_total()
 
-        # Create a session with Shiping information
-        my_shipping= request.POST
-        request.session['my_shipping'] = my_shipping
-
-        # Check if the user is logged in
-        if request.user.is_authenticated:
-            #get the billing form
-            billing_form = PaymentForm()
-            return render(request, 'payment/billing_info.html', {
-            "cart_products": cart_products,
-            "quantities": quantities,
-            "total": total,
-            "shipping_info": request.POST,
-            "billing_form": billing_form
-    })
-        else:
-            #not logged in
-            billing_form = PaymentForm()
-            return render(request, 'payment/billing_info.html', {
-            "cart_products": cart_products,
-            "quantities": quantities,
-            "total": total,
-            "shipping_info": request.POST,
-            "billing_form": billing_form
-    })
-   
-
-
-        shipping_form = request.POST
+        # Store shipping info in session
+        if 'shipping_full_name' in request.POST:
+            request.session['my_shipping'] = request.POST.dict()
+            
+        # Get payment form
+        billing_form = PaymentForm()
+        
         return render(request, 'payment/billing_info.html', {
-        "cart_products": cart_products,
-        "quantities": quantities,
-        "total": total,
-        "shipping_form": shipping_form
-    })
+            "cart_products": cart_products,
+            "quantities": quantities,
+            "total": total,
+            "shipping_info": request.session.get('my_shipping'),
+            "billing_form": billing_form
+        })
     else:
-        message.success(request, "Access Denied")
+        message.warning(request, "Access Denied")
         return redirect('home')
 
 
@@ -261,4 +357,49 @@ def checkout(request):
 def payment_success(request):
 
     return render(request, 'payment/payment_success.html', {})
+
+def export_order_details(request, order_id):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return HttpResponse("Access Denied", status=403)
+        
+    try:
+        order = Order.objects.get(id=order_id)
+        items = OrderItem.objects.filter(order=order)
+        
+        # Calculate total commission
+        total_commission = sum(item.commission_amount for item in items)
+        
+        content = f"""ORDER #{order.id}
+===========
+
+Customer: {order.full_name}
+Email: {order.email}
+Amount Paid: ZMK {order.amount_paid}
+Status: {order.get_status_display()}
+Payment Method: {order.get_payment_method_display()}
+
+Shipping Address:
+{order.shipping_address}
+
+Items Ordered:
+-------------"""
+        
+        for item in items:
+            content += f"\n- {item.product.name}"
+            content += f"\n  Quantity: {item.quantity} @ ZMK {item.price} each"
+            content += f"\n  Subtotal: ZMK {item.price * item.quantity}"
+            content += f"\n  Commission (15%): ZMK {item.commission_amount}"
+            
+        content += f"\n\nOrder Summary:"
+        content += f"\n-------------"
+        content += f"\nSubtotal: ZMK {order.amount_paid}"
+        content += f"\nTotal Commission (15%): ZMK {total_commission}"
+        content += f"\nNet Amount: ZMK {order.amount_paid - total_commission}"
+        
+        response = HttpResponse(content, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="order_{order_id}_details.txt"'
+        return response
+        
+    except Order.DoesNotExist:
+        return HttpResponse("Order not found", status=404)
 
