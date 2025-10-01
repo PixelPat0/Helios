@@ -1,5 +1,50 @@
 from django import forms
 from .models import ShippingAddress
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
+from .models import Seller
+
+
+
+
+class SellerSignupForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    business_name = forms.CharField(max_length=200, required=False)
+    business_email = forms.EmailField(required=False)
+    phone = forms.CharField(max_length=30, required=False)
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "password1", "password2", "business_name", "business_email", "phone")
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data.get("email")
+        if commit:
+            user.is_active = True
+            user.save()
+            Seller.objects.create(
+                user=user,
+                business_name=self.cleaned_data.get("business_name"),
+                business_email=self.cleaned_data.get("business_email"),
+                phone=self.cleaned_data.get("phone")
+            )
+        return user
+
+class SellerLoginForm(AuthenticationForm):
+    pass
+
+class SellerProfileForm(forms.ModelForm):
+    class Meta:
+        model = Seller
+        fields = [
+            'business_name', 'business_description', 'business_email',
+            'phone', 'business_address', 'logo', 'bank_account_name',
+            'bank_account_number', 'bank_name', 'is_active', 'city', 'country'
+        ]
+
+
+# payment/decorators.py
 
 class ShippingForm(forms.ModelForm):
 

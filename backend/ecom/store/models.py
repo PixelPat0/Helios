@@ -1,19 +1,16 @@
+# store/models.py
 from django.db import models
 import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.conf import settings
 
-
-
-
 def user_directory_path(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     return f'profile_pics/user_{instance.user.id}/{filename}'
-#customer profile
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    date_modified = models.DateTimeField(User, auto_now=True)
+    date_modified = models.DateTimeField(auto_now=True)  # FIXED
     profile_picture = models.ImageField(upload_to=user_directory_path, default='profile_pics/default.jpg', blank=True)
     national_id = models.CharField(max_length=50, blank=True)
     gender = models.CharField(null=True, max_length=10, blank=True)
@@ -25,9 +22,7 @@ class Profile(models.Model):
         ('divorced', 'Divorced'),
         ('widowed', 'Widowed'),
         ('separated', 'Separated'),
-
-    ], blank = True)
-    
+    ], blank=True)
     phone = models.CharField(max_length=30, blank=True)
     address = models.CharField(max_length=200, blank=True)
     city = models.CharField(max_length=200, blank=True)
@@ -35,76 +30,59 @@ class Profile(models.Model):
     country = models.CharField(max_length=200, blank=True)
     old_cart = models.CharField(max_length=200, blank=True, null=True)
     business_email = models.EmailField(max_length=254, blank=True, null=True)
-    # For testing, we'll use this default test email
     TEST_SELLER_EMAIL = 'test.seller@example.com'
 
     def get_business_email(self):
-        """Returns business email or test email for development"""
-        if settings.DEBUG:
+        if getattr(settings, 'DEBUG', False):
             return self.TEST_SELLER_EMAIL
         return self.business_email or self.user.email
 
     def __str__(self):
         return self.user.username
 
-#create a profile when a user is created
 def create_profile(sender, instance, created, **kwargs):
     if created:
-        user_profile = Profile(user=instance)
-        user_profile.save()
-#automate profile creation
+        Profile.objects.create(user=instance)
+
 post_save.connect(create_profile, sender=User)
+
 
 class Category(models.Model):
     name = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return self.name
-    
     class Meta:
         verbose_name_plural = 'categories'
-    
+    def __str__(self):
+        return self.name
 
-class Customer(models.Model): 
+
+class Customer(models.Model):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     email = models.EmailField(max_length=200)
     phone = models.CharField(max_length=100)
     password = models.CharField(max_length=200)
-    
     def __str__(self):
         return self.first_name
 
-#list of products in the store
+
 class Product(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
-    description = models.CharField(max_length=1000, default='', blank=True, null=True )
+    description = models.CharField(max_length=1000, default='', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1)
-    image = models.ImageField(upload_to='uploads/products/')
-    # For product sale
+    image = models.ImageField(upload_to='uploads/products/', blank=True, null=True)
     is_sale = models.BooleanField(default=False)
     sale_price = models.DecimalField(default=0, max_digits=10, decimal_places=2)
+    is_available = models.BooleanField(default=True)
+    
+    # <- IMPORTANT: string ref to payment.Seller to avoid circular import
     seller = models.ForeignKey(
-        User,
+        'payment.Seller',
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name='products'
     )
-    
+
     def __str__(self):
         return self.name
-
-#customer orders
-class Order(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    address = models.CharField(max_length=100,default='', blank=True, null=True)
-    phone = models.CharField(max_length=30, default='', blank=True)
-    date = models.DateField(default=datetime.datetime.today)
-    status = models.BooleanField(default=False)
-    
-    def __str__(self):
-        return self.product.name

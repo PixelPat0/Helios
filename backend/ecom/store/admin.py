@@ -1,29 +1,31 @@
+# store/admin.py
 from django.contrib import admin
-from.models import Category, Customer, Product, Order, Profile
+from .models import Category, Customer, Product, Profile
 from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 
+# ---------------------------
+# Register store models safely
+# ---------------------------
+# Register only store-owned models here. Order is registered in payment.admin.
+for model in (Category, Customer, Product, Profile):
+    if model not in admin.site._registry:
+        admin.site.register(model)
 
-
-admin.site.register(Category)
-admin.site.register(Customer)
-admin.site.register(Product)
-admin.site.register(Order)
-admin.site.register(Profile)
-
-
-#mix profile info and user info
-
-class ProfileInLine(admin.StackedInline):
+# ---------------------------
+# Embed Profile inline into User admin
+# ---------------------------
+class ProfileInline(admin.StackedInline):
     model = Profile
+    can_delete = False
+    verbose_name_plural = "profile"
 
-#extend the user profile
-class UserAdmin(admin.ModelAdmin):
-    model = User
-    field = ["username", "first_name", "last_name", "email"]
-    inlines = [ProfileInLine]
+class CustomUserAdmin(DefaultUserAdmin):
+    inlines = (ProfileInline,)
+    # You can customize list_display, search_fields, etc. here if you want:
+    # list_display = DefaultUserAdmin.list_display + ('email',)
 
-
-#unregister the default user admin
-admin.site.unregister(User)
-#register the new user admin
-admin.site.register(User, UserAdmin)
+# Unregister default User admin and register our extended version safely
+if User in admin.site._registry:
+    admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)

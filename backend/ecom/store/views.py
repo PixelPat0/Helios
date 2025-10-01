@@ -1,3 +1,4 @@
+from payment.models import ShippingAddress, Seller, ImpactFundTransaction
 from django.shortcuts import render, redirect
 from .models import Product, Category, Profile
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -7,9 +8,9 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
 
 from payment.forms import ShippingForm
-from payment.models import ShippingAddress
 
-from django.db.models import Q
+
+from django.db.models import Q, Sum
 import json
 from cart.cart import Cart
 from django.core.mail import send_mail
@@ -17,6 +18,79 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from .tokens import account_activation_token
+
+
+def donation_page_view(request):
+    """
+    Placeholder view for the public donation page.
+    """
+    # Later, this is where you'll handle the payment form and processing logic.
+    context = {} 
+    return render(request, 'donation_page.html', context)
+
+
+# this is the business end of the public impact page
+def public_impact_view(request):
+    """
+    Displays key social impact metrics to the public.
+    """
+    # 1. Total Active Seller Count
+    try:
+        seller_count = Seller.objects.filter(is_active=True).count()
+    except:
+        seller_count = 0 # Handle case where Seller model/table does not exist
+
+    # 2. Total Funds collected (The running total)
+    # Expeses are recorded as negative amounts in the database
+    funds_collected_result = ImpactFundTransaction.objects.aggregate(total=Sum('amount'))
+    total_funds_collected = funds_collected_result['total'] if funds_collected_result['total'] else 0
+
+    # 3. Number of installations (This will be done manually)
+    number_of_installations = 20
+
+
+    # ----------------------------------------------------
+    # NEW LOGIC: Calculate Project Progress
+    # ----------------------------------------------------
+    PROJECT_GOAL = 10000.00 # Set your project fundraising goal here (ZMK 10,000.00)
+    
+    if PROJECT_GOAL > 0 and total_funds_collected > 0:
+        # Calculate percentage: (collected / goal) * 100
+        progress_raw = (total_funds_collected / PROJECT_GOAL) * 100
+        # Ensure it doesn't exceed 100% and format to 0 decimal places
+        progress_percentage = min(progress_raw, 100)
+    else:
+        progress_percentage = 0
+    
+    # ----------------------------------------------------
+
+    context = {
+        'seller_count': seller_count,
+        'total_funds_collected': total_funds_collected,
+        'number_of_installations': number_of_installations
+    }
+
+    return render(request, 'public_impact.html', context)
+
+
+def seller_profile_public(request, pk):
+    try:
+        # Get the seller by primary key
+        seller = Seller.objects.get(pk=pk, is_active=True)
+        # Get products associated with the seller
+        products = Product.objects.filter(seller=seller, is_sale=False, is_available=True).order_by('-id')
+        sale_products = Product.objects.filter(seller=seller, is_sale=True, is_available=True).order_by('-id')
+        context = {
+            'seller': seller,
+            'products': products,
+            'sale_products': sale_products,
+        }
+        return render(request, 'seller_profile_public.html', context)
+   
+    except Seller.DoesNotExist:
+    # Handle case where seller ID is invalid or seller is not active
+        messages.error(request, 'Seller not found or profile is inactive.')
+        return redirect('home')
 
 def activate(request, uidb64, token):
     User = get_user_model()

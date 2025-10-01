@@ -1,98 +1,107 @@
-<!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container px-4 px-lg-5">
-        <!-- Brand/Logo -->
         <a class="navbar-brand" href="{% url 'home' %}">HELIOS</a>
 
-        <!-- Toggle Button for Mobile View -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Navbar Content -->
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <!-- Left-aligned Navbar Links -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                <!-- Home Link -->
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
                 </li>
 
-                <!-- Search Link -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'search' %}">Search</a>
+                </li>
 
-                <!-- About Link -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'public_impact' %}">Public Impact</a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'about' %}">About</a>
                 </li>
 
-                <!-- Conditional Links Based on User Authentication -->
+                {% if user.is_authenticated and user.seller_profile.is_active %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'product_list' %}">Products</a>
+                </li>
+                {% endif %}
+
                 {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'update_user' %}">User Profile</a>
+                            </li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'update_info' %}">User Information</a>
+                            </li>
+                        </ul>
+                    </li>
                     
-                    <!-- Dropdown Menu for Profile Options -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <!-- All Products Link -->
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'update_user' %}">User Profile</a>
-                                </li>
-                                <!-- Divider -->
-                                <li><hr class="dropdown-divider" /></li>
-                                <!-- Category Links -->
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'update_info' %}">User Information</a>
-                                </li>
-                            </ul>
+                   {% if user.is_superuser or user.seller_profile.is_active %}
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dashboard</a>
+    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        {% if user.seller_profile.is_active or user.is_superuser %}
+            <li>
+                <a class="dropdown-item" href="{% url 'seller_dashboard' %}">My Orders Dashboard</a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+        {% endif %}
+        
+        {% if user.seller_profile.is_active %}
+            <li>
+                <a class="dropdown-item" href="{% url 'seller_profile_public' user.seller_profile.pk %}">
+                    View Public Profile 🌎
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{% url 'seller_profile' %}">Edit Seller Profile</a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+        {% endif %}
 
-                    {% if user.is_superuser %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Orders</a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <!-- All Products Link -->
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'shipped_dash' %}">Shipped Orders</a>
-                                </li>
-                                <!-- Divider -->
-                                <li><hr class="dropdown-divider" /></li>
-                                <!-- Category Links -->
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'not_shipped_dash' %}">Unshipped Orders</a>
-                                </li>
-                                
-                            </ul>
-                        </li>
-                    {% endif %}
+        {% if user.is_superuser %}
+            <li>
+                <a class="dropdown-item" href="{% url 'shipped_dash' %}">All Shipped Orders</a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{% url 'not_shipped_dash' %}">All Unshipped Orders</a>
+            </li>
+        {% endif %}
+    </ul>
+</li>
+{% endif %}
 
-
-                    <!-- Logout Link (Visible if User is Logged In) -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                     </li>
                 {% else %}
-                    <!-- Login Link (Visible if User is Not Logged In) -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">Login</a>
                     </li>
 
-                    <!-- Register Link (Visible if User is Not Logged In) -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'register' %}">Register</a>
                     </li>
+                    <li class ="nav-item">
+                        <a class="nav-link" href="{% url 'seller_signup' %}">Become a Seller</a>
+                    </li>
                 {% endif %}
 
-                <!-- Dropdown Menu for Categories -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <!-- All Products Link -->
                         <li>
                             <a class="dropdown-item" href="{% url 'category_summary' %}">All Products</a>
                         </li>
-                        <!-- Divider -->
                         <li><hr class="dropdown-divider" /></li>
-                        <!-- Category Links -->
                         <li>
                             <a class="dropdown-item" href="{% url 'category' 'Inverters' %}">Inverters</a>
                         </li>
@@ -102,22 +111,20 @@
                         <li>
                             <a class="dropdown-item" href="{% url 'category' 'Solar-Panels' %}">Solar Panels</a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'category' 'Lighting' %}">Lighting</a>
+                        </li>
                     </ul>
                 </li>
             </ul>
 
-            <!-- Right-aligned Cart Button -->
             <form class="d-flex">
                 <a href="{% url 'cart_summary' %}" class="btn btn-outline-dark">
-                    <!-- Cart Icon -->
                     <i class="bi-cart-fill me-1"></i>
-                    <!-- Cart Text -->
                     Cart
-                    <!-- Cart Item Count (Hardcoded to 0 for Now) -->
                     <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart_quantity">{{ cart|length }}</span>
                 </a>
             </form>
         </div>
     </div>
 </nav>
-

@@ -16,4 +16,7 @@ urlpatterns = [
     path('category_summary/', views.category_summary, name='category_summary'),
     path('search/', views.search, name='search'),
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
+    path('seller/<int:pk>/', views.seller_profile_public, name='seller_profile_public'),
+    path('impact/', views.public_impact_view, name='public_impact'),
+    path('donate/', views.donation_page_view, name='donation_page'),
 ]

@@ -1,15 +1,47 @@
+# payment/models.py
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
-from store.models import Product
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
-import datetime
-from decimal import Decimal
+from django.utils import timezone
+from django.conf import settings
 
+
+
+class ImpactFundTransaction(models.Model):
+    """
+    Model to track contributions to the Impact Fund.
+    """
+
+# Type pf transaction (SALE_COMMISSION, DONATION, EXPENSE)
+    TRANSACTION_CHOICES = [
+        ('COMMISSION', 'Sales Commission Allocation'),
+        ('DONATION', 'Direct Donation'),
+        ('EXPENSE', 'Project Expense/Disbursement'),
+    ]
+    transaction_type = models.CharField(max_length=50, choices=TRANSACTION_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Link the user/order that triggered the transaction
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.transaction_type} of {self.amount}"
+
+    class Meta:
+        # We can calculate the running total easily by summing the 'amount' field
+        # (Expenses would be recorded as negative amounts)
+        pass 
+
+# -----------------------
+# ShippingAddress
+# -----------------------
 class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     shipping_full_name = models.CharField(max_length=255)
-    shipping_email = models.EmailField(max_length=255)  # Use EmailField for validation
+    shipping_email = models.EmailField(max_length=255)
     shipping_address1 = models.CharField("Address Line 1", max_length=255)
     shipping_address2 = models.CharField("Address Line 2", max_length=255, blank=True, null=True)
     shipping_city = models.CharField(max_length=255)
@@ -24,26 +56,49 @@ class ShippingAddress(models.Model):
     def __str__(self):
         return f'{self.shipping_full_name}, {self.shipping_address1}, {self.shipping_city}, {self.shipping_country}'
 
-#create a user Shipping Address by default
-#create a profile when a user is created
-def create_shipping(sender, instance, created, **kwargs):
-    if created:
-        user_shipping = ShippingAddress(user=instance)
-        user_shipping.save()
-#automate profile creation
-post_save.connect(create_shipping, sender=User)
+
+# -----------------------
+# Seller (new)
+# -----------------------
+class Seller(models.Model):
+    """
+    Seller profile linked 1:1 to auth.User.
+    Keep fields minimal for now — add more later as needed.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="seller_profile")
+    business_name = models.CharField(max_length=200, blank=True, null=True)
+    business_description = models.TextField(blank=True, null=True)
+    business_email = models.EmailField(max_length=254, blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    business_address = models.CharField(max_length=300, blank=True, null=True)
+    logo = models.ImageField(upload_to='profile_pics/sellers/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+
+    # optional payout info
+    bank_account_name = models.CharField(max_length=200, blank=True, null=True)
+    bank_account_number = models.CharField(max_length=100, blank=True, null=True)
+    bank_name = models.CharField(max_length=150, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Seller Profile"
+
+    @property
+    def shop_name(self):
+        return self.business_name or (self.user.username if self.user else None)
+
+    def __str__(self):
+        return self.shop_name or f"Seller:{self.pk}"
 
 
-#create Order model
+# -----------------------
+# Order
+# -----------------------
 class Order(models.Model):
-    class Meta:
-        indexes = [
-            models.Index(fields=['status']),
-            models.Index(fields=['-date_ordered']),
-            models.Index(fields=['-date_shipped']),
-        ]
-
-    # Define status choices for better tracking
     ORDER_STATUS = (
         ('pending', 'Pending Payment'),
         ('paid', 'Paid'),
@@ -53,7 +108,6 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     )
 
-    # Define payment method choices
     PAYMENT_CHOICES = (
         ('airtel', 'Airtel Money'),
         ('mtn', 'MTN Mobile Money'),
@@ -62,103 +116,104 @@ class Order(models.Model):
         ('cod', 'Cash on Delivery'),
     )
 
-    # Existing fields
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     full_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
     shipping_address = models.TextField(max_length=1000, blank=True, null=True)
-    amount_paid = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     date_ordered = models.DateTimeField(auto_now_add=True)
-    
-    # New fields for enhanced tracking
+
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default='pending')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, null=True, blank=True)
-    payment_reference = models.CharField(max_length=100, null=True, blank=True)  # For mobile money/card reference
+    payment_reference = models.CharField(max_length=100, null=True, blank=True)
     date_paid = models.DateTimeField(null=True, blank=True)
     date_processed = models.DateTimeField(null=True, blank=True)
     date_shipped = models.DateTimeField(null=True, blank=True)
     date_delivered = models.DateTimeField(null=True, blank=True)
     cancellation_notes = models.TextField(blank=True, null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['-date_ordered']),
+            models.Index(fields=['-date_shipped']),
+        ]
+
     def __str__(self):
-        return f'Order - {str(self.id)}'
+        return f'Order - {self.id}'
 
     def update_status(self, new_status):
-        """Updates order status and corresponding timestamp"""
-        from django.utils import timezone
-        now = timezone.now()  # Use timezone-aware datetime
-        
-        # Validate status
+        now = timezone.now()
+
         if new_status not in dict(self.ORDER_STATUS):
             raise ValueError(f"Invalid status: {new_status}")
-            
+
         self.status = new_status
-        
-        # Update corresponding timestamp
-        if new_status == 'paid':
+        if new_status == 'paid' and not self.date_paid:
             self.date_paid = now
-        elif new_status == 'processing':
+        elif new_status == 'processing' and not self.date_processed:
             self.date_processed = now
-        elif new_status == 'shipped':
+        elif new_status == 'shipped' and not self.date_shipped:
             self.date_shipped = now
-        elif new_status == 'delivered':
+        elif new_status == 'delivered' and not self.date_delivered:
             self.date_delivered = now
-        
+
         self.save()
 
-# Remove or update the old signal if it exists
+
 @receiver(pre_save, sender=Order)
 def set_shipped_date_on_update(sender, instance, **kwargs):
-    """Updates date_shipped when status changes to shipped"""
+    """Set date_shipped when status moves to shipped."""
+    if not instance.pk:
+        return
     try:
         old_order = Order.objects.get(pk=instance.pk)
-        if old_order.status != 'shipped' and instance.status == 'shipped':
-            instance.date_shipped = datetime.datetime.now()
     except Order.DoesNotExist:
-        pass
+        return
+    if old_order.status != 'shipped' and instance.status == 'shipped' and not instance.date_shipped:
+        instance.date_shipped = timezone.now()
 
 
-#create order items model
+# -----------------------
+# OrderItem
+# -----------------------
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    # Use a string reference to avoid circular imports
+    product = models.ForeignKey('store.Product', on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveBigIntegerField(default=1)
-    price = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
-    COMMISSION_RATE = Decimal('0.15')  # Convert to Decimal
-    
-    commission_rate = models.DecimalField(
-        max_digits=4, 
-        decimal_places=2, 
-        default=COMMISSION_RATE,
-        help_text="Commission rate as decimal (e.g., 0.15 for 15%)"
-    )
-    commission_amount = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=Decimal('0.00')
-    )
-    seller = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        related_name='sold_items'
-    )
-    seller_logo = models.ImageField(
-        upload_to='seller_logos/', 
-        null=True, 
-        blank=True
-    )
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+
+    # Commission config
+    COMMISSION_RATE = Decimal('0.15')
+    commission_rate = models.DecimalField(max_digits=5, decimal_places=4, default=COMMISSION_RATE,
+                                          help_text="Decimal (0.15 = 15%)")
+    commission_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+
+    # Seller now references the new Seller model
+    seller = models.ForeignKey(Seller, on_delete=models.SET_NULL, null=True, blank=True, related_name='order_items')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # Set seller from product if available
-        if self.product and self.product.seller:
+        # If product has a seller (Product.seller -> Seller), set it automatically
+        if self.product and getattr(self.product, 'seller', None):
             self.seller = self.product.seller
-        
-        # Calculate commission amount
-        self.commission_amount = self.price * self.quantity * self.commission_rate
-        
+
+        # compute commission amount safely
+        try:
+            item_total = Decimal(self.price) * Decimal(self.quantity)
+            self.commission_amount = (item_total * Decimal(self.commission_rate)).quantize(Decimal('0.01'))
+        except Exception:
+            self.commission_amount = Decimal('0.00')
+
         super().save(*args, **kwargs)
 
-    def __str__(self): 
-        return f'Order Item - {str(self.id)}'
+    def get_seller_earnings(self):
+        item_total = Decimal(self.price) * Decimal(self.quantity)
+        return item_total - self.commission_amount
+
+    def __str__(self):
+        return f'OrderItem - {self.id}'

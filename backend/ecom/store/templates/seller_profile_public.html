@@ -1,0 +1,72 @@
+{% extends 'base.html' %} 
+{% load static %}
+
+{% block content %}
+
+<div class="container my-5">
+    
+    <div class="row mb-4 p-4 border rounded shadow-sm bg-light">
+        <div class="col-md-2 text-center">
+            {% if seller.logo %}
+                <img src="{{ seller.logo.url }}" class="img-fluid rounded-circle" alt="{{ seller.business_name }} Logo" style="width: 100px; height: 100px; object-fit: cover;">
+            {% else %}
+                <i class="bi bi-shop display-4 text-secondary"></i>
+            {% endif %}
+        </div>
+        <div class="col-md-10">
+            <h1 class="display-5">{{ seller.business_name }}</h1>
+            <p class="lead">{{ seller.business_description|default:"No description provided." }}</p>
+            <p class="text-muted">
+                <i class="bi bi-geo-alt-fill me-2"></i>Location: {{ seller.city|default:"N/A" }}, {{ seller.country|default:"N/A" }}
+                | 
+                <i class="bi bi-envelope-fill me-2"></i>Email: <a href="mailto:{{ seller.business_email }}">{{ seller.business_email }}</a>
+            </p>
+        </div>
+    </div>
+
+    {% if sale_products %}
+    <h2 class="mt-5 mb-3">🔥 On Sale Now</h2>
+    <hr>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for product in sale_products %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">
+                            <span class="text-danger fw-bold">Sale: ZMK {{ product.sale_price }}</span> 
+                            <s class="text-muted">ZMK {{ product.price }}</s>
+                        </p>
+                        <a href="{% url 'product' product.id %}" class="btn btn-sm btn-outline-primary">View Product</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="mt-5 mb-3">🛍️ All Products</h2>
+    <hr>
+    {% if products or sale_products %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for product in products %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">ZMK {{ product.price }}</p>
+                            <a href="{% url 'product' product.id %}" class="btn btn-sm btn-outline-secondary">View Product</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+    {% else %}
+        <p class="alert alert-info">This seller currently has no products listed.</p>
+    {% endif %}
+
+</div>
+
+{% endblock content %}

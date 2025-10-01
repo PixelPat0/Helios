@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Seller Dashboard</h2>
+        <span class="badge bg-primary">{{ orders|length }} Orders</span>
+    </div>
+
+    <div class="row mb-3 g-3">
+        <div class="col-md-6 col-lg-4">
+            <form class="d-flex" method="GET">
+                <input type="hidden" name="status" value="{{ current_filter }}">
+                <input type="text"
+                       name="search"
+                       class="form-control me-2"
+                       placeholder="Search orders..."
+                       value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <select class="form-select" onchange="window.location.href='?status=' + this.value + '&search={{ search_query }}'">
+                <option value="all" {% if current_filter == 'all' %}selected{% endif %}>All Orders</option>
+                <option value="pending" {% if current_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="paid" {% if current_filter == 'paid' %}selected{% endif %}>Paid</option>
+                <option value="processing" {% if current_filter == 'processing' %}selected{% endif %}>Processing</option>
+                <option value="shipped" {% if current_filter == 'shipped' %}selected{% endif %}>Shipped</option>
+                <option value="delivered" {% if current_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+                <option value="cancelled" {% if current_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+        </div>
+    </div>
+
+    <table class="table table-hover" id="ordersTable">
+        <thead class="table-light">
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Items & Total</th>
+                <th>Date Ordered</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><a href="{% url 'seller_order_details' order.id %}" class="text-primary">{{ order.id }}</a></td>
+                <td>{{ order.full_name }}</td>
+                <td>
+                    <span class="badge bg-info">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    {% for item in order.orderitem_set.all %}
+                        <small class="d-block">{{ item.product.name }} ({{ item.quantity }})</small>
+                    {% endfor %}
+                    <hr class="my-1">
+                    <strong class="text-success">ZMK {{ order.amount_paid|floatformat:2|intcomma }}</strong>
+                </td>
+                <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <div class="btn-group">
+                        {% if order.status == 'paid' %}
+                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-inline me-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="processing">
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-arrow-repeat"></i> Process
+                                </button>
+                            </form>
+                        {% elif order.status == 'processing' %}
+                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-inline me-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="shipped">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-truck"></i> Ship
+                                </button>
+                            </form>
+                        {% elif order.status == 'shipped' %}
+                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-inline me-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delivered">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check2-circle"></i> Mark Delivered
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="bi bi-inbox h4"></i>
+                        <p>No orders to display.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+
+
+{% comment %} <!DOCTYPE html>
+<html>
+<head>
+    <title>Seller Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, {{ request.user.username }}</h2>
+
+    {% if seller %}
+        <p>Shop Name: {{ seller.shop_name }}</p>
+        <p>Email: {{ seller.business_email }}</p>
+        <p>Phone: {{ seller.phone }}</p>
+        <p>Address: {{ seller.address }}</p>
+        <p>City: {{ seller.city }}</p>
+        <p>Country: {{ seller.country }}</p>
+    {% else %}
+        <p>No seller profile found.</p>
+    {% endif %}
+
+    <p><a href="{% url 'seller_profile' %}">Edit Profile</a></p>
+    <p><a href="{% url 'logout' %}">Logout</a></p>
+</body>
+</html> {% endcomment %}

@@ -52,11 +52,33 @@
                             </div>
                         </div>
                     </div>
+                    <div class="seller-info-box">
+
+                        <!-- Public seller linking-->
+                        <div class="seller-info-box">
+
+<div class="seller-info-box">
+{% if product.seller %}
+    <h5>Sold By:</h5>
+    <a href="{% url 'seller_profile_public' product.seller.pk %}">
+        <strong>{{ product.seller.business_name|default:"Unnamed Business" }}</strong>
+    </a>
+    
+    <p>Location: {{ product.seller.city }}, {{ product.seller.country }}</p>
+    
+    {% else %}
+    <p class="text-muted">No seller information available.</p>
+{% endif %}
+</div>
+   
+</div>
                 </div>
             </div>
         </div>
     </div>
 
+
+        
     <script>
         $(document).on('click', '#add-cart', function(e) {
             e.preventDefault();

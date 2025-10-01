@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5 text-center">
+    <h1 class="display-4 text-warning">Support Our Project! 💖</h1>
+    <p class="lead mb-4">Every contribution helps us power the next community installation.</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4 shadow-lg">
+                <h4 class="mb-3">Make a Donation</h4>
+                <p class="text-muted">Donation form and payment gateway integration coming soon.</p>
+                <a href="{% url 'public_impact' %}" class="btn btn-outline-primary mt-3">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Impact Page
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
