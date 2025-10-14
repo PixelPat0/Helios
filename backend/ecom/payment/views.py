@@ -1,125 +1,249 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
-from django.contrib import messages as message
-from django.utils import timezone
-from django.db.models import Q
-from cart.cart import Cart
-from .forms import ShippingForm, PaymentForm, SellerSignupForm, SellerLoginForm, SellerProfileForm
-from .models import ShippingAddress, Order, OrderItem, Seller
-from store.models import Product, Profile, Product
-from django.contrib.auth.models import User
-import datetime
+# payment/views.py
+"""
+Cleaned, consolidated payment/views for Helios.
+Drop this file into payment/views.py (backup original first).
+"""
+
 from decimal import Decimal
-from .email_utils import send_order_notifications
+import json
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.urls import reverse
-from django.contrib.auth import login, logout
-from django.db.models import Sum, F, ExpressionWrapper, DecimalField
-from .decorators import seller_required
-# form imports for the seller views
-from .forms import SellerSignupForm, SellerLoginForm, SellerProfileForm
-# Product forms for the seller views
+from django.utils import timezone
+from django.conf import settings
+from django.contrib import messages as message
+from django.contrib.auth import login, logout, get_user_model
+from django.contrib.auth.decorators import user_passes_test, login_required
+from django.db import transaction
+from django.db.models import Q, Sum, F, ExpressionWrapper, DecimalField
+
+from cart.cart import Cart
+from store.models import Product, Profile
 from store.forms import ProductForm
-from django.contrib.auth.decorators import user_passes_test
+from .email_utils import send_order_notifications
+from .decorators import seller_required
+from .forms import (
+    ShippingForm,
+    PaymentForm,
+    SellerSignupForm,
+    SellerLoginForm,
+    SellerProfileForm,
+)
+from .models import ShippingAddress, Order, OrderItem, Seller, Notification
+
+# Optional Impact transaction model (may exist in your models)
+try:
+    from .models import ImpactFundTransaction
+except Exception:
+    ImpactFundTransaction = None
+
+User = get_user_model()
 
 
-@seller_required
-def update_order_status(request, pk):
+# -------------------------
+# Notifications views
+# -------------------------
+@login_required
+def notifications_list(request):
+    """Full list view of notifications for the logged-in user."""
+    notifs = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'payment/notifications_list.html', {'notifications': notifs})
+
+
+# payment/views.py (UPDATED notification_open)
+# ...
+
+# payment/views.py (SIMPLIFIED notification_open)
+# ...
+
+# payment/views.py
+
+@login_required
+def notification_open(request, pk):
     """
-    Handles POST requests to update the status of a specific order.
+    Mark notification read and redirect safely:
+      - If notification has order_id:
+            - If current user is a seller who has items in that order -> seller-facing order view
+            - Else if current user is superuser -> admin change page for the order
+            - Else if current user is the customer who placed the order -> customer/home or a user order page
+            - Otherwise -> notifications list (or home)
     """
-    if request.method == 'POST':
-        order = get_object_or_404(Order, pk=pk)
-        seller = request.user.seller_profile
+    try:
+        notif = get_object_or_404(Notification, pk=pk, user=request.user)
+    except Exception:
+        return HttpResponseForbidden("You cannot access this notification.")
+
+    # mark read (idempotent)
+    if not notif.is_read:
+        notif.is_read = True
+        notif.save(update_fields=['is_read'])
+
+    # If notification links to an order, decide redirect based on role/ownership
+    if notif.order_id:
+        try:
+            order = Order.objects.get(pk=notif.order_id)
+        except Order.DoesNotExist:
+            message.error(request, "The linked order could not be found.")
+            return redirect('notifications_list')
+
         
-        # Check if the order contains at least one product from the current seller
-        if not OrderItem.objects.filter(order=order, product__seller=seller).exists():
-            message.error(request, "Access denied. You can only update the status of orders that contain your products.")
-            return redirect('seller_dashboard')
+        # --- 1. SELLER CHECK (Redirect to Dashboard with Context) ---
+        seller_profile = getattr(request.user, 'seller_profile', None)
+        if seller_profile is not None:
             
+            # Check if the seller has any items in this specific order
+            seller_has_items_in_order = OrderItem.objects.filter(
+                order=order, 
+                seller=seller_profile
+            ).exists()
+
+            if seller_has_items_in_order:
+                # 👇 SMART COMPROMISE: Redirect to the dashboard (safer navigation)
+                # The notification alert link (which is not this view) will still work as before.
+                message.info(
+                    request, 
+                    f"Notification for Order #{order.id}. Find your items listed below."
+                )
+                # Ensure 'seller_dashboard' is the correct URL name
+                return redirect('seller_dashboard') 
+
+
+        # --- 2. SUPERUSER/ADMIN CHECK ---
+        if request.user.is_superuser:
+            # Redirect admin to Django Admin change page
+            return redirect(reverse('admin:payment_order_change', args=(order.id,)))
+
+
+        # --- 3. CUSTOMER CHECK ---
+        if order.user and request.user == order.user:
+            return redirect('home')
+
+        # --- 4. DEFAULT FALLBACK ---
+        return redirect('notifications_list')
+
+    # If notification didn't link to an order, send to the notifications list
+    return redirect('notifications_list')
+
+
+@login_required
+def notification_redirect_view(request, notif_id):
+    """Backward-compatible wrapper — just call notification_open."""
+    # The wrapper exists because some templates used this name earlier.
+    return notification_open(request, notif_id)
+
+
+
+@login_required
+def mark_all_notifications_read(request):
+    """Mark all unread notifications for the current user as read (POST only)."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST required'}, status=400)
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({'ok': True})
+
+
+# -------------------------
+# Seller-facing order detail view(s)
+# -------------------------
+@login_required
+def seller_order_detail(request, order_id):
+    """
+    Seller-facing order detail.
+    - Admins see everything.
+    - Sellers only see items that belong to them and see calculations for their items.
+    """
+    order = get_object_or_404(Order, pk=order_id)
+
+    # --- 1. Superuser/Admin Flow ---
+    if request.user.is_superuser:
+        items = OrderItem.objects.filter(order=order).select_related('product', 'seller')
+        seller_view = False
+        
+        # Calculate full order totals (if you need them for the admin view)
+        full_subtotal = sum(item.price * item.quantity for item in items)
+        full_commission = sum(item.price * item.quantity * item.commission_rate for item in items)
+        
+        return render(request, 'payment/seller_order_detail.html', {
+            'order': order, 
+            'items': items, 
+            'seller_view': seller_view,
+            'seller_subtotal': full_subtotal.quantize(Decimal('0.01')),
+            'total_commission': full_commission.quantize(Decimal('0.01')),
+            'seller_net_earnings': (full_subtotal - full_commission).quantize(Decimal('0.01')),
+        })
+
+    # --- 2. Seller Authentication Check ---
+    if not hasattr(request.user, 'seller_profile') or request.user.seller_profile is None:
+        return HttpResponseForbidden("You must be a seller to view this page.")
+
+    seller = request.user.seller_profile
+    items = OrderItem.objects.filter(order=order, seller=seller).select_related('product')
+    
+    if not items.exists():
+        return HttpResponseForbidden("You do not have permission to view this order.")
+
+    # --- 3. Seller Calculations ---
+    seller_subtotal = Decimal('0.00')
+    total_commission = Decimal('0.00')
+    
+    for item in items:
+        # NOTE: commission_rate should be a Decimal field for accurate multiplication
+        item_subtotal = item.price * item.quantity
+        item_commission = item_subtotal * item.commission_rate
+        
+        seller_subtotal += item_subtotal
+        total_commission += item_commission
+
+    # Final totals (quantized for currency precision)
+    seller_subtotal = seller_subtotal.quantize(Decimal('0.01'))
+    total_commission = total_commission.quantize(Decimal('0.01'))
+    seller_net_earnings = (seller_subtotal - total_commission).quantize(Decimal('0.01'))
+    
+    # --- 4. Handle POST Request (Status Update) ---
+    if request.method == 'POST':
         action = request.POST.get('action')
         
-        if action == 'processing' and order.status == 'paid':
-            order.status = 'processing'
+        if action in ['processing', 'shipped', 'delivered', 'cancelled']:
+            # You might need additional checks here to ensure the seller can only advance certain statuses
+            order.status = action
+            if action == 'shipped':
+                 order.date_shipped = timezone.now()
             order.save()
-            message.success(request, f"Order {order.id} is now being processed.")
-            
-        elif action == 'shipped' and order.status == 'processing':
-            order.status = 'shipped'
-            order.save()
-            message.success(request, f"Order {order.id} has been marked as shipped.")
-            
-        elif action == 'delivered' and order.status == 'shipped':
-            order.status = 'delivered'
-            order.save()
-            message.success(request, f"Order {order.id} has been marked as delivered.")
+            message.success(request, f"Order #{order.id} status updated to {action}.")
+        else:
+            message.error(request, "Invalid status action.")
 
-    return redirect('seller_dashboard')
+        # Redirect to prevent re-submission of form
+        return redirect('seller_order_detail', order_id=order.id)
 
 
-@seller_required
-def seller_order_details(request, pk):
-    """
-    Displays the details of a specific order for the logged-in seller.
-    It verifies that the order contains at least one item from the seller.
-    """
-    seller = request.user.seller_profile
-    
-    # Get the order and its items, ensuring at least one item belongs to the seller
-    order = get_object_or_404(Order, pk=pk)
-    
-    # Filter order items to only include those belonging to the current seller
-    seller_order_items = OrderItem.objects.filter(order=order, product__seller=seller)
-    
-    # If the seller has no items in this order, deny access
-    if not seller_order_items.exists():
-        message.error(request, "Access denied. This order does not contain your products.")
-        return redirect('seller_dashboard')
-
-    # Calculate subtotal and total commission for the seller's items in this order
-    subtotal = seller_order_items.aggregate(
-        total=Sum(F('price') * F('quantity'))
-    )['total'] or 0
-
-    total_commission = seller_order_items.aggregate(
-        commission_sum=Sum(
-            ExpressionWrapper(
-                F('price') * F('quantity') * F('commission_rate'),
-                output_field=DecimalField()
-            )
-        )
-    )['commission_sum'] or 0
-    
-    net_profit = subtotal - total_commission
-
-    context = {
-        'order': order,
-        'seller_order_items': seller_order_items,
-        'subtotal': subtotal,
+    # --- 5. Render Template ---
+    seller_view = True
+    return render(request, 'payment/seller_order_detail.html', {
+        'order': order, 
+        'items': items, 
+        'seller_view': seller_view,
+        'seller_subtotal': seller_subtotal,
         'total_commission': total_commission,
-        'net_profit': net_profit,
-    }
-    
-    return render(request, 'payment/seller_order_details.html', context)
+        'seller_net_earnings': seller_net_earnings,
+    })
 
 
+# alias (if some URLs/templates reference the plural name)
+seller_order_details = seller_order_detail
+# -------------------------
+# Seller product CRUD
+# -------------------------
 @seller_required
 def product_list(request):
-    """
-    Displays a list of all products belonging to the current seller.
-    """
     seller = request.user.seller_profile
     products = Product.objects.filter(seller=seller).order_by('-id')
-    
-    context = {
-        'products': products
-    }
-    return render(request, 'payment/product_list.html', context)
+    return render(request, 'payment/product_list.html', {'products': products})
+
 
 @seller_required
 def product_add(request):
-    """
-    Allows a seller to add a new product.
-    """
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
@@ -130,21 +254,12 @@ def product_add(request):
             return redirect('product_list')
     else:
         form = ProductForm()
-    
-    context = {
-        'form': form,
-        'action': 'Add'
-    }
-    return render(request, 'payment/product_form.html', context)
+    return render(request, 'payment/product_form.html', {'form': form, 'action': 'Add'})
+
 
 @seller_required
 def product_edit(request, pk):
-    """
-    Allows a seller to edit one of their products.
-    Includes a security check to ensure they own the product.
-    """
     product = get_object_or_404(Product, pk=pk, seller=request.user.seller_profile)
-    
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
@@ -153,57 +268,37 @@ def product_edit(request, pk):
             return redirect('product_list')
     else:
         form = ProductForm(instance=product)
-    
-    context = {
-        'form': form,
-        'action': 'Edit',
-        'product': product
-    }
-    return render(request, 'payment/product_form.html', context)
+    return render(request, 'payment/product_form.html', {'form': form, 'action': 'Edit', 'product': product})
+
 
 @seller_required
 def product_delete(request, pk):
-    """
-    Handles the deletion of a product.
-    Includes a security check to ensure the seller owns the product.
-    """
     product = get_object_or_404(Product, pk=pk, seller=request.user.seller_profile)
-    
     if request.method == 'POST':
         product.delete()
         message.success(request, f"Product '{product.name}' deleted successfully!")
         return redirect('product_list')
-    
-    context = {
-        'product': product
-    }
-    return render(request, 'payment/product_confirm_delete.html', context)
-
-#Seller lifecycle (signup, login, logout, profile)
+    return render(request, 'payment/product_confirm_delete.html', {'product': product})
 
 
-def seller_signup(request): 
+# -------------------------
+# Seller account lifecycle (signup/login/logout/profile)
+# -------------------------
+def seller_signup(request):
     if request.method == 'POST':
         form = SellerSignupForm(request.POST)
         if form.is_valid():
-            # The save method in the form handles creating the User and Seller
-            user = form.save() 
-
-
-
-            # We are making sure that the related Seler profile is inactive until approved by admin
-            #This should be working now
+            user = form.save()
+            # Make sure seller_profile exists and is inactive until admin approves
             if hasattr(user, "seller_profile"):
                 user.seller_profile.is_active = False
                 user.seller_profile.save()
-                
             message.success(request, "Your seller application has been submitted successfully! We'll review it and get back to you shortly.")
-            return redirect('home')  # Redirect to the home page after submission
+            return redirect('home')
     else:
         form = SellerSignupForm()
-    
-    context = {'form': form}
-    return render(request, 'payment/seller_signup.html', context)
+    return render(request, 'payment/seller_signup.html', {'form': form})
+
 
 def seller_login(request):
     if request.method == "POST":
@@ -220,57 +315,83 @@ def seller_login(request):
         form = SellerLoginForm()
     return render(request, 'payment/seller_login.html', {'form': form})
 
+
 def seller_logout(request):
     logout(request)
     message.success(request, "Logged out.")
     return redirect('home')
 
 
-
 @seller_required
 def seller_dashboard(request):
-    # Fetch all order items for the logged-in seller
-    seller_id = request.user.seller_profile.id
-    order_items = OrderItem.objects.filter(seller__id=seller_id).select_related('order').order_by('-created_at')
+    # ... (code remains the same above this line)
+    request.disable_newsletter = True
+    seller = request.user.seller_profile
 
-    # Get filter and search parameters from the request
+    order_items_qs = OrderItem.objects.filter(seller=seller).select_related('order', 'product').order_by('-created_at')
+
+    # ... (filtering logic is unchanged)
     status_filter = request.GET.get('status', 'all')
     search_query = request.GET.get('search', '')
 
-    # Apply filters
     if status_filter != 'all':
-        order_items = order_items.filter(order__status=status_filter)
-    
+        order_items_qs = order_items_qs.filter(order__status=status_filter)
+
     if search_query:
-        order_items = order_items.filter(
+        order_items_qs = order_items_qs.filter(
             Q(order__full_name__icontains=search_query) |
             Q(order__email__icontains=search_query) |
             Q(order__id__icontains=search_query) |
             Q(product__name__icontains=search_query)
         )
+    # ...
 
-    # To show unique orders, not unique order items
-    # You might want to display individual items, but if you want one row per order,
-    # you'd group them. For simplicity, let's stick to OrderItems first.
-    # To display unique orders, you could do:
-    order_ids = order_items.values_list('order_id', flat=True).distinct()
+    # Get the unique orders IDs and fetch the Orders
+    order_ids = order_items_qs.values_list('order_id', flat=True).distinct()
     orders = Order.objects.filter(id__in=order_ids).order_by('-date_ordered')
 
-    # We will pass both order_items (for detail view) and orders (for the main table)
-    # Let's adjust for the request of "all on one page but with the help of filters"
+    seller_items_map = {}
     
-    # We will just show all order items in a table, and the filter will apply to the order status
+    # 👇 NEW DICTIONARY FOR CALCULATIONS 👇
+    seller_totals_map = {} 
+    
+    for item in order_items_qs:
+        # Aggregate OrderItems into a list per Order ID
+        if item.order_id not in seller_items_map:
+            seller_items_map[item.order_id] = []
+        seller_items_map[item.order_id].append(item)
+
+        # Aggregate totals per Order ID
+        if item.order_id not in seller_totals_map:
+            seller_totals_map[item.order_id] = {'subtotal': Decimal('0.00'), 'commission': Decimal('0.00')}
+        
+        # Calculate subtotal and commission for this specific order item
+        item_subtotal = item.price * item.quantity
+        item_commission = item_subtotal * item.commission_rate
+        
+        seller_totals_map[item.order_id]['subtotal'] += item_subtotal
+        seller_totals_map[item.order_id]['commission'] += item_commission
+        
+    # Apply Decimal formatting to the aggregated totals
+    for order_id in seller_totals_map:
+         seller_totals_map[order_id]['subtotal'] = seller_totals_map[order_id]['subtotal'].quantize(Decimal('0.01'))
+         seller_totals_map[order_id]['commission'] = seller_totals_map[order_id]['commission'].quantize(Decimal('0.01'))
+
+
     context = {
-        'orders': orders, # This will be the list of orders to display
+        'orders': orders,
+        'seller_items_map': seller_items_map,
+        # 👇 PASS THE NEW MAP TO CONTEXT 👇
+        'seller_totals_map': seller_totals_map, 
         'current_filter': status_filter,
         'search_query': search_query,
     }
-
     return render(request, 'payment/seller_dashboard.html', context)
 
-    
+
 @seller_required
 def seller_profile_view(request):
+    request.disable_newsletter = True
     seller = request.user.seller_profile
     if request.method == 'POST':
         form = SellerProfileForm(request.POST, request.FILES, instance=seller)
@@ -282,403 +403,494 @@ def seller_profile_view(request):
         form = SellerProfileForm(instance=seller)
     return render(request, 'payment/seller_profile.html', {'form': form, 'seller': seller})
 
+
+# -------------------------
+# Admin helpers
+# -------------------------
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
 
+
 @user_passes_test(is_superuser)
 def orders(request, pk):
-    """
-    Displays the details of a specific order for the admin.
-    """
+    """Admin view for a single order."""
     order = get_object_or_404(Order, pk=pk)
-    
-    # You might want to get all order items, not just a subset
     items = order.orderitem_set.all()
-    
-    # For a full admin view, you might not need to calculate commission,
-    # but let's include it for consistency with the seller dashboard.
-    total_commission = 0
-    for item in items:
-        total_commission += item.price * item.quantity * item.commission_rate
-        
-    context = {
-        'order': order,
-        'items': items, # Changed from orderitem_set to items for clarity
-        'total_commission': total_commission,
-    }
-    
-    return render(request, 'payment/admin_order_details.html', context)
+    total_commission = sum((item.price * item.quantity * item.commission_rate) for item in items)
+    return render(request, 'payment/admin_order_details.html', {'order': order, 'items': items, 'total_commission': total_commission})
 
-# payments/views.py
 
+# -------------------------
+# Admin dashboards (unshipped / shipped)
+# -------------------------
 def not_shipped_dash(request):
+    request.disable_newsletter = True
     if not request.user.is_authenticated or not request.user.is_superuser:
         message.warning(request, "Access Denied")
         return redirect('home')
-    
-    # Handle POST requests (button actions)
+
     if request.method == "POST":
         order_id = request.POST.get('num')
         action = request.POST.get('action')
-        
         try:
             order = Order.objects.get(id=order_id)
-            
             if action == 'ship':
                 order.status = 'shipped'
                 order.date_shipped = timezone.now()
                 order.save()
                 message.success(request, f"Order #{order_id} marked as shipped")
-                
             elif action == 'cancel':
-                reason = request.POST.get('reason', 'No reason provided')
+                cancellation_reason = request.POST.get('reason', 'Cancelled by admin')
                 order.status = 'cancelled'
-                # If you have a cancellation_notes field, add it here
-                # order.cancellation_notes = reason
+                order.cancellation_notes = cancellation_reason
                 order.save()
                 message.success(request, f"Order #{order_id} has been cancelled")
-                
         except Order.DoesNotExist:
             message.error(request, "Order not found")
-        
-        # Redirect back to the same page with current filters
+
         status_filter = request.GET.get('status', 'active')
         search_query = request.GET.get('search', '')
         redirect_url = f"{reverse('not_shipped_dash')}?status={status_filter}&search={search_query}"
         return redirect(redirect_url)
-    
-    # Get filter parameters from URL (GET request handling remains the same)
+
     status_filter = request.GET.get('status', 'active')
     search_query = request.GET.get('search', '')
-    
-    # Base queryset
+
     if status_filter == 'cancelled':
-        orders = Order.objects.filter(status='cancelled')
+        orders_qs = Order.objects.filter(status='cancelled')
     elif status_filter == 'all':
-        orders = Order.objects.exclude(status__in=['shipped', 'delivered'])
-    else:  # active orders
-        orders = Order.objects.filter(status__in=['paid', 'processing'])
-    
-    # Apply search if provided
+        orders_qs = Order.objects.exclude(status__in=['shipped', 'delivered'])
+    else:
+        orders_qs = Order.objects.filter(status__in=['paid', 'processing'])
+
     if search_query:
-        orders = orders.filter(
-            full_name__icontains=search_query
-        ) | orders.filter(
-            id__icontains=search_query
-        ) | orders.filter(
-            email__icontains=search_query
-        )
-    
-    # Final ordering
-    orders = orders.select_related('user').order_by('-date_ordered')
-    
-    return render(request, 'payment/not_shipped_dash.html', {
-        "orders": orders,
-        "current_filter": status_filter,
-        "search_query": search_query
-    })
+        orders_qs = orders_qs.filter(full_name__icontains=search_query) | orders_qs.filter(id__icontains=search_query) | orders_qs.filter(email__icontains=search_query)
+
+    orders_qs = orders_qs.select_related('user').order_by('-date_ordered')
+    return render(request, 'payment/not_shipped_dash.html', {"orders": orders_qs, "current_filter": status_filter, "search_query": search_query})
+
 
 def shipped_dash(request):
+    request.disable_newsletter = True
     if not request.user.is_authenticated or not request.user.is_superuser:
         message.warning(request, "Access Denied")
         return redirect('home')
-    
-    # Handle POST requests (button actions)
+
     if request.method == "POST":
         order_id = request.POST.get('num')
         action = request.POST.get('action')
-        
         try:
             order = Order.objects.get(id=order_id)
-            
             if action == 'deliver':
                 order.status = 'delivered'
                 order.save()
                 message.success(request, f"Order #{order_id} marked as delivered")
-                
             elif action == 'process':
                 order.status = 'processing'
                 order.save()
                 message.success(request, f"Order #{order_id} returned to processing")
-                
         except Order.DoesNotExist:
             message.error(request, "Order not found")
-        
-        # Redirect back to the same page with current filters
+
         status_filter = request.GET.get('status', 'all')
         search_query = request.GET.get('search', '')
         redirect_url = f"{reverse('shipped_dash')}?status={status_filter}&search={search_query}"
         return redirect(redirect_url)
-    
-    # Get filter parameters (GET request handling remains the same)
+
     status_filter = request.GET.get('status', 'all')
     search_query = request.GET.get('search', '')
-    
-    # Base queryset
+
     if status_filter == 'delivered':
-        orders = Order.objects.filter(status='delivered')
+        orders_qs = Order.objects.filter(status='delivered')
     elif status_filter == 'shipped':
-        orders = Order.objects.filter(status='shipped')
-    else:  # all shipped/delivered orders
-        orders = Order.objects.filter(status__in=['shipped', 'delivered'])
-    
-    # Apply search if provided
-    if search_query:
-        orders = orders.filter(
-            full_name__icontains=search_query
-        ) | orders.filter(
-            id__icontains=search_query
-        ) | orders.filter(
-            email__icontains=search_query
-        )
-    
-    # Final ordering
-    orders = orders.select_related('user').order_by('-date_shipped')
-    
-    return render(request, 'payment/shipped_dash.html', {
-        "orders": orders,
-        "current_filter": status_filter,
-        "search_query": search_query
-    })
-
-
-# the meat and potatoes of order processing
-def process_order(request):
-    if request.method == "POST":
-        cart = Cart(request)
-        cart_products = cart.get_prods()
-        quantities = cart.get_quants()
-        total = cart.cart_total()
-
-        payment_form = PaymentForm(request.POST or None)
-        # Get Shipping Session Data
-        my_shipping = request.session.get('my_shipping')
-
-        # gather order information
-        full_name = my_shipping['shipping_full_name']
-        email = my_shipping['shipping_email']
-        # Create Shipping Address from session info
-        shipping_address = f"{my_shipping['shipping_address1']}\n{my_shipping['shipping_address2']}\n{my_shipping['shipping_city']}\n{my_shipping['shipping_province']}\n{my_shipping['shipping_postal_code']}\n{my_shipping['shipping_country']}"
-        amount_paid = total
-
-        # Get payment method
-        payment_method = request.POST.get('payment_method')
-
-        # Create Order
-        if request.user.is_authenticated:
-            create_order = Order(
-                user=request.user,
-                full_name=full_name,
-                email=email,
-                shipping_address=shipping_address,
-                amount_paid=amount_paid,
-                status='paid',
-                payment_method=payment_method
-            )
-            create_order.save()
-
-            # Add Order Items
-            order_id = create_order.pk
-            order_items = []  # To store items for email notification
-            
-            for product in cart_products:
-                product_id = product.id
-                # Get product price
-                if product.sale_price:
-                    price = product.sale_price
-                else:
-                    price = product.price
-
-                # Get product quantity
-                for key, value in quantities.items():
-                    if int(key) == product_id:
-                        # create order item
-                        create_order_item = OrderItem(
-                            order_id=order_id,
-                            product=product,
-                            user=request.user,
-                            quantity=value,
-                            price=price,
-                            commission_rate=Decimal('0.15')
-                        )
-                        create_order_item.save()
-                        order_items.append(create_order_item)
-
-            # Send email notifications
-            try:
-                send_order_notifications(create_order, order_items)
-            except Exception as e:
-                print(f"Error sending notifications: {e}")
-
-            # Delete cart and redirect
-            for key in list(request.session.keys()):
-                if key == "session_key":
-                    del request.session[key]
-
-            message.success(request, "Order Placed Successfully")
-            return redirect('home')
-        else:
-            # Guest checkout
-            create_order = Order(
-                full_name=full_name,
-                email=email,
-                shipping_address=shipping_address,
-                amount_paid=amount_paid,
-                status='paid',
-                payment_method=payment_method
-            )
-            create_order.save()
-
-            order_id = create_order.pk
-            order_items = []  # To store items for email notification
-            
-            for product in cart_products:
-                product_id = product.id
-                # Get product price
-                if product.sale_price:
-                    price = product.sale_price
-                else:
-                    price = product.price
-
-                # Get product quantity
-                for key, value in quantities.items():
-                    if int(key) == product_id:
-                        # create order item
-                        create_order_item = OrderItem(
-                            order_id=order_id,
-                            product=product,
-                            quantity=value,
-                            price=price,
-                            commission_rate=Decimal('0.15')
-                        )
-                        create_order_item.save()
-                        order_items.append(create_order_item)
-
-            # Send email notifications
-            try:
-                send_order_notifications(create_order, order_items)
-            except Exception as e:
-                print(f"Error sending notifications: {e}")
-
-            # Delete cart
-            for key in list(request.session.keys()):
-                if key == "session_key":
-                    del request.session[key]
-
-            message.success(request, "Order Placed Successfully")
-            return redirect('home')
+        orders_qs = Order.objects.filter(status='shipped')
     else:
+        orders_qs = Order.objects.filter(status__in=['shipped', 'delivered'])
+
+    if search_query:
+        orders_qs = orders_qs.filter(full_name__icontains=search_query) | orders_qs.filter(id__icontains=search_query) | orders_qs.filter(email__icontains=search_query)
+
+    orders_qs = orders_qs.select_related('user').order_by('-date_shipped')
+    return render(request, 'payment/shipped_dash.html', {"orders": orders_qs, "current_filter": status_filter, "search_query": search_query})
+
+
+# -------------------------
+# Order processing (checkout)
+# -------------------------
+def process_order(request):
+    """
+    Full checkout/order creation logic.
+    Creates Order, OrderItems, ImpactFundTransaction (best-effort), notifications and clears cart.
+    """
+    request.disable_newsletter = True
+    if request.method != "POST":
         message.success(request, "Access Denied")
         return redirect('home')
 
+    cart = Cart(request)
+    cart_products = cart.get_prods()
+    quantities = cart.get_quants()
+    total = cart.cart_total()
+    my_shipping = request.session.get('my_shipping') or {}
+
+    full_name = my_shipping.get('shipping_full_name', '')
+    email = my_shipping.get('shipping_email', '')
+    phone_number = my_shipping.get('phone_number', '') 
+    shipping_address = (
+        f"{my_shipping.get('shipping_address1','')}\n"
+        f"{my_shipping.get('shipping_address2','')}\n"
+        f"{my_shipping.get('shipping_city','')}\n"
+        f"{my_shipping.get('shipping_province','')}\n"
+        f"{my_shipping.get('shipping_postal_code','')}\n"
+        f"{my_shipping.get('shipping_country','')}"
+    )
+    amount_paid = Decimal(total) if not isinstance(total, Decimal) else total
+    payment_method = request.POST.get('payment_method', None)
+
+    ITEM_COMMISSION_RATE = Decimal('0.15')
+    IMPACT_FUND_RATE = Decimal('0.10')
+
+    total_impact_allocation = Decimal('0.00')
+
+    with transaction.atomic():
+        # Create order (auth or guest)
+        if request.user.is_authenticated:
+            order = Order(user=request.user, full_name=full_name, email=email, 
+                          shipping_address=shipping_address, amount_paid=amount_paid, phone_number=phone_number,
+                            
+                          status='paid', payment_method=payment_method)
+        else:
+            order = Order(full_name=full_name, email=email,
+                          shipping_address=shipping_address, amount_paid=amount_paid, phone_number=phone_number,
+                          
+                          status='paid', payment_method=payment_method)
+        order.save()
+
+        order_items = []
+        user_for_impact = request.user if request.user.is_authenticated else None
+
+        for product in cart_products:
+            product_id = product.id
+            price = product.sale_price if getattr(product, 'is_sale', False) and getattr(product, 'sale_price', None) else product.price
+            if not isinstance(price, Decimal):
+                price = Decimal(price)
+
+            for key, value in quantities.items():
+                try:
+                    q_key = int(key)
+                except (ValueError, TypeError):
+                    continue
+                if q_key != product_id:
+                    continue
+
+                quantity = int(value)
+                oi = OrderItem(order=order, product=product, user=user_for_impact,
+                               quantity=quantity, price=price, commission_rate=ITEM_COMMISSION_RATE)
+                oi.save()
+                order_items.append(oi)
+
+                item_subtotal = (price * Decimal(quantity)).quantize(Decimal('0.01'))
+                platform_commission = (item_subtotal * ITEM_COMMISSION_RATE).quantize(Decimal('0.01'))
+                impact_allocation = (platform_commission * IMPACT_FUND_RATE).quantize(Decimal('0.01'))
+                total_impact_allocation += impact_allocation
+
+        # Create ImpactFundTransaction if model exists
+        if total_impact_allocation > Decimal('0.00') and ImpactFundTransaction is not None:
+            try:
+                ImpactFundTransaction.objects.create(
+                    transaction_type='COMMISSION',
+                    amount=total_impact_allocation,
+                    user=user_for_impact,
+                    description=f"Impact allocation from Order #{order.pk} ({(IMPACT_FUND_RATE * 100)}% of commission)",
+                )
+            except Exception as e:
+                print("ImpactFundTransaction create failed:", e)
+
+        # Send notifications (best-effort)
+        print("DEBUG 1: Before calling send_order_notifications. Order items count:", len(order_items))
+        try:
+            send_order_notifications(order, order_items)
+            print("DEBUG 2: send_order_notifications called successfully.")
+        except Exception as e:
+            print("Error sending notifications:", e)
+
+        # Clear cart
+        try:
+            if hasattr(cart, "clear"):
+                cart.clear()
+            else:
+                for key in list(request.session.keys()):
+                    if key == "session_key":
+                        del request.session[key]
+        except Exception:
+            pass
+
+    message.success(request, "Order Placed Successfully")
+    return redirect('home')
 
 
-
+# -------------------------
+# Billing/Checkout helpers + exports
+# -------------------------
 def billing_info(request):
-    if request.POST:
-        cart = Cart(request)
-        cart_products = cart.get_prods()
-        quantities = cart.get_quants()
-        total = cart.cart_total()
+    request.disable_newsletter = True
+    
+    # Check if shipping data exists in the session
+    my_shipping = request.session.get('my_shipping')
+    if not my_shipping:
+        # If shipping data is missing, redirect back to checkout
+        message.warning(request, "Please enter your shipping information.")
+        return redirect('checkout')
 
-        # Store shipping info in session
-        if 'shipping_full_name' in request.POST:
-            request.session['my_shipping'] = request.POST.dict()
-            
-        # Get payment form
-        billing_form = PaymentForm()
-        
-        return render(request, 'payment/billing_info.html', {
-            "cart_products": cart_products,
-            "quantities": quantities,
-            "total": total,
-            "shipping_info": request.session.get('my_shipping'),
-            "billing_form": billing_form
-        })
-    else:
-        message.warning(request, "Access Denied")
-        return redirect('home')
-
-
-
-
-
-def checkout(request):
+    # Now the view is guaranteed to have clean shipping data
     cart = Cart(request)
     cart_products = cart.get_prods()
     quantities = cart.get_quants()
     total = cart.cart_total()
 
-    if request.user.is_authenticated:
-        #Checkout as logged in user
-        #Shipping User
-        shipping_user, created = ShippingAddress.objects.get_or_create(user=request.user)
-        #Shipping Form
-        shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
-        return render(request, 'payment/checkout.html', {
+    billing_form = PaymentForm() 
+    return render(request, 'payment/billing_info.html', {
         "cart_products": cart_products,
         "quantities": quantities,
         "total": total,
-        "shipping_form": shipping_form
+        "shipping_info": my_shipping, # Use the clean session data
+        "billing_form": billing_form
     })
 
+
+def checkout(request):
+    # ... (code to get cart, products, etc.) ...
+
+    if request.user.is_authenticated:
+        shipping_user, created = ShippingAddress.objects.get_or_create(user=request.user)
+        shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
     else:
-        #Checkout as guest
         shipping_form = ShippingForm(request.POST or None)
-        return render(request, 'payment/checkout.html', {
-        "cart_products": cart_products,
-        "quantities": quantities,
-        "total": total,
+
+    # --- MUST BE PRESENT: Form Validation and Session Save ---
+    if request.method == 'POST':
+        if shipping_form.is_valid():
+            request.session['my_shipping'] = shipping_form.cleaned_data
+            
+            if request.user.is_authenticated:
+                shipping_form.save()
+            
+            # SUCCESS! Redirect to the next step
+            return redirect('billing_info') 
+        else:
+            # Form invalid, errors will show on the rendered page
+            message.error(request, "Please correct the errors in your shipping information.")
+            # FALL THROUGH to render the page with errors
+    # --------------------------------------------------------
+
+    return render(request, 'payment/checkout.html', {
+        # ... (context data) ...
         "shipping_form": shipping_form
     })
 
 
 def payment_success(request):
-
     return render(request, 'payment/payment_success.html', {})
 
-def export_order_details(request, order_id):
-    if not request.user.is_authenticated or not request.user.is_superuser:
-        return HttpResponse("Access Denied", status=403)
-        
-    try:
-        order = Order.objects.get(id=order_id)
-        items = OrderItem.objects.filter(order=order)
-        
-        # Calculate total commission
-        total_commission = sum(item.commission_amount for item in items)
-        
-        content = f"""ORDER #{order.id}
-===========
 
+@login_required
+def export_order_details(request, order_id):
+    """
+    Exports order details as a text file.
+    - Allowed for Superusers (any order).
+    - Allowed for Sellers (only orders that contain their products).
+    """
+    order = get_object_or_404(Order, id=order_id)
+    
+    # --- 1. Permission Check ---
+    is_seller = hasattr(request.user, 'seller_profile') and request.user.seller_profile is not None
+    allowed = False
+    
+    if request.user.is_superuser:
+        allowed = True
+    elif is_seller:
+        # Check if the order contains any OrderItem sold by this seller
+        allowed = OrderItem.objects.filter(
+            order=order, 
+            seller=request.user.seller_profile
+        ).exists()
+
+    if not allowed:
+        if order.user == request.user:
+            # If the customer wants their own order details, they should probably be redirected 
+            # to a customer order history view, but for export simplicity, we deny for now.
+            pass 
+        return HttpResponse("Access Denied. You are not authorized to export details for this order.", status=403)
+
+    # --- 2. Data Retrieval and Calculation ---
+    
+    # Only retrieve items relevant to the seller if the user is a seller and not a superuser
+    if is_seller and not request.user.is_superuser:
+        items = OrderItem.objects.filter(order=order, seller=request.user.seller_profile).select_related('product')
+    else:
+        # Superuser gets all items
+        items = OrderItem.objects.filter(order=order).select_related('product')
+    
+    # Recalculate totals based on the filtered items queryset
+    total_subtotal_seller_view = Decimal('0.00')
+    total_commission_seller_view = Decimal('0.00')
+    
+    for item in items:
+        # Ensure price is a Decimal for math
+        price = item.price if isinstance(item.price, Decimal) else Decimal(str(item.price))
+        
+        item_subtotal = price * item.quantity
+        item_commission = item_subtotal * item.commission_rate
+        total_subtotal_seller_view += item_subtotal
+        total_commission_seller_view += item_commission
+        
+        # Attach the calculated commission amount to the item object for use in the loop below
+        item.calculated_commission_amount = item_commission.quantize(Decimal('0.01'))
+        item.calculated_subtotal = item_subtotal.quantize(Decimal('0.01'))
+
+
+    # --- 3. Content Generation ---
+    content = f"""ORDER #{order.id}
+===========
 Customer: {order.full_name}
 Email: {order.email}
-Amount Paid: ZMK {order.amount_paid}
+Phone Number: {order.phone_number}
+Amount Paid (Order Total): ZMK {order.amount_paid}
 Status: {order.get_status_display()}
 Payment Method: {order.get_payment_method_display()}
 
 Shipping Address:
 {order.shipping_address}
 
-Items Ordered:
+Items {'(Your Products Only)' if is_seller and not request.user.is_superuser else '(Full Order)'}:
 -------------"""
-        
-        for item in items:
-            content += f"\n- {item.product.name}"
-            content += f"\n  Quantity: {item.quantity} @ ZMK {item.price} each"
-            content += f"\n  Subtotal: ZMK {item.price * item.quantity}"
-            content += f"\n  Commission (15%): ZMK {item.commission_amount}"
-            
-        content += f"\n\nOrder Summary:"
-        content += f"\n-------------"
-        content += f"\nSubtotal: ZMK {order.amount_paid}"
-        content += f"\nTotal Commission (15%): ZMK {total_commission}"
-        content += f"\nNet Amount: ZMK {order.amount_paid - total_commission}"
-        
-        response = HttpResponse(content, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename="order_{order_id}_details.txt"'
-        return response
-        
-    except Order.DoesNotExist:
-        return HttpResponse("Order not found", status=404)
+    
+    for item in items:
+        content += f"\n- {item.product.name}"
+        content += f"\n  Quantity: {item.quantity} @ ZMK {item.price} each"
+        content += f"\n  Subtotal: ZMK {item.calculated_subtotal}"
+        content += f"\n  Commission ({item.commission_rate * 100}%): ZMK {item.calculated_commission_amount}"
 
+    # Use the logged-in user's username for the summary heading
+    content += f"\n\nSeller Summary ({request.user.username}'s Items):"
+    content += f"\n-------------"
+    content += f"\nTotal Subtotal (Your items): ZMK {total_subtotal_seller_view.quantize(Decimal('0.01'))}"
+    content += f"\nTotal Commission (Your items): ZMK {total_commission_seller_view.quantize(Decimal('0.01'))}"
+    content += f"\nNet Earnings: ZMK {(total_subtotal_seller_view - total_commission_seller_view).quantize(Decimal('0.01'))}"
+
+    # --- 4. HTTP Response ---
+    response = HttpResponse(content, content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename="order_{order_id}_details.txt"'
+    return response
+
+
+# -------------------------
+# Utilities: update_order_status (used by seller/admin pages)
+# -------------------------
+def cancel_order(request, order_id):
+    if request.method == "POST":
+        # Check seller permissions here if necessary
+        
+        order = get_object_or_404(Order, id=order_id)
+        
+        # --- ADD YOUR CANCELLATION LOGIC HERE ---
+        try:
+            # 1. Update the order status
+            order.status = 'cancelled'
+            order.cancellation_notes = "Cancelled by seller." # Add seller notes if needed
+            order.save()
+            
+            # 2. Add logic to refund the customer or handle payment status
+            # 3. Add logic to notify the customer/admin
+            
+            message.success(request, f"Order #{order_id} has been successfully cancelled.")
+        except Exception as e:
+            message.error(request, f"Failed to cancel order #{order_id}. Error: {e}")
+            
+    # Redirect back to the order detail page or seller dashboard
+    return redirect('seller_order_detail', order_id=order_id)
+
+
+@seller_required
+def update_order_status(request, pk):
+    """
+    POST-only endpoint to update order status.
+    Sellers may only update orders that contain their products.
+    Admins may update any order.
+    """
+    if request.method != 'POST':
+        message.warning(request, "Invalid request.")
+        return redirect('seller_dashboard')
+
+    order = get_object_or_404(Order, pk=pk)
+
+    # --- 1. Permission Check ---
+    if request.user.is_superuser:
+        allowed = True
+    else:
+        seller_profile = getattr(request.user, 'seller_profile', None)
+        if not seller_profile:
+            message.error(request, "Access denied. You must be a seller.")
+            return redirect('seller_dashboard')
+        # Check if the order contains any OrderItem sold by this seller
+        allowed = OrderItem.objects.filter(order=order, seller=seller_profile).exists()
+
+    if not allowed:
+        message.error(request, "Access denied. You can only update orders that contain your products.")
+        # Redirect back to the order detail page for the forbidden action
+        return redirect('seller_order_detail', order_id=order.id)
+
+    # --- 2. Process Action ---
+    action = (request.POST.get('action') or '').strip().lower()
+    updated = False
+
+    if action == 'processing' and order.status in ['paid', 'pending']:
+        order.status = 'processing'
+        updated = True
+        message.success(request, f"Order #{order.id} set to Processing.")
+    
+    elif action == 'shipped' and order.status == 'processing':
+        order.status = 'shipped'
+        order.date_shipped = timezone.now() # Record ship date
+        updated = True
+        message.success(request, f"Order #{order.id} marked as Shipped.")
+    
+    elif action == 'delivered' and order.status == 'shipped':
+        order.status = 'delivered'
+        updated = True
+        message.success(request, f"Order #{order.id} marked as Delivered.")
+    
+    # Allow cancellation from any status that isn't already final (delivered/cancelled)
+    elif action == 'cancelled' and order.status not in ['delivered', 'cancelled']:
+        order.status = 'cancelled'
+        updated = True
+        message.success(request, f"Order #{order.id} Cancelled.")
+    
+    else:
+        message.warning(request, "Invalid or disallowed status transition.")
+
+    if updated:
+        # NOTE: Using save() directly instead of the assumed order.update_status() method
+        order.save() 
+        
+        # --- 3. Create Admin Notification ---
+        try:
+            # Assuming User and Notification are correctly imported
+            admin_email = getattr(settings, 'ADMIN_EMAIL', None)
+            admin_user = None
+            if admin_email:
+                # Find admin user by email
+                admin_user = User.objects.filter(email=admin_email, is_superuser=True).first()
+            if admin_user:
+                Notification.objects.create(
+                    user=admin_user,
+                    message=f"Order #{order.id} status changed to {order.get_status_display()} by {request.user.username}",
+                    order_id=order.id
+                )
+        except Exception as e:
+            # Log the exception instead of just passing
+            print(f"Error creating admin notification: {e}") 
+
+
+    # --- 4. Redirect to Order Detail View (Crucial for the new UI flow) ---
+    return redirect('seller_order_detail', order_id=order.id)

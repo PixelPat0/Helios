@@ -29,7 +29,7 @@
                     <a class="nav-link" href="{% url 'product_list' %}">Products</a>
                 </li>
                 {% endif %}
-
+                
                 {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
@@ -44,41 +44,41 @@
                         </ul>
                     </li>
                     
-                   {% if user.is_superuser or user.seller_profile.is_active %}
-<li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dashboard</a>
-    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-        {% if user.seller_profile.is_active or user.is_superuser %}
-            <li>
-                <a class="dropdown-item" href="{% url 'seller_dashboard' %}">My Orders Dashboard</a>
-            </li>
-            <li><hr class="dropdown-divider" /></li>
-        {% endif %}
-        
-        {% if user.seller_profile.is_active %}
-            <li>
-                <a class="dropdown-item" href="{% url 'seller_profile_public' user.seller_profile.pk %}">
-                    View Public Profile 🌎
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="{% url 'seller_profile' %}">Edit Seller Profile</a>
-            </li>
-            <li><hr class="dropdown-divider" /></li>
-        {% endif %}
+                    {% if user.is_superuser or user.seller_profile.is_active %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDashboardDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dashboard</a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDashboardDropdown">
+                            {% if user.seller_profile.is_active or user.is_superuser %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'seller_dashboard' %}">My Orders Dashboard</a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                            {% endif %}
+                            
+                            {% if user.seller_profile.is_active %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'seller_profile_public' user.seller_profile.pk %}">
+                                        View Public Profile 🌎
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'seller_profile' %}">Edit Seller Profile</a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                            {% endif %}
 
-        {% if user.is_superuser %}
-            <li>
-                <a class="dropdown-item" href="{% url 'shipped_dash' %}">All Shipped Orders</a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="{% url 'not_shipped_dash' %}">All Unshipped Orders</a>
-            </li>
-        {% endif %}
-    </ul>
-</li>
-{% endif %}
-
+                            {% if user.is_superuser %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'shipped_dash' %}">All Shipped Orders</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'not_shipped_dash' %}">All Unshipped Orders</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                     </li>
@@ -96,8 +96,8 @@
                 {% endif %}
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarCategoryDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarCategoryDropdown">
                         <li>
                             <a class="dropdown-item" href="{% url 'category_summary' %}">All Products</a>
                         </li>
@@ -119,6 +119,70 @@
             </ul>
 
             <form class="d-flex">
+                
+                {% if user.is_authenticated and user.is_staff %}
+                    <a class="btn btn-outline-dark me-2" href="{% url 'admin:index' %}">
+                        <i class="bi bi-gear-fill me-1"></i>
+                        Admin
+                    </a>
+                {% endif %}
+
+               {% if user.is_authenticated %}
+<div class="dropdown me-2">
+    <a class="btn btn-outline-dark position-relative" 
+        href="#" {# Change to '#' to allow the dropdown to open without navigating away #}
+        role="button" 
+        id="notificationDropdown" 
+        data-bs-toggle="dropdown" 
+        aria-expanded="false">
+        <i class="bi bi-bell-fill me-1"></i>
+        <span class="d-none d-lg-inline">Alerts</span>
+        {% if unread_notification_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ unread_notification_count }}
+                <span class="visually-hidden">Unread notifications</span>
+            </span>
+        {% endif %}
+    </a>
+    
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="min-width: 300px;">
+        <h6 class="dropdown-header">Notifications</h6>
+        
+        {# --- 1. DISPLAY INDIVIDUAL UNREAD NOTIFICATIONS --- #}
+        {% if unread_notifications %} 
+            {% for notification in unread_notifications %}
+            <li>
+                <a class="dropdown-item p-2 {% if not notification.is_read %}fw-bold text-dark bg-light{% endif %}" 
+                    href="{% url 'notification_open' notification.id %}"> 
+                    {{ notification.message|truncatechars:70 }}
+                    <small class="text-muted d-block fw-normal">{{ notification.created_at|timesince }} ago</small>
+                </a>
+            </li>
+            {% if not forloop.last %}
+                <li><hr class="dropdown-divider my-1"></li>
+            {% endif %}
+            {% endfor %}
+            
+        {% else %}
+            {# --- 2. DISPLAY 'NO NEW NOTIFICATIONS' MESSAGE --- #}
+            <li>
+                <a class="dropdown-item disabled text-muted" href="#">
+                    No new notifications.
+                </a>
+            </li>
+        {% endif %}
+
+        {# --- 3. ALWAYS SHOW THE "VIEW ALL" LINK AFTER THE NOTIFICATIONS/MESSAGE --- #}
+        <li><hr class="dropdown-divider my-1"></li>
+        <li>
+            <a class="dropdown-item text-center text-primary fw-bold" href="{% url 'notifications_list' %}">
+                View All Notifications
+            </a>
+        </li>
+    </ul>
+</div>
+{% endif %}
+
                 <a href="{% url 'cart_summary' %}" class="btn btn-outline-dark">
                     <i class="bi-cart-fill me-1"></i>
                     Cart

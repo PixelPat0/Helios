@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Helios Notification{% endblock %}</title>
+    <style>
+      body { font-family: Arial, Helvetica, sans-serif; color: #333; }
+      .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+      header { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+      footer { border-top: 1px solid #eee; margin-top: 20px; padding-top: 10px; color: #888; font-size: 0.9em; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1 style="margin:0; font-size:1.25em;">Helios</h1>
+        <p style="margin:0; font-size:0.9em; color:#666;">Sustainable energy marketplace</p>
+      </header>
+
+      <main>
+        {% block content %}
+        <!-- email body goes here -->
+        {% endblock %}
+      </main>
+
+      <footer>
+        <p>Thank you — the Helios team</p>
+      </footer>
+    </div>
+  </body>
+</html>

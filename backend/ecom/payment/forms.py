@@ -3,9 +3,19 @@ from .models import ShippingAddress
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import Seller
+from .models import NewsletterSubscriber
 
 
-
+class NewsletterSubscriberForm(forms.ModelForm):
+    class Meta:
+        model = NewsletterSubscriber
+        fields = ['email'] # We only require the email address
+        widgets = {
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your email for updates'
+            })
+        }
 
 class SellerSignupForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -46,28 +56,77 @@ class SellerProfileForm(forms.ModelForm):
 
 # payment/decorators.py
 
+from django import forms
+from .models import ShippingAddress # Assuming ShippingAddress is imported from .models
+
 class ShippingForm(forms.ModelForm):
 
-    shipping_full_name = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Full Name'}), required=True)
-    shipping_email = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Email Address'}), required=True)
-    shipping_address1 = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Address 1'}), required=True)
-    shipping_address2 = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Address 2'}), required=False)
-    shipping_city = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'City'}), required=True)
-    shipping_province = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Province'}), required=False)
-    shipping_postal_code = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Postal Code'}), required=False)
-    shipping_country= forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Country'}), required=True)
+    # Use consistent styling (label="" and 'class': 'form-control ') for all fields
 
+    # Contact Details
+    shipping_full_name = forms.CharField(
+        label="", 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'})
+    )
+    shipping_email = forms.CharField(
+        label="", 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'})
+    )
+    phone_number = forms.CharField(
+        max_length=20, 
+        label="", # Consistent with other fields
+        required=True, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number (e.g., 0977XXXXXX)'}) # Added form-control class
+    )
+    
+    # Address Details
+    shipping_address1 = forms.CharField(
+        label="", 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address 1'})
+    )
+    shipping_address2 = forms.CharField(
+        label="", 
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address 2 (Optional)'})
+    )
+    shipping_city = forms.CharField(
+        label="", 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'})
+    )
+    shipping_province = forms.CharField(
+        label="", 
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Province (Optional)'})
+    )
+    shipping_postal_code = forms.CharField(
+        label="", 
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Postal Code (Optional)'})
+    )
+    shipping_country = forms.CharField(
+        label="", 
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Country'})
+    )
 
     class Meta:
         model = ShippingAddress
+        
+        # Explicitly defining fields here ensures consistent order, 
+        # even though they are all defined above.
         fields = [
-            'shipping_full_name', 'shipping_email', 'shipping_address1', 
-            'shipping_address2', 'shipping_city', 'shipping_province', 
-            'shipping_postal_code', 'shipping_country'
+            'shipping_full_name', 'shipping_email', 'phone_number', 
+            'shipping_address1', 'shipping_address2', 'shipping_city', 
+            'shipping_province', 'shipping_postal_code', 'shipping_country'
         ]
 
-        exclude = ['user',]
+        exclude = ['user'] # Keep this for security/logic
 
+        
 class PaymentForm(forms.Form):
     card_name = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Name On Card'}), required=True)
     card_number = forms.CharField(label="", widget=forms.TextInput(attrs={'class': 'form-control ', 'placeholder': 'Card Number'}), required=True)

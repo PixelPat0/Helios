@@ -6,7 +6,54 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.conf import settings
+from store.models import Customer
 
+
+
+class Notification(models.Model):
+    """
+    Model for internal site notifications (e.g., new orders, system alerts).
+    """
+    # Links to the User who should receive the notification (Admin or Seller)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    
+    # The content of the notification
+    message = models.CharField(max_length=255)
+    
+    # Link to the object that triggered the notification (e.g., the Order)
+    # Using GenericForeignKey is often complex for MVPs, so we'll keep it simple for now.
+    order_id = models.IntegerField(null=True, blank=True)
+
+    # Status
+    is_read = models.BooleanField(default=False)
+    
+    # Timestamp
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Internal Notification"
+        verbose_name_plural = "Internal Notifications"
+
+    def __str__(self):
+        return f"Notif for {self.user.username}: {self.message[:30]}..."
+
+class NewsletterSubscriber(models.Model):
+    """
+    Stores email addresses for the project's newsletter subscribers.
+    """
+    email = models.EmailField(unique=True, max_length=254)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    is_active = models.BooleanField(default=True, help_text="Set to False to unsubscribe")
+    date_subscribed = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.email
+    
+    class Meta:
+        verbose_name = "Newsletter Subscriber"
+        verbose_name_plural = "Newsletter Subscribers"
+        
 
 
 class ImpactFundTransaction(models.Model):
@@ -42,6 +89,7 @@ class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     shipping_full_name = models.CharField(max_length=255)
     shipping_email = models.EmailField(max_length=255)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
     shipping_address1 = models.CharField("Address Line 1", max_length=255)
     shipping_address2 = models.CharField("Address Line 2", max_length=255, blank=True, null=True)
     shipping_city = models.CharField(max_length=255)
@@ -119,6 +167,7 @@ class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     full_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
     shipping_address = models.TextField(max_length=1000, blank=True, null=True)
     amount_paid = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     date_ordered = models.DateTimeField(auto_now_add=True)
@@ -185,7 +234,7 @@ class OrderItem(models.Model):
     quantity = models.PositiveBigIntegerField(default=1)
     price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
-    # Commission config
+    # Commission config!!
     COMMISSION_RATE = Decimal('0.15')
     commission_rate = models.DecimalField(max_digits=5, decimal_places=4, default=COMMISSION_RATE,
                                           help_text="Decimal (0.15 = 15%)")

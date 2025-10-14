@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load humanize payment_extras %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4">Order #{{ order.id }} Details</h2>
+    <hr>
+
+    <div class="row g-4">
+        
+        {# --- LEFT COLUMN: Customer & Order Info --- #}
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-person-circle me-2"></i>Customer & Order Info
+                </div>
+                <div class="card-body">
+                    <p><strong>Customer:</strong> {{ order.full_name }}</p>
+                    <p><strong>Email:</strong> {{ order.email }}</p>
+                    <strong>Phone: {{ order.phone_number }}</strong><br>
+                    <p><strong>Shipping Address:</strong><br>
+                        <span class="text-muted" style="white-space: pre-wrap;">{{ order.shipping_address }}</span>
+                    </p>
+                    <p>
+                        <strong>Order Status:</strong>
+                        <span class="badge bg-info ms-2">{{ order.get_status_display }}</span>
+                    </p>
+                    <p><strong>Date Ordered:</strong> {{ order.date_ordered|date:"Y-m-d H:i" }}</p>
+                    {% if order.date_shipped %}
+                        <p><strong>Date Shipped:</strong> {{ order.date_shipped|date:"Y-m-d H:i" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# --- RIGHT COLUMN: Your Products and Calculations --- #}
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-box-seam me-2"></i>Your Products in this Order
+                </div>
+                <div class="card-body">
+                    
+                    {# Product List #}
+                    <ul class="list-group list-group-flush mb-4">
+                        {% for item in items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ item.product.name }}</strong> 
+                                    <small class="text-muted d-block">@ ZMK {{ item.price|floatformat:2|intcomma }}</small>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill">x {{ item.quantity }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <hr>
+                    
+                    {# Calculations Display #}
+                    <dl class="row mb-0">
+                        <dt class="col-8 text-end text-muted">Your Subtotal:</dt>
+                        <dd class="col-4 text-end text-muted">ZMK {{ seller_subtotal|floatformat:2|intcomma }}</dd>
+
+                        <dt class="col-8 text-end text-danger">Commission ({{ items.first.commission_rate|multiply:100|floatformat:0 }}%):</dt>
+                        <dd class="col-4 text-end text-danger">ZMK {{ total_commission|floatformat:2|intcomma }}</dd>
+
+                        <dt class="col-8 text-end h5">Your Net Earnings:</dt>
+                        <dd class="col-4 text-end h5 text-success">ZMK {{ seller_net_earnings|floatformat:2|intcomma }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4 text-center">
+        <h4 class="mb-3">Update Order Status</h4>
+        <div class="card p-3 d-inline-block">
+            {% if order.status != 'delivered' and order.status != 'cancelled' %}
+                
+                {# Status Button Logic - Must match your desired flow and available statuses #}
+                {% if order.status == 'paid' %}
+                    {% with next_action='processing' next_label='Process' btn_class='btn-warning' %}
+                        <form method="POST" class="d-inline-block me-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="{{ next_action }}">
+                            <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-arrow-repeat"></i> {{ next_label }} Order</button> 
+                        </form>
+                    {% endwith %}
+                
+                {% elif order.status == 'processing' %}
+                    {% with next_action='shipped' next_label='Ship' btn_class='btn-success' %}
+                        <form method="POST" class="d-inline-block me-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="{{ next_action }}">
+                            <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-truck"></i> {{ next_label }} Order</button> 
+                        </form>
+                    {% endwith %}
+                
+                {% elif order.status == 'shipped' %}
+                    {% with next_action='delivered' next_label='Mark Delivered' btn_class='btn-primary' %}
+                        <form method="POST" class="d-inline-block me-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="{{ next_action }}">
+                            <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-check2-circle"></i> {{ next_label }}</button> 
+                        </form>
+                    {% endwith %}
+                
+                {% endif %}
+                
+                {# Cancel button - optional, ensure update_order_status view handles 'cancel' #}
+                <form action="{% url 'seller_cancel_order' order.id %}" method="POST" style="display:inline;">
+    {% csrf_token %}
+    <button 
+        type="submit" 
+        class="btn btn-danger"
+        
+        {# ----------------------------------------------------------------- #}
+        {# Use the corrected URL name here #}
+        onclick="return confirm('Are you sure you want to cancel this order? This action cannot be undone and the customer will be notified.');"
+        {# ----------------------------------------------------------------- #}
+    >
+        <i class="bi bi-x-circle me-1"></i> Cancel Order
+    </button>
+</form>
+                
+            {% else %}
+                <p class="text-muted">No further actions available for this order status ({{ order.get_status_display }}).</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,23 @@
 # payment/admin.py
 from django.contrib import admin
-from .models import Order, OrderItem, ShippingAddress, Seller
+from .models import Order, OrderItem, ShippingAddress, Seller, NewsletterSubscriber
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    # 1. Controls which fields are displayed on the change list page
+    list_display = ('email', 'date_subscribed', 'is_active')
+    
+    # 2. Add search functionality for quick lookups
+    search_fields = ('email', 'name')
+    
+    # 3. Add filters for management (e.g., viewing only active subscribers)
+    list_filter = ('is_active', 'date_subscribed')
+    
+    # 4. Fields displayed when editing a subscriber
+    fields = ('email', 'name', 'is_active', 'date_subscribed')
+    
+    # 5. Make date_subscribed read-only, as it's set automatically
+    readonly_fields = ('date_subscribed',)
 
 
 # Register Seller (safe guard)

@@ -49,25 +49,30 @@
             <br/><br/><br/>
 
 <div class="card">
-  <div class="card-header">
-    Shipping Information
-  </div>
-  <div class="card-body">
-    <form method="POST" action="{% url 'billing_info' %}">
-        {% csrf_token %}
-    
-    {{ shipping_form.as_p }}
-</div>
+    <div class="card-header">
+        Shipping Information
+    </div>
+    <div class="card-body">
+        
+        {# --- FIX 1: Form action must submit to the 'checkout' view for validation --- #}
+        <form method="POST" action="{% url 'checkout' %}">
+            {% csrf_token %}
+            
+            {{ shipping_form.as_p }}
+            
+            <br/>
+            {# --- FIX 2: Place the button INSIDE the form tags --- #}
+            <button type="submit" class="btn btn-secondary">
+                Continue To Billing
+            </button>
+            
+        </form>
+        
+    </div>
 </div>
 
-</br>
-<button class= "btn btn-secondary">Continue To Billing
-    
-</button>
- </br></br> </br></br>
+</br></br> </br></br>
         </div>
-       
-        
     </div>
 </div>
 

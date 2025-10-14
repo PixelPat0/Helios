@@ -1,29 +1,29 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load humanize payment_extras %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container mt-4"> {# Reduced margin-top #}
+    <div class="d-flex justify-content-between align-items-center mb-3"> {# Reduced margin-bottom #}
         <h2>My Seller Dashboard</h2>
-        <span class="badge bg-primary">{{ orders|length }} Orders</span>
+        <span class="badge bg-primary fs-6 p-2">{{ orders|length }} Orders</span> {# Slightly smaller badge #}
     </div>
 
-    <div class="row mb-3 g-3">
+    <div class="row mb-3 g-2"> {# Reduced row gutter and margin-bottom #}
         <div class="col-md-6 col-lg-4">
             <form class="d-flex" method="GET">
                 <input type="hidden" name="status" value="{{ current_filter }}">
                 <input type="text"
-                       name="search"
-                       class="form-control me-2"
-                       placeholder="Search orders..."
-                       value="{{ search_query }}">
-                <button type="submit" class="btn btn-primary">
+                        name="search"
+                        class="form-control me-2" {# Removed form-control-lg #}
+                        placeholder="Search orders..."
+                        value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary"> {# Removed btn-lg #}
                     <i class="bi bi-search"></i>
                 </button>
             </form>
         </div>
         <div class="col-md-6 col-lg-4">
-            <select class="form-select" onchange="window.location.href='?status=' + this.value + '&search={{ search_query }}'">
+            <select class="form-select" onchange="window.location.href='?status=' + this.value + '&search={{ search_query }}'"> {# Removed form-select-lg #}
                 <option value="all" {% if current_filter == 'all' %}selected{% endif %}>All Orders</option>
                 <option value="pending" {% if current_filter == 'pending' %}selected{% endif %}>Pending</option>
                 <option value="paid" {% if current_filter == 'paid' %}selected{% endif %}>Paid</option>
@@ -35,102 +35,148 @@
         </div>
     </div>
 
-    <table class="table table-hover" id="ordersTable">
-        <thead class="table-light">
-            <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Status</th>
-                <th>Items & Total</th>
-                <th>Date Ordered</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-            <tr>
-                <td><a href="{% url 'seller_order_details' order.id %}" class="text-primary">{{ order.id }}</a></td>
-                <td>{{ order.full_name }}</td>
-                <td>
-                    <span class="badge bg-info">
-                        {{ order.get_status_display }}
-                    </span>
-                </td>
-                <td>
-                    {% for item in order.orderitem_set.all %}
-                        <small class="d-block">{{ item.product.name }} ({{ item.quantity }})</small>
-                    {% endfor %}
-                    <hr class="my-1">
-                    <strong class="text-success">ZMK {{ order.amount_paid|floatformat:2|intcomma }}</strong>
-                </td>
-                <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
-                <td>
-                    <div class="btn-group">
+    {# --- START: Compact Card-based List --- #}
+    {% for order in orders %}
+    <div class="card shadow-sm mb-3 border border-2 
+                {% if order.status == 'delivered' %}border-success{% elif order.status == 'cancelled' %}border-danger{% else %}border-secondary{% endif %}"
+        id="order-{{ order.id }}">
+        
+        <div class="card-body p-3"> {# Reduced padding on card body #}
+            <div class="row align-items-center g-2"> {# Reduced row gutter #}
+                
+                {# 1. Order ID and Customer (Col 1) #}
+                <div class="col-12 col-lg-3">
+                    <h6 class="card-title mb-0"> {# Reduced font size to h6 #}
+                        Order #<a href="{% url 'seller_order_detail' order.id %}" class="text-primary text-decoration-none fw-bold">{{ order.id }}</a>
+                    </h6>
+                    <p class="card-text text-muted mb-0 small">
+                        <i class="bi bi-person-circle me-1"></i> {{ order.full_name }}
+                    </p>
+                    <small class="text-muted d-block">
+                        <i class="bi bi-calendar-event me-1"></i> {{ order.date_ordered|date:"Y-m-d H:i" }}
+                    </small>
+                </div>
+
+                {# 2. Status & Delivered Tick (Col 2) #}
+                <div class="col-6 col-lg-2 text-center">
+                    <p class="mb-1 fw-bold small">Status:</p> {# Reduced font size #}
+                    {# Status Badge #}
+                    {% if order.status == 'delivered' %}
+                        <span class="badge bg-success fs-7">{{ order.get_status_display }}</span> {# Smaller badge #}
+                    {% elif order.status == 'shipped' %}
+                        <span class="badge bg-primary fs-7">{{ order.get_status_display }}</span>
+                    {% elif order.status == 'paid' or order.status == 'processing' %}
+                        <span class="badge bg-warning text-dark fs-7">{{ order.get_status_display }}</span>
+                    {% elif order.status == 'cancelled' %}
+                        <span class="badge bg-danger fs-7">{{ order.get_status_display }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary fs-7">{{ order.get_status_display }}</span>
+                    {% endif %}
+                    
+                    {# Delivered Tick #}
+                    <div class="mt-1">
+                        {% if order.status == 'delivered' %}
+                            <i class="bi bi-check-circle-fill text-success h5" 
+                               data-bs-toggle="tooltip" data-bs-placement="top" title="Order Delivered"></i> {# Reduced icon size to h5 #}
+                        {% else %}
+                            <i class="bi bi-x-circle text-secondary h5" 
+                               data-bs-toggle="tooltip" data-bs-placement="top" title="In Progress"></i>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# 3. Items and Totals (Col 3) #}
+                  {# 3. Items and Totals (Col 3) #}
+                <div class="col-6 col-lg-4 border-start border-end">
+                    {% with order_totals=seller_totals_map|get_item:order.id %}
+                        
+                        {# NEW: Display the seller's Subtotal (Amount sold) more prominently #}
+                        <strong class="text-success d-block fs-5">Amount Sold: ZMK {{ order_totals.subtotal|floatformat:2|intcomma }}</strong>
+                        
+                        {# Display Net Earnings from this order #}
+                        {% with net_earnings=order_totals.subtotal|subtract:order_totals.commission %}
+                        <small class="text-primary d-block fw-bold">Net Earnings: ZMK {{ net_earnings|floatformat:2|intcomma }}</small>
+                        {% endwith %}
+
+                        {# Display Commission for context #}
+                        <small class="text-danger d-block">Commission: ZMK {{ order_totals.commission|floatformat:2|intcomma }}</small>
+                        
+                        {# REMOVED: <small class="text-muted d-block mb-1">Total Paid: ZMK {{ order.amount_paid|floatformat:2|intcomma }}</small> #}
+
+                        
+                        {# Item List Popover/Details (unchanged) #}
+                        {% for item in seller_items_map|get_item:order.id|slice:":2" %}
+                            <small class="d-block text-truncate fst-italic">{{ item.product.name }} ({{ item.quantity }})</small>
+                        {% endfor %}
+                        {% if seller_items_map|get_item:order.id|length > 2 %}
+                            <small class="d-block fst-italic text-primary">+{{ seller_items_map|get_item:order.id|length|add:"-2" }} more items</small>
+                        {% endif %}
+
+                    {% endwith %}
+                </div>
+                
+                {# 4. Actions (Col 4) #}
+                <div class="col-12 col-lg-3 text-center">
+                    <div class="d-grid gap-1"> {# Reduced gap between buttons #}
+                        
+                        {# Export Button #}
+                        <a href="{% url 'export_order_details' order.id %}" class="btn btn-outline-info btn-sm fw-bold mb-1"> {# Reduced to btn-sm and smaller margin #}
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Details
+                        </a>
+                        
+                        {# Status Update Forms #}
                         {% if order.status == 'paid' %}
-                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-inline me-2">
+                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-grid">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="processing">
-                                <button type="submit" class="btn btn-warning btn-sm">
+                                <button type="submit" class="btn btn-warning btn-sm fw-bold"> {# Reduced to btn-sm #}
                                     <i class="bi bi-arrow-repeat"></i> Process
                                 </button>
                             </form>
                         {% elif order.status == 'processing' %}
-                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-inline me-2">
+                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-grid">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="shipped">
-                                <button type="submit" class="btn btn-success btn-sm">
+                                <button type="submit" class="btn btn-success btn-sm fw-bold"> {# Reduced to btn-sm #}
                                     <i class="bi bi-truck"></i> Ship
                                 </button>
                             </form>
                         {% elif order.status == 'shipped' %}
-                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-inline me-2">
+                            <form method="POST" action="{% url 'update_order_status' order.id %}" class="d-grid">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delivered">
-                                <button type="submit" class="btn btn-success btn-sm">
+                                <button type="submit" class="btn btn-success btn-sm fw-bold"> {# Reduced to btn-sm #}
                                     <i class="bi bi-check2-circle"></i> Mark Delivered
                                 </button>
                             </form>
+                        {% else %}
+                             <a href="{% url 'seller_order_detail' order.id %}" class="btn btn-secondary btn-sm fw-bold mt-1"> {# Reduced to btn-sm and smaller margin #}
+                                <i class="bi bi-box-arrow-up-right"></i> View Details
+                            </a>
                         {% endif %}
                     </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center py-4">
-                    <div class="text-muted">
-                        <i class="bi bi-inbox h4"></i>
-                        <p>No orders to display.</p>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info text-center py-4">
+        <i class="bi bi-inbox h4 d-block"></i>
+        <p class="mb-0 fs-6">No orders found matching your criteria.</p>
+    </div>
+    {% endfor %}
+    {# --- END: Compact Card-based List --- #}
+
 </div>
+
+{# Tooltip initialization #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
 {% endblock %}
-
-
-
-{% comment %} <!DOCTYPE html>
-<html>
-<head>
-    <title>Seller Dashboard</title>
-</head>
-<body>
-    <h2>Welcome, {{ request.user.username }}</h2>
-
-    {% if seller %}
-        <p>Shop Name: {{ seller.shop_name }}</p>
-        <p>Email: {{ seller.business_email }}</p>
-        <p>Phone: {{ seller.phone }}</p>
-        <p>Address: {{ seller.address }}</p>
-        <p>City: {{ seller.city }}</p>
-        <p>Country: {{ seller.country }}</p>
-    {% else %}
-        <p>No seller profile found.</p>
-    {% endif %}
-
-    <p><a href="{% url 'seller_profile' %}">Edit Profile</a></p>
-    <p><a href="{% url 'logout' %}">Logout</a></p>
-</body>
-</html> {% endcomment %}

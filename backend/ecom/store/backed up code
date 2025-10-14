@@ -1,0 +1,369 @@
+# store/views:
+
+from payment.models import ShippingAddress, Seller, ImpactFundTransaction
+from django.shortcuts import render, redirect
+from .models import Product, Category, Profile
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
+
+from payment.forms import ShippingForm
+
+
+from django.db.models import Q, Sum
+import json
+from cart.cart import Cart
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from .tokens import account_activation_token
+from decimal import Decimal
+from payment.forms import NewsletterSubscriberForm
+from payment.models import NewsletterSubscriber, Notification
+
+
+
+
+@login_required
+def notifications_list_view(request):
+    # Fetch all notifications for the current user, ordered by creation time
+    user_notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Mark all currently displayed notifications as read (the simple MVP way)
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    
+    return render(request, 'store/notifications_list.html', {
+        'notifications': user_notifications
+    })
+
+
+def newsletter_subscribe(request):
+    if request.method == 'POST':
+        form = NewsletterSubscriberForm(request.POST)
+        
+        # 1. Determine the return URL first
+        # Get the page the user came from
+        referer_url = request.META.get('HTTP_REFERER', '/')
+        
+        # List pages where submitting the newsletter should NOT redirect back to
+        DISRUPTIVE_PAGES = [
+            'cart_summary',   # Your cart page URL name
+            'checkout',       # Your checkout page URL name
+            'process_order',  # Any payment processing page
+        ]
+        
+        # Check if the referer URL contains any disruptive page names
+        # Note: This is an inexact check, but effective for MVP.
+        should_redirect_home = False
+        for page_name in DISRUPTIVE_PAGES:
+            if page_name in referer_url:
+                should_redirect_home = True
+                break
+
+        # Define the target redirect URL
+        if should_redirect_home:
+            # If on cart/checkout, redirect to the home page or a fixed success page
+            redirect_to = 'home'
+        else:
+            # Otherwise, redirect back to the exact page they came from
+            redirect_to = referer_url
+        
+        # 2. Process the form
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, "Success! Thank you for subscribing to the Helios Project Newsletter.")
+            except:
+                # Handles the unique email constraint
+                messages.warning(request, "It looks like you are already subscribed!")
+            
+            # Final redirect
+            return redirect(redirect_to)
+            
+        else:
+            # If form is invalid (e.g., bad email format)
+            messages.error(request, "Please enter a valid email address.")
+            return redirect(redirect_to) # Redirect them back, even if invalid, using the safe URL
+    
+    # Non-POST requests are disallowed
+    return redirect('home')
+
+
+def donation_page_view(request):
+    """
+    Placeholder view for the public donation page.
+    """
+    # Later, this is where you'll handle the payment form and processing logic.
+    context = {} 
+    return render(request, 'donation_page.html', context)
+
+
+# this is the business end of the public impact page
+def public_impact_view(request):
+    """
+    Displays key social impact metrics to the public.
+    """
+    # 1. Total Active Seller Count
+    try:
+        seller_count = Seller.objects.filter(is_active=True).count()
+    except:
+        seller_count = 0 # Handle case where Seller model/table does not exist
+
+    # 2. Total Funds collected (The running total)
+    # Expeses are recorded as negative amounts in the database
+    funds_collected_result = ImpactFundTransaction.objects.aggregate(total=Sum('amount'))
+    total_funds_collected = funds_collected_result['total'] if funds_collected_result['total'] else 0
+
+    # 3. Number of installations (This will be done manually)
+    number_of_installations = 20
+
+
+    # ----------------------------------------------------
+    # NEW LOGIC: Calculate Project Progress
+    # ----------------------------------------------------
+    PROJECT_GOAL = Decimal('10000.00') # <-- CHANGED: Use Decimal() here!
+    
+    # Ensure total_funds_collected is a Decimal before calculation
+    if not isinstance(total_funds_collected, Decimal):
+         total_funds_collected = Decimal(total_funds_collected)
+
+    if PROJECT_GOAL > Decimal('0.00') and total_funds_collected >= Decimal('0.00'):
+        # Calculation is now Decimal / Decimal, which is supported.
+        progress_raw = (total_funds_collected / PROJECT_GOAL) * Decimal('100.00')
+        
+        # Ensure it doesn't exceed 100% and round to the nearest whole number
+        progress_percentage = min(progress_raw, Decimal('100.00'))
+        
+        # Convert to a standard Python integer/float for the template
+        progress_percentage = int(round(progress_percentage))
+    else:
+        progress_percentage = 0
+    
+    # ----------------------------------------------------
+
+    newsletter_form = NewsletterSubscriberForm()
+
+    context = {
+        'seller_count': seller_count,
+        'total_funds_collected': total_funds_collected,
+        'number_of_installations': number_of_installations,
+        'newsletter_form': newsletter_form,
+    }
+
+    return render(request, 'public_impact.html', context)
+
+
+def seller_profile_public(request, pk):
+    try:
+        # Get the seller by primary key
+        seller = Seller.objects.get(pk=pk, is_active=True)
+        # Get products associated with the seller
+        products = Product.objects.filter(seller=seller, is_sale=False, is_available=True).order_by('-id')
+        sale_products = Product.objects.filter(seller=seller, is_sale=True, is_available=True).order_by('-id')
+        context = {
+            'seller': seller,
+            'products': products,
+            'sale_products': sale_products,
+        }
+        return render(request, 'seller_profile_public.html', context)
+   
+    except Seller.DoesNotExist:
+    # Handle case where seller ID is invalid or seller is not active
+        messages.error(request, 'Seller not found or profile is inactive.')
+        return redirect('home')
+
+def activate(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Your account has been activated successfully!')
+        return redirect('login')
+    else:
+        messages.error(request, 'Activation link is invalid!')
+        return redirect('home')
+
+def search(request):
+    if request.method == 'POST':
+        searched = request.POST['searched']
+        searched = Product.objects.filter(Q(name__icontains=searched) | Q(description__icontains=searched))
+        if not searched:
+            messages.success(request, 'No products found')
+        return render(request, "search.html", {'searched': searched})
+    else:
+        return render(request, "search.html", {})
+
+def update_info(request):
+    if request.user.is_authenticated:
+        current_user = Profile.objects.get(user__id=request.user.id)
+        # Get or create the user's shipping address
+        shipping_user, created = ShippingAddress.objects.get_or_create(user=request.user)
+        # Accept POST data and FILES for image upload
+        form = UserInfoForm(request.POST or None, request.FILES or None, instance=current_user)
+        shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
+        if form.is_valid() and shipping_form.is_valid():
+            #save original form
+            form.save()
+            shipping_form.save()
+            messages.success(request, 'Your information has been updated!')
+            return redirect('home')
+        return render(request, 'update_info.html', {'form': form, 'shipping_form': shipping_form})
+    else:
+        messages.error(request, 'You must be logged in to update your profile')
+        return redirect('home')
+
+def update_password(request):
+    if request.user.is_authenticated:
+        current_user = request.user
+        if request.method == 'POST':
+            form = ChangePasswordForm(current_user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your password has been updated successfully.')
+                return redirect('update_user')
+            else:
+                for error in list(form.errors.values()):
+                    messages.error(request, error)
+                return redirect('update_password')
+        else:
+            form = ChangePasswordForm(current_user)
+        return render(request, 'update_password.html', {'form': form})
+    else:
+        messages.error(request, 'You must be logged in to update your password.')
+        return redirect('login')
+
+def update_user(request):
+    if request.user.is_authenticated:
+        current_user = User.objects.get(id=request.user.id)
+        shipping_user, created = ShippingAddress.objects.get_or_create(user=request.user)
+        user_form = UpdateUserForm(request.POST or None, instance=current_user)
+        shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
+        if user_form.is_valid() and shipping_form.is_valid():
+            user_form.save()
+            shipping_form.save()
+            login(request, current_user)
+            messages.success(request, 'User updated successfully')
+            return redirect('home')
+        return render(request, 'update_user.html', {'user_form': user_form, 'shipping_form': shipping_form})
+    else:
+        messages.error(request, 'You must be logged in to update your profile')
+        return redirect('home')
+
+def category_summary(request):
+    categories = Category.objects.all()
+    return render(request, 'category_summary.html', {"categories": categories})
+
+def category(request, foo):
+    foo = foo.replace('-', ' ')
+    try:
+        category = Category.objects.get(name=foo)
+        products = Product.objects.filter(category=category)
+        return render(request, 'category.html', {'products': products, 'category': category})
+    except:
+        messages.success(request, 'Category does not exist')
+        return redirect('home')
+
+def product(request, pk):
+    product = Product.objects.get(id=pk)
+    return render(request, 'product.html', {'product': product})
+
+def home(request):
+    products = Product.objects.all()
+    return render(request, 'home.html', {'products': products})
+
+def about(request):
+    return render(request, 'about.html')
+
+def login_user(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            current_user = Profile.objects.get(user__id=request.user.id)
+            saved_cart = current_user.old_cart
+            if saved_cart:
+                converted_cart = json.loads(saved_cart)
+                cart = Cart(request)
+                for key, value in converted_cart.items():
+                    cart.db_add(product=key, quantity=value)
+            messages.success(request, 'You are now logged in')
+            return redirect('home')
+        else:
+            messages.success(request, 'Invalid credentials, try again')
+            return redirect('login')
+    return render(request, 'login.html')
+
+def logout_user(request):
+    logout(request)
+    messages.success(request, 'You are now logged out')
+    return redirect('home')
+
+def register_user(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = account_activation_token.make_token(user)
+            activation_link = request.build_absolute_uri(
+                reverse('activate', kwargs={'uidb64': uid, 'token': token})
+            )
+            send_mail(
+                'Activate your account',
+                f'Click the link to activate your account: {activation_link}',
+                'noreply@yourdomain.com',
+                [email],
+                fail_silently=False,
+            )
+            messages.success(request, "Check your email to activate your account.")
+            return redirect('login')
+        else:
+            messages.error(request, "Registration failed. Please correct the errors below.")
+    else:
+        form = SignUpForm()
+    return render(request, 'register.html', {'form': form})
+
+    
+
+
+
+
+
+
+    def billing_info(request):
+    request.disable_newsletter = True
+    if request.POST:
+        cart = Cart(request)
+        cart_products = cart.get_prods()
+        quantities = cart.get_quants()
+        total = cart.cart_total()
+
+        if 'shipping_full_name' in request.POST:
+            request.session['my_shipping'] = request.POST.dict()
+
+        billing_form = PaymentForm()
+        return render(request, 'payment/billing_info.html', {
+            "cart_products": cart_products,
+            "quantities": quantities,
+            "total": total,
+            "shipping_info": request.session.get('my_shipping'),
+            "billing_form": billing_form
+        })
+    message.warning(request, "Access Denied")
+    return redirect('home')

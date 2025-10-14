@@ -18,3 +18,9 @@ def subtract(value, arg):
         return Decimal(str(value)) - Decimal(str(arg))
     except (ValueError, TypeError):
         return Decimal('0')
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Allows lookup on dicts or similar objects in templates (e.g., dictionary|get_item:key)"""
+    return dictionary.get(key, []) # Return an empty list if key not found (safe)

@@ -1,0 +1,27 @@
+{% extends 'emails/seller_base.html' %}
+{% load static %}
+
+{% block content %}
+    <h3 style="color: #28a745;">Welcome to the HELIOS Family, {{ seller.username|default:"Partner" }}!</h3>
+
+    <p>We are thrilled to have you join the HELIOS Energy Project marketplace. Your commitment to sustainability and high-quality products aligns perfectly with our mission to empower communities.</p>
+
+    <p>Your account is now fully approved and ready for action. You can begin uploading your solar and energy-related products immediately via your Seller Dashboard.</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ login_url }}" class="btn-primary">
+            Go to Seller Dashboard
+        </a>
+    </div>
+
+    <p>Here are your next steps:</p>
+    <ol>
+        <li>**Login:** Use your credentials to access the dashboard.</li>
+        <li>**Complete Profile:** Ensure your business profile, payment details, and shipping information are up-to-date.</li>
+        <li>**Upload Products:** Start listing your products to reach our customer base!</li>
+    </ol>
+
+    <p>If you have any questions, please reply directly to this email. We look forward to a successful partnership!</p>
+
+    <p>Best Regards,<br>The HELIOS Team</p>
+{% endblock %}

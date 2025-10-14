@@ -8,14 +8,18 @@ from django.contrib import messages
 
 
 def cart_summary(request):
-    #get the cart
+    # SET THE FLAG HERE to disable the newsletter form in the footer
+    # This flag is read by the 'newsletter_form' context processor.
+    request.disable_newsletter = True 
+
+    # get the cart
     cart = Cart(request)
-    #get the products
+    # get the products
     cart_products = cart.get_prods()
     quantities = cart.get_quants()
     total = cart.cart_total()
+    
     return render(request, 'cart_summary.html', {"cart_products": cart_products, "quantities":quantities, "total":total})
-
 
 
 def cart_add(request):

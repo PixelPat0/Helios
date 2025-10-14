@@ -58,7 +58,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'cart.context_processors.cart', # add this line to the context_processors list
+                'cart.context_processors.cart',
+                'ecom.context_processors.newsletter_form',
+                'ecom.context_processors.notifications',      # preferred name
+                #'ecom.context_processors.unread_notifications', # compatibility (safe)
             ],
         },
     },
@@ -124,6 +127,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
+DEFAULT_FROM_EMAIL = 'noreply@helios.example'
+ADMIN_EMAIL = 'admin@example.com'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

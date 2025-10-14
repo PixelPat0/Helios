@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Your Notifications</h1>
+
+    {% if notifications %}
+        <div class="list-group">
+            {% for notification in notifications %}
+                {% comment %} Define the link for the notification {% endcomment %}
+                {% if notification.order_id %}
+                    {% url 'admin:payment_order_change' notification.order_id as link_url %}
+                {% else %}
+                    {% url 'seller_dashboard' as link_url %}
+                {% endif %}
+
+                <a href="{{ link_url }}" class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-warning{% endif %}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ notification.message }}</h5>
+                        <small>{{ notification.created_at|timesince }} ago</small>
+                    </div>
+                    {% if not notification.is_read %}
+                        <small class="text-danger">NEW</small>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            You have no notifications.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

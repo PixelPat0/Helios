@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django import forms
 from .models import Profile, Product
+from payment.models import NewsletterSubscriber
 
 class ProductForm(forms.ModelForm):
     class Meta:

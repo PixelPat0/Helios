@@ -3,92 +3,95 @@
 
 {% block content %}
 
-        <!-- Header-->
-        <header class="bg-dark py-5">
-            <div class="container px-4 px-lg-5 my-5">
-                <div class="text-center text-white">
-                    <h1 class="display-4 fw-bolder">Helios</h1>
-                    <p class="lead fw-normal text-white-50 mb-0">Solar Energy Made Simple, Affordable, and Accessible.</p>
-                </div>
+    {# --- Header: Using the new dark primary color --- #}
+    <header class="bg-primary py-5">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="text-center text-white">
+                <h1 class="display-3 fw-bolder mb-3">HELIOS</h1>
+                <p class="lead fw-normal text-white-75 mb-0">Solar Energy Made Simple, Affordable, and Accessible.</p>
+                {# Added a subtle call-to-action button #}
+                <a class="btn btn-outline-light btn-lg mt-3" href="#product-list">Explore Products <i class="bi bi-arrow-down-circle"></i></a>
             </div>
-        </header>
+        </div>
+    </header>
 
 
-        <!-- Section-->
-        <section class="py-5">
-            <div class="container px-4 px-lg-5 mt-5">
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-                
-                    {% for product in products %}
-                        {% if product.is_sale %}
+    <section class="py-5" id="product-list">
+        <div class="container px-4 px-lg-5 mt-5">
+            
+            <h2 class="text-center mb-5 text-primary fw-bold">Our Solar Products</h2>
 
+            <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+            
+                {% for product in products %}
+                    
+                    <div class="col mb-5">
+                        <div class="card h-100 shadow-sm border-0 {% if product.is_sale %}border-warning{% endif %}">
+                            
+                            {# --- Sale Product Card --- #}
+                            {% if product.is_sale %}
+                                <div class="badge bg-warning text-dark position-absolute fw-bold" style="top: 0.5rem; right: 0.5rem">
+                                    <i class="bi bi-sun-fill me-1"></i> SALE
+                                </div>
 
-                        <div class="col mb-5">
-                            <div class="card h-100">
-                                <!-- Sale badge-->
-                                <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
-
-
-
-                                <!-- Product image-->
-                                <img class="card-img-top" src="{{product.image.url}}" alt="..." />
-                                <!-- Product details-->
+                                <img class="card-img-top" src="{{product.image.url}}" alt="{{ product.name }}" />
                                 <div class="card-body p-4">
                                     <div class="text-center">
-                                        <!-- Product name-->
                                         <h5 class="fw-bolder">{{ product.name }}</h5>
 
-                                        <!-- Sale Notification on product -->
-                                        <div class="d-flex justify-content-center small text-warning mb-2">
-                                        <div class="bi-star-fill"></div>
-                                        &nbsp;&nbsp;Sale!!&nbsp;&nbsp;
-                                        <div class="bi-star-fill"></div>
+                                        <div class="d-flex justify-content-center small text-danger mb-2">
+                                            <i class="bi bi-lightning-fill"></i>
+                                            &nbsp;&nbsp;**Limited Time Offer**&nbsp;&nbsp;
+                                            <i class="bi bi-lightning-fill"></i>
                                         </div>
-                                        <!-- Product price-->
-                                        <strike>
-                                        ZMK {{ product.price|floatformat:2|intcomma }}
-                                        </strike>
-                                        &nbsp;
-                                        ZMK {{ product.sale_price|floatformat:2|intcomma }}
-                                        <!-- Product description-->
+
+                                        <span class="text-muted text-decoration-line-through me-2">
+                                            ZMK {{ product.price|floatformat:2|intcomma }}
+                                        </span>
+                                        <span class="fw-bold text-danger fs-5">
+                                            ZMK {{ product.sale_price|floatformat:2|intcomma }}
+                                        </span>
+                                        
                                     </div>
                                 </div>
-                                <!-- Product actions-->
                                 <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                    <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View products</a></div>
+                                    <div class="text-center">
+                                        <a class="btn btn-primary mt-auto fw-bold" href="{% url 'product' product.id %}">
+                                            View Details
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
 
-                        {% else %}
-                    <div class="col mb-5">
-                        <div class="card h-100">
-                            <!-- Product image-->
-                            <img class="card-img-top" src="{{product.image.url}}" alt="..." />
-                            <!-- Product details-->
-                            <div class="card-body p-4">
-                                <div class="text-center">
-                                    <!-- Product name-->
-                                    <h5 class="fw-bolder">{{ product.name }}</h5>
-                                    <!-- Product price-->
-                                    ZMK{{ product.price|floatformat:2|intcomma }}
-                                    <!-- Product description-->
+                            {# --- Standard Product Card --- #}
+                            {% else %}
+                            
+                                <img class="card-img-top" src="{{product.image.url}}" alt="{{ product.name }}" />
+                                <div class="card-body p-4">
+                                    <div class="text-center">
+                                        <h5 class="fw-bolder">{{ product.name }}</h5>
+                                        <span class="fw-bold text-dark fs-5">
+                                            ZMK {{ product.price|floatformat:2|intcomma }}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Product actions-->
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View Product</a></div>
-                            </div>
+                                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                                    <div class="text-center">
+                                        <a class="btn btn-outline-primary mt-auto" href="{% url 'product' product.id %}">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+
+                            {% endif %}
                         </div>
                     </div>
-                        {% endif %}
-                    {% endfor %}
 
-                   
-                </div>
+                {% endfor %}
+
             </div>
-        </section>
-       
+        </div>
+    </section>
+    
 
 {% endblock %}
