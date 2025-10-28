@@ -13,8 +13,10 @@ from django.contrib.auth import get_user_model # Import for Admin User lookup
 import logging
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 # ----------------------------------------------------------------------
 # A. GENERIC UTILITY FOR SELLER COMMUNICATIONS (RENAMED to send_generic_email)
@@ -49,171 +51,140 @@ def send_generic_email(subject, template_name, context, recipient_list):
 
 def send_order_notifications(order, items):
     """
-    Send email notifications and create internal database notifications 
-    for the admin and relevant sellers about a new order.
+    Robust email + in-app notification sender for new orders.
+    - Sends admin email (to settings.ADMIN_EMAIL or superusers)
+    - Sends seller email per seller (if seller has an email) or creates a notification
+    - Sends customer confirmation if order.email or order.user.email exists
+    - Uses EmailMultiAlternatives with plain-text fallback
     """
-    User = get_user_model() # Define User model for clear Admin lookup
-    
     try:
-        # Calculate total commission (Used for Admin Context)
-        total_commission = sum(item.commission_amount for item in items)
-
-        # Group items by seller USER object (THIS IS THE KEY FIX)
+        # Group order items by seller (seller may be OrderItem.seller or product.seller)
         sellers_items = {}
         for item in items:
-            # 1. Get the custom Seller object from the Product
-            if hasattr(item.product, 'seller') and item.product.seller:
-                seller_profile = item.product.seller
+            seller = getattr(item, 'seller', None) or getattr(getattr(item, 'product', None), 'seller', None)
+            if seller is None:
+                # fallback to product.seller_user or similar if your model differs
+                sellers_items.setdefault(None, []).append(item)
             else:
-                print(f"Warning: Product {item.product.name} missing seller profile.")
-                continue 
-            
-            # 2. Get the Django User object from the Seller profile
-            try:
-                seller_user = seller_profile.user # Assumes SellerProfile has a ForeignKey to User named 'user'
-            except AttributeError:
-                print(f"Warning: Seller profile for product {item.product.name} missing linked User object.")
-                continue
+                sellers_items.setdefault(seller, []).append(item)
 
-            # Use the User object for grouping
-            if seller_user not in sellers_items:
-                sellers_items[seller_user] = []
-            sellers_items[seller_user].append(item)
-
-        # ----------------------------------------------------------------------
-        # 1. ADMIN EMAIL NOTIFICATION (No change needed here, just the variable names)
-        # ----------------------------------------------------------------------
-        
-        # We need a list of User objects for the admin context breakdown
-        sellers_breakdown_list = [
-            {
-                'seller_name': seller_user.username, # Now guaranteed to be a User object
-                'items': items_list,
-                'total': sum(item.price * item.quantity for item in items_list),
-                'commission': sum(item.commission_amount for item in items_list)
-            }
-            for seller_user, items_list in sellers_items.items()
-        ]
-        
+        # Prepare admin context and send admin email
+        total_commission = sum((item.price * item.quantity * item.commission_rate) for item in items)
         admin_context = {
             'order': order,
             'items': items,
-            'total_commission': total_commission,
-            'sellers_breakdown': sellers_breakdown_list
-        }
-        
-        admin_message = render_to_string(
-            'payment/emails/admin_order_notification.html', 
-            admin_context
-        )
-        
-        # Send email to admin (use HTML + plain fallback, safe send)
-        try:
-            admin_plain = ''
-            try:
-                admin_plain = render_to_string('payment/emails/admin_order_notification.txt', admin_context)
-            except Exception:
-                admin_plain = strip_tags(admin_message)
-
-            subject = f'New Order #{order.id} Received - Action Required'
-            msg = EmailMultiAlternatives(subject, admin_plain, settings.DEFAULT_FROM_EMAIL, [settings.ADMIN_EMAIL])
-            msg.attach_alternative(admin_message, "text/html")
-            msg.send(fail_silently=False)
-        except Exception as e:
-            logger.exception("Failed to send admin order email for order %s: %s", getattr(order, 'id', 'unknown'), e)
-        
-        # ----------------------------------------------------------------------
-        # 2. CREATE INTERNAL NOTIFICATIONS
-        # ----------------------------------------------------------------------
-        
-        # A. Notification for Admin
-        try:
-            # Look up the admin User object by the ADMIN_EMAIL setting
-            admin_user = User.objects.get(email=settings.ADMIN_EMAIL)
-            # REPLACED Notification.objects.create with helper function
-            create_notification(
-                user=admin_user,
-                message=f"NEW ORDER #{order.id}: Received a total order of ZMK {order.amount_paid:.2f}. Click to view details.",
-                order_id=order.id
-            )
-        except User.DoesNotExist:
-            print(f"Warning: Admin user not found with email {settings.ADMIN_EMAIL}. Cannot create notification.")
-        except Exception as e:
-            print(f"Warning: Could not create Admin notification. Error: {e}")
-        
-        
-        # 3. SELLER EMAIL AND DB NOTIFICATIONS
-        for seller_user, seller_items in sellers_items.items():
-            seller_total = sum(item.price * item.quantity for item in seller_items)
-            seller_commission = sum(item.commission_amount for item in seller_items)
-
-            # Determine seller email safely:
-            seller_email = None
-            # Product.seller is the Seller model instance; use its business_email if present
-            seller_profile = getattr(seller_items[0].product, 'seller', None)
-            if seller_profile:
-                # Prefer business_email field on Seller model
-                seller_email = getattr(seller_profile, 'business_email', None)
-
-            # fallback to Django user email
-            if not seller_email:
-                seller_email = getattr(seller_user, 'email', None)
-
-            # If still no email, skip sending email (but still create DB notification)
-            if not seller_email:
-                print(f"Warning: No email available for seller {getattr(seller_user,'username',seller_user)}; skipping email send.")
-            else:
-                seller_context = {
-                    'order_id': order.id,
-                    'items': seller_items,
-                    'total_amount': seller_total,
-                    'commission': seller_commission,
-                    'net_amount': seller_total - seller_commission,
-                    'customer_name': order.full_name,
-                    'customer_address': order.shipping_address,
-                    'customer_email': order.email,
+            'sellers_breakdown': [
+                {
+                    'seller_name': getattr(seller, 'username', getattr(seller, 'name', str(seller))),
+                    'items': items_list,
+                    'total': sum(item.price * item.quantity for item in items_list),
+                    'commission': sum(item.price * item.quantity * item.commission_rate for item in items_list)
                 }
+                for seller, items_list in sellers_items.items() if seller is not None
+            ],
+            'total_commission': total_commission,
+        }
 
-                try:
-                    seller_message = render_to_string(
-                        'payment/emails/seller_order_notification.html',
-                        seller_context
-                    )
-                except Exception as e:
-                    print(f"Template error rendering seller email: {e}")
-                    seller_message = None
+        admin_html = render_to_string('payment/emails/admin_order_notification.html', admin_context)
+        try:
+            admin_txt = render_to_string('payment/emails/admin_order_notification.txt', admin_context)
+        except Exception:
+            admin_txt = strip_tags(admin_html)
 
-                if seller_message and settings.DEBUG:
-                    print(f"DEBUG: Would send email to seller {seller_user.username} at {seller_email}")
-                elif seller_message:
-                    try:
-                        seller_plain = ''
-                        try:
-                            seller_plain = render_to_string('payment/emails/seller_order_notification.txt', seller_context)
-                        except Exception:
-                            seller_plain = strip_tags(seller_message)
+        admin_recipients = []
+        admin_email = getattr(settings, 'ADMIN_EMAIL', None)
+        if admin_email:
+            admin_recipients = [admin_email]
+        else:
+            # fallback to all superusers' emails
+            admin_recipients = list(User.objects.filter(is_superuser=True).values_list('email', flat=True))
 
-                        subject = f'New Order #{order.id} Received'
-                        seller_email_msg = EmailMultiAlternatives(subject, seller_plain, settings.DEFAULT_FROM_EMAIL, [seller_email])
-                        seller_email_msg.attach_alternative(seller_message, "text/html")
-                        seller_email_msg.send(fail_silently=False)
-                        logger.info("Sent seller email to %s for order %s", seller_email, order.id)
-                    except Exception as e:
-                        logger.exception("Failed to send seller email to %s for order %s: %s", seller_email, getattr(order, 'id', 'unknown'), e)
-# ...existing code...
-            # Create DB Notification for seller_user
+        if admin_recipients:
             try:
-                # REPLACED Notification.objects.create with helper function
-                create_notification(
-                    user=seller_user,
-                    message=f"New Order #{order.id}! Items totalling ZMK {seller_total:.2f} from your store. Fulfill now.",
-                    order_id=order.id
-                )
+                subject = f'New Order #{order.id} Received - Action Required'
+                msg = EmailMultiAlternatives(subject, admin_txt, settings.DEFAULT_FROM_EMAIL, admin_recipients)
+                msg.attach_alternative(admin_html, "text/html")
+                msg.send(fail_silently=False)
+                logger.info("Admin order email sent for order %s to %s", order.id, admin_recipients)
             except Exception as e:
-                print(f"Warning: Could not create notification for seller {seller_user.username}. Error: {e}")
+                logger.exception("Failed to send admin order email for order %s: %s", getattr(order, 'id', 'unknown'), e)
+        else:
+            logger.warning("No admin recipients configured (ADMIN_EMAIL or superusers missing).")
 
+        # Create admin in-app notification (optional)
+        try:
+            if admin_email:
+                admin_user = User.objects.filter(email=admin_email, is_superuser=True).first()
+                if admin_user:
+                    create_notification(user=admin_user, message=f"New order #{order.id} placed.", order=order)
+            else:
+                for u in User.objects.filter(is_superuser=True):
+                    create_notification(user=u, message=f"New order #{order.id} placed.", order=order)
+        except Exception:
+            logger.exception("Failed to create admin notification for order %s", getattr(order, 'id', 'unknown'))
+
+        # Send seller emails / create notifications
+        for seller, items_list in sellers_items.items():
+            seller_name = getattr(seller, 'username', getattr(seller, 'name', str(seller))) if seller else "Unknown Seller"
+            seller_email = None
+            # try common places for seller email
+            if seller is not None:
+                seller_email = getattr(seller, 'email', None) or getattr(getattr(seller, 'user', None), 'email', None)
+
+            seller_context = {
+                'order': order,
+                'seller': seller,
+                'items': items_list,
+                'seller_name': seller_name,
+            }
+
+            seller_html = render_to_string('payment/emails/seller_order_notification.html', seller_context)
+            try:
+                seller_txt = render_to_string('payment/emails/seller_order_notification.txt', seller_context)
+            except Exception:
+                seller_txt = strip_tags(seller_html)
+
+            if seller_email:
+                try:
+                    subject = f'New Order #{order.id} - Items to Fulfill'
+                    msg = EmailMultiAlternatives(subject, seller_txt, settings.DEFAULT_FROM_EMAIL, [seller_email])
+                    msg.attach_alternative(seller_html, "text/html")
+                    msg.send(fail_silently=False)
+                    logger.info("Sent seller email to %s for order %s", seller_email, order.id)
+                except Exception:
+                    logger.exception("Failed to send seller email to %s for order %s", seller_email, getattr(order, 'id', 'unknown'))
+            else:
+                # Create internal notification for the seller (if mapped to a user) or admin fallback
+                try:
+                    if seller and getattr(seller, 'user', None):
+                        create_notification(user=seller.user, message=f"New order #{order.id} contains your items.", order=order)
+                    else:
+                        # notify admins if seller has no email/user
+                        for u in User.objects.filter(is_superuser=True):
+                            create_notification(user=u, message=f"Order #{order.id} contains items for seller '{seller_name}' with no contact email.", order=order)
+                except Exception:
+                    logger.exception("Failed to create seller notification for order %s and seller %s", getattr(order, 'id', 'unknown'), seller_name)
+
+        # Send customer confirmation email (if email available)
+        customer_email = getattr(order, 'email', None) or (getattr(getattr(order, 'user', None), 'email', None))
+        if customer_email:
+            cust_context = {'order': order, 'items': items}
+            cust_html = render_to_string('payment/emails/customer_order.html', cust_context)
+            try:
+                cust_txt = render_to_string('payment/emails/customer_order.txt', cust_context)
+            except Exception:
+                cust_txt = strip_tags(cust_html)
+
+            try:
+                subject = f'Order Confirmation #{order.id} - HELIOS'
+                msg = EmailMultiAlternatives(subject, cust_txt, settings.DEFAULT_FROM_EMAIL, [customer_email])
+                msg.attach_alternative(cust_html, "text/html")
+                msg.send(fail_silently=False)
+                logger.info("Sent customer confirmation to %s for order %s", customer_email, order.id)
+            except Exception:
+                logger.exception("Failed to send customer confirmation to %s for order %s", customer_email, getattr(order, 'id', 'unknown'))
+        else:
+            logger.warning("No customer email available for order %s; skipping customer email.", getattr(order, 'id', 'unknown'))
 
     except Exception as e:
-        print(f"Error sending order notifications: {e}")
-        if settings.DEBUG:
-            raise
+        logger.exception("Unexpected error in send_order_notifications for order %s: %s", getattr(order, 'id', 'unknown'), e)

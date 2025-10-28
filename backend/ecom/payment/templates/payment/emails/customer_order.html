@@ -1,0 +1,12 @@
+<div style="font-family:Arial,Helvetica,sans-serif">
+  <h3>Thank you — Order #{{ order.id }}</h3>
+  <p>Dear {{ order.full_name }},</p>
+  <p>Order summary:</p>
+  <ul>
+    {% for it in items %}
+      <li>{{ it.product.name }} x {{ it.quantity }} @ ZMK {{ it.price }}</li>
+    {% endfor %}
+  </ul>
+  <p>Order Total: ZMK {{ order.amount_paid }}</p>
+  <p>We will notify you when your items are shipped.</p>
+</div>

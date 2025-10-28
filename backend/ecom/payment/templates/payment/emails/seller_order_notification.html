@@ -2,29 +2,21 @@
 {% load payment_extras %}
 
 {% block content %}
-    <h3 style="color: #28a745;">✅ New Customer Order! (#{{ order_id }})</h3>
-    <p>A customer has placed an order that includes products from your store. Please fulfill these items promptly.</p>
+<div style="font-family:Arial,Helvetica,sans-serif">
+  <h3 style="color: #28a745;">✅ New Customer Order! (#{{ order_id }})</h3>
+  <p>Hello {{ seller_name }},</p>
+  <p>A customer has placed an order that includes products from your store. Please fulfill these items promptly.</p>
 
-    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">Items to Fulfill:</h4>
-    <ul style="list-style: none; padding-left: 0;">
-    {% for item in items %}
-        <li style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee;">
-            <p style="font-size: 1.1em; font-weight: bold; margin: 0;">{{ item.product.name }} x {{ item.quantity }}</p>
-            <small>Price per unit: ZMK {{ item.price|floatformat:2 }}</small>
-        </li>
-    {% endfor %}
-    </ul>
+  <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">Items to Fulfill:</h4>
+  <ul style="list-style: none; padding-left: 0;">
+  {% for item in items %}
+      <li style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee;">
+          <p style="font-size: 1.1em; font-weight: bold; margin: 0;">{{ item.product.name }} x {{ item.quantity }}</p>
+          <small>Price per unit: ZMK {{ item.price|floatformat:2 }}</small>
+      </li>
+  {% endfor %}
+  </ul>
 
-    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px;">Financial Summary:</h4>
-    <p>Total Revenue (Your Items): ZMK {{ total_amount|floatformat:2 }}</p>
-    <p style="color: #dc3545;">HELIOS Commission (15%): ZMK {{ commission|floatformat:2 }}</p>
-    <p style="color: #28a745; font-size: 1.2em; font-weight: bold;">Your Payout (Net): ZMK {{ net_amount|floatformat:2 }}</p>
-
-    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px;">Customer Shipping Details:</h4>
-    <p><strong>Customer Name:</strong> {{ customer_name }}</p>
-    <p><strong>Customer Email:</strong> {{ customer_email }}</p>
-    <p style="margin-top: 10px;"><strong>Shipping Address:</strong></p>
-    <p style="white-space: pre-wrap;">{{ customer_address|linebreaks }}</p>
-
-    <p style="margin-top: 30px;">Thank you for your quick service! Log into your dashboard to update the order status.</p>
+  <p>Please login to your dashboard to manage fulfillment.</p>
+</div>
 {% endblock content %}

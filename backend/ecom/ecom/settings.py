@@ -75,6 +75,8 @@ WSGI_APPLICATION = 'ecom.wsgi.application'
 
 DATABASES = {
     'default': {
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
@@ -126,8 +128,21 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@helios.example'
-ADMIN_EMAIL = 'admin@example.com'
+# Replace the previous hard-coded email/debug settings with environment-driven values.
+# Use environment variables in production; defaults shown are safe for local testing.
+
+# DEBUG: allow override from env (keep True for local dev)
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+
+# Email config (console backend by default for local testing)
+EMAIL_BACKEND = os.getenv(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend'
+)
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@helios.example')
+ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
+
+# Useful test/dev value
+TEST_SELLER_EMAIL = os.getenv('TEST_SELLER_EMAIL', 'test.seller@example.com')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

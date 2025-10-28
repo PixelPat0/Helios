@@ -2,38 +2,23 @@
 {% load payment_extras %}
 
 {% block content %}
-    <h3 style="color: #dc3545;">🚨 NEW ORDER #{{ order.id }} - Action Required 🚨</h3>
-    <p>A new order has been placed on the HELIOS marketplace. Please verify the payment and begin the fulfillment process.</p>
-
-    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">Customer Details:</h4>
-    <p><strong>Name:</strong> {{ order.full_name }}</p>
-    <p><strong>Email:</strong> {{ order.email }}</p>
-    <p><strong>Phone:</strong> {{ order.shipping_address.phone }}</p>
-    <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
-    
-    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px;">Shipping Address:</h4>
-    <p style="white-space: pre-wrap;">{{ order.shipping_address|linebreaks }}</p>
-
-    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px;">Seller and Commission Breakdown:</h4>
-    {% for seller in sellers_breakdown %}
-        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-left: 3px solid #007bff;">
-            <h5 style="margin-top: 0;">Items from: {{ seller.seller_name }}</h5>
-            <ul style="list-style: none; padding-left: 0;">
-            {% for item in seller.items %}
-                <li style="margin-bottom: 5px;">
-                    **{{ item.product.name }}** x {{ item.quantity }} @ ZMK {{ item.price }}
-                    <br>
-                    <small>Subtotal: ZMK {{ item.price|multiply:item.quantity }}</small>
-                </li>
-            {% endfor %}
-            </ul>
-            <p style="margin-top: 10px; font-weight: bold;">Seller Total: ZMK {{ seller.total|floatformat:2 }}</p>
-            <p style="color: #dc3545;">Commission (15%): ZMK {{ seller.commission|floatformat:2 }}</p>
-            <p style="color: #28a745; font-size: 1.1em;">Net to Seller: ZMK {{ seller.total|subtract:seller.commission|floatformat:2 }}</p>
-        </div>
-    {% endfor %}
-
-    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px;">Order Summary:</h4>
-    <p><strong>Order Total:</strong> ZMK {{ order.amount_paid|floatformat:2 }}</p>
-    <p><strong>Total Commission to HELIOS (Impact Fund):</strong> ZMK {{ total_commission|floatformat:2 }}</p>
+<div style="font-family:Arial,Helvetica,sans-serif">
+  <h3>🚨 NEW ORDER #{{ order.id }} - Action Required</h3>
+  <p>Customer: {{ order.full_name }} ({{ order.email }})</p>
+  <p>Order Total: ZMK {{ order.amount_paid }}</p>
+  <h4>Seller breakdown:</h4>
+  <ul>
+  {% for s in sellers_breakdown %}
+    <li>
+      <strong>{{ s.seller_name }}</strong>: Total ZMK {{ s.total }}, Commission ZMK {{ s.commission }}
+      <ul>
+        {% for it in s.items %}
+          <li>{{ it.product.name }} x {{ it.quantity }} @ ZMK {{ it.price }}</li>
+        {% endfor %}
+      </ul>
+    </li>
+  {% endfor %}
+  </ul>
+  <p>Total commission: ZMK {{ total_commission }}</p>
+</div>
 {% endblock content %}

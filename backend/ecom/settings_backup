@@ -1,0 +1,15 @@
+# Email basics
+DEFAULT_FROM_EMAIL = 'noreply@helios.example'
+ADMIN_EMAIL = 'admin@example.com'
+
+# Development: print emails to console (safe for local testing)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Production (example) — configure your real SMTP provider (uncomment in prod)
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.yourprovider.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'user@yourprovider.com'
+# EMAIL_HOST_PASSWORD = 'supersecret'
+# DEFAULT_FROM_EMAIL = 'no-reply@yourdomain.com'
