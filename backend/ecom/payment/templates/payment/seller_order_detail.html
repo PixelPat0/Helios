@@ -29,6 +29,10 @@
                     {% if order.date_shipped %}
                         <p><strong>Date Shipped:</strong> {{ order.date_shipped|date:"Y-m-d H:i" }}</p>
                     {% endif %}
+                    {# Display cancellation reason if cancelled #}
+                    {% if order.status == 'cancelled' and order.cancellation_notes %}
+                        <p class="text-danger mt-3"><strong>Cancellation Reason:</strong> {{ order.cancellation_notes }}</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -73,60 +77,93 @@
     </div>
     
     <div class="mt-4 text-center">
-        <h4 class="mb-3">Update Order Status</h4>
-        <div class="card p-3 d-inline-block">
-            {% if order.status != 'delivered' and order.status != 'cancelled' %}
-                
-                {# Status Button Logic - Must match your desired flow and available statuses #}
-                {% if order.status == 'paid' %}
-                    {% with next_action='processing' next_label='Process' btn_class='btn-warning' %}
-                        <form method="POST" class="d-inline-block me-2">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="{{ next_action }}">
-                            <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-arrow-repeat"></i> {{ next_label }} Order</button> 
-                        </form>
-                    {% endwith %}
-                
-                {% elif order.status == 'processing' %}
-                    {% with next_action='shipped' next_label='Ship' btn_class='btn-success' %}
-                        <form method="POST" class="d-inline-block me-2">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="{{ next_action }}">
-                            <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-truck"></i> {{ next_label }} Order</button> 
-                        </form>
-                    {% endwith %}
-                
-                {% elif order.status == 'shipped' %}
-                    {% with next_action='delivered' next_label='Mark Delivered' btn_class='btn-primary' %}
-                        <form method="POST" class="d-inline-block me-2">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="{{ next_action }}">
-                            <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-check2-circle"></i> {{ next_label }}</button> 
-                        </form>
-                    {% endwith %}
-                
-                {% endif %}
-                
-                {# Cancel button - optional, ensure update_order_status view handles 'cancel' #}
-                <form action="{% url 'seller_cancel_order' order.id %}" method="POST" style="display:inline;">
-    {% csrf_token %}
-    <button 
-        type="submit" 
-        class="btn btn-danger"
-        
-        {# ----------------------------------------------------------------- #}
-        {# Use the corrected URL name here #}
-        onclick="return confirm('Are you sure you want to cancel this order? This action cannot be undone and the customer will be notified.');"
-        {# ----------------------------------------------------------------- #}
-    >
-        <i class="bi bi-x-circle me-1"></i> Cancel Order
-    </button>
-</form>
-                
-            {% else %}
-                <p class="text-muted">No further actions available for this order status ({{ order.get_status_display }}).</p>
+    <h4 class="mb-3">Update Order Status</h4>
+    <div class="card p-3 d-inline-block">
+        {% if order.status != 'delivered' and order.status != 'cancelled' %}
+            
+            {# Status Button Logic #}
+            {% if order.status == 'paid' %}
+                {% with next_action='processing' next_label='Process' btn_class='btn-warning' %}
+                    {# ADDED action attribute here #}
+                    <form method="POST" action="{% url 'update_order_status' pk=order.id %}" class="d-inline-block me-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="{{ next_action }}">
+                        <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-arrow-repeat"></i> {{ next_label }} Order</button> 
+                    </form>
+                {% endwith %}
+            
+            {% elif order.status == 'processing' %}
+                {% with next_action='shipped' next_label='Ship' btn_class='btn-success' %}
+                    {# ADDED action attribute here #}
+                    <form method="POST" action="{% url 'update_order_status' pk=order.id %}" class="d-inline-block me-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="{{ next_action }}">
+                        <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-truck"></i> {{ next_label }} Order</button> 
+                    </form>
+                {% endwith %}
+            
+            {% elif order.status == 'shipped' %}
+                {% with next_action='delivered' next_label='Mark Delivered' btn_class='btn-primary' %}
+                    {# ADDED action attribute here #}
+                    <form method="POST" action="{% url 'update_order_status' pk=order.id %}" class="d-inline-block me-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="{{ next_action }}">
+                        <button type="submit" class="btn {{ btn_class }}"><i class="bi bi-check2-circle"></i> {{ next_label }}</button> 
+                    </form>
+                {% endwith %}
+            
             {% endif %}
+            
+            {# 💡 CANCEL BUTTON: Triggers the modal #}
+            <button type="button" class="btn btn-danger" 
+                data-bs-toggle="modal" 
+                data-bs-target="#cancelModal">
+                <i class="bi bi-x-circle me-1"></i> Cancel Order
+            </button>
+        
+        {% else %}
+            <p class="text-muted">No further actions available for this order status ({{ order.get_status_display }}).</p>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+{# -------------------------------------------------------------------------------- #}
+{# 💡 MODAL STRUCTURE: Must be outside the main structure but still inside {% block content %} #}
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            {# 💡 THE FIX IS HERE: Set the form action to the correct URL #}
+            <form method="POST" action="{% url 'update_order_status' pk=order.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelModalLabel">Cancel Order #{{ order.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">You are about to **permanently cancel** this order. A reason is required for internal records and customer communication.</p>
+                    
+                    <input type="hidden" name="action" value="cancel">
+                    <div class="mb-3">
+                        <label for="cancellationReason" class="form-label">Cancellation Reason</label>
+                        <textarea class="form-control" 
+                                  id="cancellationReason" 
+                                  name="reason" 
+                                  rows="3" 
+                                  required 
+                                  placeholder="Enter reason for cancellation (e.g., product out of stock, shipping delay issue)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-x-circle"></i> Confirm Cancellation
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+{# -------------------------------------------------------------------------------- #}
+
 {% endblock %}

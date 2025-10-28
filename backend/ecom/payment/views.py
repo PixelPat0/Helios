@@ -659,7 +659,13 @@ def billing_info(request):
 
 
 def checkout(request):
-    # ... (code to get cart, products, etc.) ...
+    # ...existing code...
+    # ensure cart context is passed to template so the Order Summary lists items
+    from cart.cart import Cart
+    cart = Cart(request)
+    cart_products = cart.get_prods()
+    quantities = cart.get_quants()
+    total = cart.cart_total()
 
     if request.user.is_authenticated:
         shipping_user, created = ShippingAddress.objects.get_or_create(user=request.user)
@@ -671,23 +677,22 @@ def checkout(request):
     if request.method == 'POST':
         if shipping_form.is_valid():
             request.session['my_shipping'] = shipping_form.cleaned_data
-            
+
             if request.user.is_authenticated:
                 shipping_form.save()
-            
+
             # SUCCESS! Redirect to the next step
-            return redirect('billing_info') 
+            return redirect('billing_info')
         else:
-            # Form invalid, errors will show on the rendered page
             message.error(request, "Please correct the errors in your shipping information.")
             # FALL THROUGH to render the page with errors
-    # --------------------------------------------------------
 
     return render(request, 'payment/checkout.html', {
-        # ... (context data) ...
+        "cart_products": cart_products,
+        "quantities": quantities,
+        "total": total,
         "shipping_form": shipping_form
     })
-
 
 def payment_success(request):
     return render(request, 'payment/payment_success.html', {})
@@ -787,29 +792,6 @@ Items {'(Your Products Only)' if is_seller and not request.user.is_superuser els
 # -------------------------
 # Utilities: update_order_status (used by seller/admin pages)
 # -------------------------
-def cancel_order(request, order_id):
-    if request.method == "POST":
-        # Check seller permissions here if necessary
-        
-        order = get_object_or_404(Order, id=order_id)
-        
-        # --- ADD YOUR CANCELLATION LOGIC HERE ---
-        try:
-            # 1. Update the order status
-            order.status = 'cancelled'
-            order.cancellation_notes = "Cancelled by seller." # Add seller notes if needed
-            order.save()
-            
-            # 2. Add logic to refund the customer or handle payment status
-            # 3. Add logic to notify the customer/admin
-            
-            message.success(request, f"Order #{order_id} has been successfully cancelled.")
-        except Exception as e:
-            message.error(request, f"Failed to cancel order #{order_id}. Error: {e}")
-            
-    # Redirect back to the order detail page or seller dashboard
-    return redirect('seller_order_detail', order_id=order_id)
-
 
 @seller_required
 def update_order_status(request, pk):
@@ -819,9 +801,11 @@ def update_order_status(request, pk):
     Admins may update any order.
     """
     if request.method != 'POST':
+        # Assuming you meant 'messages' here, not 'message'
         message.warning(request, "Invalid request.")
         return redirect('seller_dashboard')
 
+    # 'pk' is the primary key of the Order
     order = get_object_or_404(Order, pk=pk)
 
     # --- 1. Permission Check ---
@@ -841,6 +825,7 @@ def update_order_status(request, pk):
         return redirect('seller_order_detail', order_id=order.id)
 
     # --- 2. Process Action ---
+    # action is passed via hidden input name="action" in the HTML forms
     action = (request.POST.get('action') or '').strip().lower()
     updated = False
 
@@ -848,31 +833,36 @@ def update_order_status(request, pk):
         order.status = 'processing'
         updated = True
         message.success(request, f"Order #{order.id} set to Processing.")
-    
+
     elif action == 'shipped' and order.status == 'processing':
         order.status = 'shipped'
         order.date_shipped = timezone.now() # Record ship date
         updated = True
         message.success(request, f"Order #{order.id} marked as Shipped.")
-    
+
     elif action == 'delivered' and order.status == 'shipped':
         order.status = 'delivered'
         updated = True
         message.success(request, f"Order #{order.id} marked as Delivered.")
-    
+
     # Allow cancellation from any status that isn't already final (delivered/cancelled)
-    elif action == 'cancelled' and order.status not in ['delivered', 'cancelled']:
+    # 💡 CRITICAL FIX: CAPTURE CANCELLATION REASON HERE
+    elif action == 'cancel' and order.status not in ['delivered', 'cancelled']:
+        # Retrieve the reason from the modal's textarea, which has name="reason"
+        cancellation_reason = request.POST.get('reason', 'Cancelled by seller (No reason provided).')
+
         order.status = 'cancelled'
+        order.cancellation_notes = cancellation_reason  # Save the reason
         updated = True
-        message.success(request, f"Order #{order.id} Cancelled.")
-    
+        message.success(request, f"Order #{order.id} Cancelled. Reason recorded.")
+
     else:
         message.warning(request, "Invalid or disallowed status transition.")
 
     if updated:
-        # NOTE: Using save() directly instead of the assumed order.update_status() method
-        order.save() 
-        
+        # NOTE: Using save() directly
+        order.save()
+
         # --- 3. Create Admin Notification ---
         try:
             # Assuming User and Notification are correctly imported
@@ -889,8 +879,7 @@ def update_order_status(request, pk):
                 )
         except Exception as e:
             # Log the exception instead of just passing
-            print(f"Error creating admin notification: {e}") 
-
+            print(f"Error creating admin notification: {e}")
 
     # --- 4. Redirect to Order Detail View (Crucial for the new UI flow) ---
     return redirect('seller_order_detail', order_id=order.id)

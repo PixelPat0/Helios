@@ -74,6 +74,9 @@ class ImpactFundTransaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, 
+        help_text="Transactions for the current active project fund goal.")
+    
     def __str__(self):
         return f"{self.transaction_type} of {self.amount}"
 

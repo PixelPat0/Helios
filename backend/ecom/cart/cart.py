@@ -43,30 +43,26 @@ class Cart():
             #get the user profile
 
     def add(self, product, quantity):
-        product_id = str(product.id)
-        product_qty = str(quantity)
-        #logic
+        # normalize product to its id (accepts Product instance or id/string)
+        product_id = str(getattr(product, 'id', product))
+        product_qty = int(quantity)
+
+        # add/update cart
         if product_id not in self.cart:
-            #self.cart[product_id] = {'price': str(product.price)}
-            self.cart[product_id] = int(product_qty)
+            self.cart[product_id] = product_qty
             self.session.modified = True
-
-            print("Product added to cart:", product_id) # Debugging step
+            print("Product added to cart:", product_id)
         else:
-            print("Product already added to cart:", product_id) #Debugging step
+            # If you want to increment instead of ignore, change this line to:
+            # self.cart[product_id] += product_qty
+            print("Product already added to cart:", product_id)
 
-            #Logged in User logic
+        # persist cart snapshot to Profile for authenticated users (existing behavior)
         if self.request.user.is_authenticated:
-            #get the user
             current_user = Profile.objects.filter(user__id=self.request.user.id)
-            #serialize the cart
-            carty = str(self.cart)
-            carty = carty.replace("\'", '\"')
-            #update the user profile with the cart
+            carty = str(self.cart).replace("'", '"')
             current_user.update(old_cart=str(carty))
-            #update the session 
             self.session.modified = True
-            #get the user profile
             
 
 

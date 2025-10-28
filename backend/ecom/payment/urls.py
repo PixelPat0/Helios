@@ -19,7 +19,7 @@ urlpatterns = [
     path('seller/logout/', views.seller_logout, name='seller_logout'),
     path('seller/dashboard/', views.seller_dashboard, name='seller_dashboard'),
     path('seller/profile/', views.seller_profile_view, name='seller_profile'),
-    path('seller/order/<int:order_id>/cancel/', views.cancel_order, name='seller_cancel_order'),
+    #path('seller/order/<int:order_id>/cancel/', views.cancel_order, name='seller_cancel_order'),
     path('seller/order/<int:order_id>/', views.seller_order_detail, name='seller_order_detail'),
 
     # Seller product CRUD

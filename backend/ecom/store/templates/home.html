@@ -3,18 +3,20 @@
 
 {% block content %}
 
-    {# --- Header: Using the new dark primary color --- #}
-    <header class="bg-primary py-5">
-        <div class="container px-4 px-lg-5 my-5">
-            <div class="text-center text-white">
-                <h1 class="display-3 fw-bolder mb-3">HELIOS</h1>
-                <p class="lead fw-normal text-white-75 mb-0">Solar Energy Made Simple, Affordable, and Accessible.</p>
-                {# Added a subtle call-to-action button #}
-                <a class="btn btn-outline-light btn-lg mt-3" href="#product-list">Explore Products <i class="bi bi-arrow-down-circle"></i></a>
-            </div>
+
+
+    <!-- Hero Header -->
+    <header class="py-5 text-white" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center">
+        <h1 class="display-5 fw-bold text-warning">HELIOS</h1>
+        <p class="lead fw-normal text-light mb-0">Solar Energy Made Simple, Affordable, and Accessible.</p>
+        <a class="btn btn-outline-light btn-lg mt-3" href="#product-list">Explore Products <i class="bi bi-arrow-down-circle"></i></a>
         </div>
+    </div>
     </header>
 
+   
 
     <section class="py-5" id="product-list">
         <div class="container px-4 px-lg-5 mt-5">

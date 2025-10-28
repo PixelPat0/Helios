@@ -6,6 +6,7 @@ Replace your existing store/views.py with this (backup first).
 
 from decimal import Decimal
 import json
+from django.conf import settings
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -99,7 +100,8 @@ def public_impact_view(request):
 
     # Sum transactions (expenses can be negative)
     try:
-        funds_collected_result = ImpactFundTransaction.objects.aggregate(total=Sum('amount'))
+        # 🚨 CRITICAL CHANGE: Filter by is_active=True
+        funds_collected_result = ImpactFundTransaction.objects.filter(is_active=True).aggregate(total=Sum('amount'))
         total_funds_collected = funds_collected_result['total'] or Decimal('0.00')
     except Exception:
         total_funds_collected = Decimal('0.00')

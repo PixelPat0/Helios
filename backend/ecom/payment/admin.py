@@ -1,6 +1,22 @@
 # payment/admin.py
 from django.contrib import admin
-from .models import Order, OrderItem, ShippingAddress, Seller, NewsletterSubscriber
+from .models import Order, OrderItem, ShippingAddress, Seller, NewsletterSubscriber, ImpactFundTransaction
+
+
+@admin.register(ImpactFundTransaction)
+class ImpactFundTransactionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'transaction_type', 'amount', 'is_active', 'user', 'date_created')
+    list_filter = ('transaction_type', 'is_active', 'date_created')
+    search_fields = ('description', 'user__username', 'id')
+    
+    # 🚨 Action to easily archive multiple transactions
+    actions = ['make_inactive']
+    
+    def make_inactive(self, request, queryset):
+        queryset.update(is_active=False)
+        self.message_user(request, f"{queryset.count()} transactions successfully marked as inactive/archived.")
+    make_inactive.short_description = "Archive selected transactions (Set is_active=False)"
+
 
 @admin.register(NewsletterSubscriber)
 class NewsletterSubscriberAdmin(admin.ModelAdmin):

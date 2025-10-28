@@ -9,6 +9,13 @@ from .models import Seller
 from .utils import create_notification # <-- NEW: Import the helper function
 from django.contrib.auth import get_user_model # Import for Admin User lookup
 
+# NEW imports
+import logging
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+
+logger = logging.getLogger(__name__)
+
 # ----------------------------------------------------------------------
 # A. GENERIC UTILITY FOR SELLER COMMUNICATIONS (RENAMED to send_generic_email)
 # ----------------------------------------------------------------------
@@ -100,15 +107,20 @@ def send_order_notifications(order, items):
             admin_context
         )
         
-        # Send email to admin (Your existing code)
-        send_mail(
-            subject=f'New Order #{order.id} Received - Action Required',
-            message=admin_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[settings.ADMIN_EMAIL],
-            html_message=admin_message,
-            fail_silently=False
-        )
+        # Send email to admin (use HTML + plain fallback, safe send)
+        try:
+            admin_plain = ''
+            try:
+                admin_plain = render_to_string('payment/emails/admin_order_notification.txt', admin_context)
+            except Exception:
+                admin_plain = strip_tags(admin_message)
+
+            subject = f'New Order #{order.id} Received - Action Required'
+            msg = EmailMultiAlternatives(subject, admin_plain, settings.DEFAULT_FROM_EMAIL, [settings.ADMIN_EMAIL])
+            msg.attach_alternative(admin_message, "text/html")
+            msg.send(fail_silently=False)
+        except Exception as e:
+            logger.exception("Failed to send admin order email for order %s: %s", getattr(order, 'id', 'unknown'), e)
         
         # ----------------------------------------------------------------------
         # 2. CREATE INTERNAL NOTIFICATIONS
@@ -174,15 +186,21 @@ def send_order_notifications(order, items):
                 if seller_message and settings.DEBUG:
                     print(f"DEBUG: Would send email to seller {seller_user.username} at {seller_email}")
                 elif seller_message:
-                    send_mail(
-                        subject=f'New Order #{order.id} Received',
-                        message=seller_message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[seller_email],
-                        html_message=seller_message,
-                        fail_silently=False
-                    )
+                    try:
+                        seller_plain = ''
+                        try:
+                            seller_plain = render_to_string('payment/emails/seller_order_notification.txt', seller_context)
+                        except Exception:
+                            seller_plain = strip_tags(seller_message)
 
+                        subject = f'New Order #{order.id} Received'
+                        seller_email_msg = EmailMultiAlternatives(subject, seller_plain, settings.DEFAULT_FROM_EMAIL, [seller_email])
+                        seller_email_msg.attach_alternative(seller_message, "text/html")
+                        seller_email_msg.send(fail_silently=False)
+                        logger.info("Sent seller email to %s for order %s", seller_email, order.id)
+                    except Exception as e:
+                        logger.exception("Failed to send seller email to %s for order %s: %s", seller_email, getattr(order, 'id', 'unknown'), e)
+# ...existing code...
             # Create DB Notification for seller_user
             try:
                 # REPLACED Notification.objects.create with helper function
