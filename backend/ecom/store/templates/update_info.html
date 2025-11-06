@@ -1,52 +1,113 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block content %}
 
-<!-- Header -->
-<header class="bg-dark py-5 mb-4">
-    <div class="container px-4 px-lg-5 my-5">
-        <div class="text-center text-white">
-            <h1 class="display-4 fw-bolder">Update User Information</h1>
-            <p class="lead fw-normal text-white-50 mb-0">Keep your profile up to date for a better experience</p>
+<header class="py-5 text-white mb-5" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
+    <div class="container px-4 px-lg-5 my-3">
+        <div class="text-center">
+            <h1 class="display-5 fw-bold text-warning">Update Your Details 📝</h1>
+            <p class="lead fw-normal text-light mb-0">Keep your profile and shipping information current for seamless service.</p>
         </div>
     </div>
 </header>
 
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <div class="card shadow-lg border-0 rounded-lg mb-5">
-                <div class="card-header bg-secondary text-white text-center">
-                    <h3 class="font-weight-light my-2">Profile Details</h3>
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST" action="{% url 'update_info' %}" enctype="multipart/form-data">
-                        {% csrf_token %}
+        <div class="col-lg-10 col-md-12">
+            
+            <form method="POST" action="{% url 'update_info' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.non_field_errors or shipping_form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                        {% for error in shipping_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="card shadow-lg border-primary mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Personal & Account Information</h4>
+                    </div>
+                    <div class="card-body p-5">
+                        
                         <div class="text-center mb-4">
                             {% if form.instance.profile_picture %}
-                                <img src="{{ form.instance.profile_picture.url }}" alt="Profile Picture" width="120" height="120" class="rounded-circle border border-3 border-secondary shadow-sm"/>
+                                <img src="{{ form.instance.profile_picture.url }}" alt="Profile Picture" width="120" height="120" class="rounded-circle border border-3 border-warning shadow-sm"/>
                             {% else %}
                                 <img src="/media/profile_pics/default.jpg" alt="Default Profile Picture" width="120" height="120" class="rounded-circle border border-3 border-secondary shadow-sm"/>
                             {% endif %}
+                            <p class="mt-2 text-muted small">Update your profile image and account details.</p>
                         </div>
-                        <strong>Billing Information</strong>
-                        <hr class="my-3"/>
-                        {{ form.as_p }}
 
-                        <hr class="my-4"/>
-
-                        <strong>Shipping Information</strong>
-                        <hr class="my-3"/>
-                        {{ shipping_form.as_p }}
-
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">Update Profile</button>
+                        <div class="row g-3">
+                            {% for field in form %}
+                                {% if field.name != 'address' and field.name != 'city' and field.name != 'zip_code' %}
+                                <div class="col-md-6">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field|add_class:'form-control' }}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+
+                <div class="card shadow-lg border-info mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">Billing Address Details</h4>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-3">
+                            {% for field in form %}
+                                {% if field.name == 'address' or field.name == 'city' or field.name == 'zip_code' %}
+                                <div class="col-md-6">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field|add_class:'form-control' }}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-lg border-success mb-5">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Shipping Address Details</h4>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-3">
+                            {% for field in shipping_form %}
+                                <div class="col-md-6">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field|add_class:'form-control' }}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-lg">
+                        Save All Updates
+                    </button>
+                </div>
+            </form>
+            
         </div>
     </div>
 </div>
+
+</br></br></br>
 
 {% endblock %}

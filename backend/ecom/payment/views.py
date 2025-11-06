@@ -584,8 +584,17 @@ def process_order(request):
                     continue
 
                 quantity = int(value)
-                oi = OrderItem(order=order, product=product, user=user_for_impact,
-                               quantity=quantity, price=price, commission_rate=ITEM_COMMISSION_RATE)
+                # ensure OrderItem.seller is set from the product (if present)
+                seller_for_item = getattr(product, 'seller', None)
+                oi = OrderItem(
+                    order=order,
+                    product=product,
+                    seller=seller_for_item,
+                    user=user_for_impact,
+                    quantity=quantity,
+                    price=price,
+                    commission_rate=ITEM_COMMISSION_RATE
+                )
                 oi.save()
                 order_items.append(oi)
 

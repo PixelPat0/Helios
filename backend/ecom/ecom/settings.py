@@ -1,22 +1,25 @@
 from pathlib import Path
 import os
-# this will import the os module
+from dotenv import load_dotenv
+import dj_database_url
+
+# Load .env once
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SECURITY
+SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-please-change')
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xw^uw1t10_uvwr#!#za%uu@pa*_unv05ee(h0h%tj0zsuk17dt'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+# ALLOWED_HOSTS: read comma-separated env var; when empty default to localhost for local dev only.
+_raw_allowed = os.getenv('ALLOWED_HOSTS', '')
+if _raw_allowed:
+    ALLOWED_HOSTS = [h.strip() for h in _raw_allowed.split(',') if h.strip()]
+else:
+    # safe local default so runserver works when DEBUG=True; in production set ALLOWED_HOSTS env var
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1'] if DEBUG else []
 
 # Application definition
 
@@ -33,6 +36,7 @@ INSTALLED_APPS = [
     'payment',
     'crispy_forms',
     'crispy_bootstrap4',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -60,8 +64,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart',
                 'ecom.context_processors.newsletter_form',
-                'ecom.context_processors.notifications',      # preferred name
-                #'ecom.context_processors.unread_notifications', # compatibility (safe)
+                'ecom.context_processors.notifications',
             ],
         },
     },
@@ -69,36 +72,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecom.wsgi.application'
 
+# DATABASE
+# Prefer DATABASE_URL (Railway) when present, otherwise use local sqlite for dev.
+DATABASE_URL = os.getenv('DATABASE_URL') or os.getenv('RAILWAY_DATABASE_URL')
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
 
@@ -128,21 +125,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Replace the previous hard-coded email/debug settings with environment-driven values.
-# Use environment variables in production; defaults shown are safe for local testing.
-
-# DEBUG: allow override from env (keep True for local dev)
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
-
-# Email config (console backend by default for local testing)
-EMAIL_BACKEND = os.getenv(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.console.EmailBackend'
-)
+# Email (env-driven)
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@helios.example')
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
-
-# Useful test/dev value
 TEST_SELLER_EMAIL = os.getenv('TEST_SELLER_EMAIL', 'test.seller@example.com')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

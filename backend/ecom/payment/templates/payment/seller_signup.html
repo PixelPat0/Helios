@@ -1,24 +1,63 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-5">
+
+<header class="py-5 text-white mb-5" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
+    <div class="container px-4 px-lg-5 my-3">
+        <div class="text-center">
+            <h1 class="display-5 fw-bold text-warning">Join the HELIOS Marketplace ☀️</h1>
+            <p class="lead fw-normal text-light mb-0">Partner with us to power a sustainable future.</p>
+        </div>
+    </div>
+</header>
+
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">Sign Up to Become a Seller</h2>
-                    <p class="text-muted text-center mb-4">
-                        Fill out the form below to submit your application. We will review it and get back to you once you've been verified!
-                        
+        <div class="col-lg-10 col-md-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    
+                    <h2 class="card-title text-center mb-4 text-dark">Seller Application Form</h2>
+                    
+                    <div class="alert alert-info border-0 text-center mb-4" role="alert">
+                        <p class="mb-0">
+                            **Become a verified seller and reach thousands of customers across Zambia.** Fill out the details below to submit your application. We prioritize vendors committed to quality and sustainability.
+                        </p>
+                    </div>
 
-[Image of business handshake]
-
-                    </p>
-                    <form method="POST">
+                    <form method="POST" class="needs-validation" novalidate>
                         {% csrf_token %}
-                        {{ form.as_p }}
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary" type="submit">Submit Application</button>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-3">
+                            {% for field in form %}
+                                <div class="col-md-6">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
                         </div>
+                        
+                        <hr class="my-4">
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-warning btn-lg fw-bold" type="submit">
+                                Submit Seller Application <i class="bi bi-arrow-right-circle"></i>
+                            </button>
+                        </div>
+                        
                     </form>
                 </div>
             </div>

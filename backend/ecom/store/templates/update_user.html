@@ -2,35 +2,59 @@
 
 {% block content %}
 
-    <!-- Header-->
-    <header class="bg-dark py-5">
-        <div class="container px-4 px-lg-5 my-5">
-            <div class="text-center text-white">
-                <h1 class="display-4 fw-bolder">Update Profile</h1>
-                <p class="lead fw-normal text-white-50 mb-0">Update your User Profile Here...</p>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                </br></br>
-                <form method="POST" action="{% url 'update_user' %}">
-                    {% csrf_token %}
-                    {{ user_form.as_p }}
-                    </br></br>
-                    <button type="submit" class="btn btn-secondary">Update Profile</button>
-                </form>
-                </br></br>
-                <a href="{% url 'update_password' %}" class="btn btn-success" >Update Password</a>
-            </div>
-            <div class="col-md-6">
-                <!-- Placeholder for the image -->
-                <img src="path/to/your/image.jpg" class="img-fluid" alt="Responsive image">
-            </div>
+<header class="py-5 text-white mb-5" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
+    <div class="container px-4 px-lg-5 my-3">
+        <div class="text-center">
+            <h1 class="display-5 fw-bold text-warning">Your HELIOS Profile ⚙️</h1>
+            <p class="lead fw-normal text-light mb-0">Manage and update your user information here.</p>
         </div>
     </div>
-    </br></br>
+</header>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <div class="card shadow-lg mb-4">
+                <div class="card-header bg-light text-dark fw-bold">
+                    Update Account Details
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'update_user' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            {% for field in user_form %}
+                                <div class="col-md-6">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-lg mb-4">
+                <div class="card-header bg-secondary text-white fw-bold">
+                    Security
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Keep your account secure by regularly updating your password.</p>
+                    <a href="{% url 'update_password' %}" class="btn btn-primary">Update Password</a>
+                </div>
+            </div>
+
+        </div>
+        
+        </div>
+</div>
 
 {% endblock %}
