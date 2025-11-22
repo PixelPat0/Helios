@@ -1,60 +1,287 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
-<header class="py-5 text-white mb-5" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
-    <div class="container px-4 px-lg-5 my-3">
-        <div class="text-center">
-            <h1 class="display-5 fw-bold text-warning">Your HELIOS Profile ⚙️</h1>
-            <p class="lead fw-normal text-light mb-0">Manage and update your user information here.</p>
+<!-- Hero Section -->
+<section class="hero-section bg-light">
+    <div class="container">
+        <div class="row align-items-center min-vh-30 py-4">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary-subtle text-primary mb-3">ACCOUNT SETTINGS</span>
+                <h1 class="display-5 fw-bold text-dark mb-3">
+                    Your <span class="text-primary">HELIOS</span> Profile
+                </h1>
+                <p class="lead text-muted">
+                    Manage and update your personal information and account settings
+                </p>
+            </div>
         </div>
     </div>
-</header>
+</section>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
+<!-- Profile Update Section -->
+<section class="profile-section py-5 bg-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="row g-5">
+                    <!-- Update Account Details -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h4 class="fw-bold mb-0">
+                                    <i class="bi bi-person-gear me-2"></i>Update Account Details
+                                </h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="POST" action="{% url 'update_user' %}">
+                                    {% csrf_token %}
+                                    
+                                    {% if messages %}
+                                        {% for message in messages %}
+                                        <div class="alert alert-{{ message.tags|default:'success' }} alert-dismissible fade show mb-4" role="alert">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi 
+                                                    {% if message.tags == 'success' %}bi-check-circle-fill text-success
+                                                    {% elif message.tags == 'error' or message.tags == 'danger' %}bi-exclamation-circle-fill text-danger
+                                                    {% elif message.tags == 'warning' %}bi-exclamation-triangle-fill text-warning
+                                                    {% else %}bi-info-circle-fill text-info{% endif %} 
+                                                    me-2"></i>
+                                                <span class="fw-semibold">{{ message }}</span>
+                                            </div>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                        {% endfor %}
+                                    {% endif %}
 
-            <div class="card shadow-lg mb-4">
-                <div class="card-header bg-light text-dark fw-bold">
-                    Update Account Details
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST" action="{% url 'update_user' %}">
-                        {% csrf_token %}
-                        
-                        <div class="row g-3">
-                            {% for field in user_form %}
-                                <div class="col-md-6">
-                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                    {{ field }}
-                                    {% for error in field.errors %}
-                                        <div class="invalid-feedback d-block">{{ error }}</div>
-                                    {% endfor %}
+                                    <div class="row g-4">
+                                        {% for field in user_form %}
+                                        <div class="col-md-6">
+                                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-dark">
+                                                <i class="bi 
+                                                    {% if 'username' in field.name %}bi-person
+                                                    {% elif 'email' in field.name %}bi-envelope
+                                                    {% elif 'first_name' in field.name %}bi-person
+                                                    {% elif 'last_name' in field.name %}bi-person
+                                                    {% else %}bi-info-circle{% endif %} 
+                                                    me-2 text-primary"></i>
+                                                {{ field.label }}
+                                            </label>
+                                            {{ field }}
+                                            {% if field.help_text %}
+                                                <div class="form-text">{{ field.help_text }}</div>
+                                            {% endif %}
+                                            {% for error in field.errors %}
+                                                <div class="text-danger small mt-1">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="d-grid gap-2 mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold">
+                                            <i class="bi bi-save me-2"></i>Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Shipping Information Card -->
+                        <div class="card border-0 shadow-sm mt-4">
+                            <div class="card-header bg-secondary text-white py-3">
+                                <h4 class="fw-bold mb-0">
+                                    <i class="bi bi-truck me-2"></i>Shipping Information
+                                </h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="POST" action="{% url 'update_user' %}">
+                                    {% csrf_token %}
+                                    
+                                    <div class="row g-4">
+                                        {% for field in shipping_form %}
+                                        <div class="col-md-6">
+                                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-dark">
+                                                <i class="bi 
+                                                    {% if 'address' in field.name %}bi-geo-alt
+                                                    {% elif 'city' in field.name %}bi-building
+                                                    {% elif 'state' in field.name %}bi-geo
+                                                    {% elif 'zipcode' in field.name %}bi-postcard
+                                                    {% elif 'country' in field.name %}bi-globe
+                                                    {% else %}bi-info-circle{% endif %} 
+                                                    me-2 text-primary"></i>
+                                                {{ field.label }}
+                                            </label>
+                                            {{ field }}
+                                            {% if field.help_text %}
+                                                <div class="form-text">{{ field.help_text }}</div>
+                                            {% endif %}
+                                            {% for error in field.errors %}
+                                                <div class="text-danger small mt-1">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="d-grid gap-2 mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold">
+                                            <i class="bi bi-save me-2"></i>Update Shipping Info
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar - Security & Quick Actions -->
+                    <div class="col-lg-4">
+                        <!-- Security Card -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-warning text-dark py-3">
+                                <h5 class="fw-bold mb-0">
+                                    <i class="bi bi-shield-lock me-2"></i>Security
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <i class="bi bi-shield-check display-4 text-warning mb-3"></i>
+                                    <h5 class="fw-bold text-dark">Account Security</h5>
+                                    <p class="text-muted small">Keep your account secure with regular updates</p>
                                 </div>
-                            {% endfor %}
+                                <a href="{% url 'update_password' %}" class="btn btn-warning w-100 py-3 fw-semibold">
+                                    <i class="bi bi-key me-2"></i>Update Password
+                                </a>
+                            </div>
                         </div>
 
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold">Save Changes</button>
+                        <!-- Quick Actions Card -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-info text-white py-3">
+                                <h5 class="fw-bold mb-0">
+                                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-grid gap-3">
+                                    <a href="{% url 'update_info' %}" class="btn btn-outline-primary py-2 fw-semibold">
+                                        <i class="bi bi-person-badge me-2"></i>Update Profile Info
+                                    </a>
+                                    <a href="{% url 'home' %}" class="btn btn-outline-secondary py-2 fw-semibold">
+                                        <i class="bi bi-house me-2"></i>Back to Home
+                                    </a>
+                                    {% if user.seller_profile.is_active %}
+                                    <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-success py-2 fw-semibold">
+                                        <i class="bi bi-speedometer2 me-2"></i>Seller Dashboard
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                    </form>
+
+                        <!-- Account Status Card -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-success text-white py-3">
+                                <h5 class="fw-bold mb-0">
+                                    <i class="bi bi-person-check me-2"></i>Account Status
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-check-circle-fill display-4 text-success"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-1">Account Active</h6>
+                                    <p class="text-muted small mb-3">Your account is in good standing</p>
+                                    
+                                    <div class="bg-light rounded p-3">
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Member since {{ user.date_joined|date:"F Y" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="card shadow-lg mb-4">
-                <div class="card-header bg-secondary text-white fw-bold">
-                    Security
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Keep your account secure by regularly updating your password.</p>
-                    <a href="{% url 'update_password' %}" class="btn btn-primary">Update Password</a>
-                </div>
-            </div>
-
         </div>
-        
-        </div>
-</div>
+    </div>
+</section>
 
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.min-vh-30 {
+    min-height: 30vh;
+}
+
+.bg-primary-subtle {
+    background-color: rgba(0, 26, 51, 0.1) !important;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.form-control, .form-select {
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 26, 51, 0.25);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.card-header {
+    border-bottom: none;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Bootstrap styling to form fields
+    const formInputs = document.querySelectorAll('input[type="text"], input[type="email"], select, textarea');
+    formInputs.forEach(input => {
+        input.classList.add('form-control');
+    });
+    
+    // Add specific styling for checkboxes if any
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.classList.add('form-check-input');
+    });
+    
+    // Add success styling to form fields on successful submission
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success')) {
+        const formInputs = document.querySelectorAll('.form-control');
+        formInputs.forEach(input => {
+            input.classList.add('is-valid');
+        });
+    }
+});
+</script>
 {% endblock %}

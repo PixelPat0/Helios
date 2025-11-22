@@ -1,93 +1,325 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
 
 {% block content %}
 
-        <!-- Header-->
-        <header class="py-5 text-white" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
-    <div class="container px-4 px-lg-5 my-5">
-        <div class="text-center">
-            <h1 class="display-5 fw-bold text-warning">{{ category }} Solutions</h1>
-            <p class="lead fw-normal text-light mb-0">Explore our curated selection of {{ category }} products.</p>
-        </div>
-    </div>
-        </header>
-
-
-        <!-- Section-->
-        <section class="py-5">
-            <div class="container px-4 px-lg-5 mt-5">
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+<!-- Hero Section -->
+<section class="hero-section bg-light">
+    <div class="container">
+        <div class="row align-items-center min-vh-30 py-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary-subtle text-primary mb-3">CATEGORY</span>
+                <h1 class="display-4 fw-bold text-dark mb-4">
+                    {{ category }} 
+                    <span class="text-primary">Solutions</span>
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Explore our curated selection of high-quality {{ category|lower }} products 
+                    from trusted suppliers across Zambia.
+                </p>
                 
-                    {% for product in products %}
-                        {% if product.is_sale %}
-
-
-                        <div class="col mb-5">
-                            <div class="card h-100">
-                                <!-- Sale badge-->
-                                <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
-
-
-
-                                <!-- Product image-->
-                                <img class="card-img-top" src="{{product.image.url}}" alt="..." />
-                                <!-- Product details-->
-                                <div class="card-body p-4">
-                                    <div class="text-center">
-                                        <!-- Product name-->
-                                        <h5 class="fw-bolder">{{ product.name }}</h5>
-
-                                        <!-- Sale Notification on product -->
-                                        <div class="d-flex justify-content-center small text-warning mb-2">
-                                        <div class="bi-star-fill"></div>
-                                        &nbsp;&nbsp;Sale!!&nbsp;&nbsp;
-                                        <div class="bi-star-fill"></div>
-                                        </div>
-                                        <!-- Product price-->
-                                        <strike>
-                                        ZMK{{ product.price }}
-                                        </strike>
-                                        &nbsp;
-                                        ZMK{{ product.sale_price }}
-                                        <!-- Product description-->
-                                    </div>
-                                </div>
-                                <!-- Product actions-->
-                                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                    <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View products</a></div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        {% else %}
-                    <div class="col mb-5">
-                        <div class="card h-100">
-                            <!-- Product image-->
-                            <img class="card-img-top" src="{{product.image.url}}" alt="..." />
-                            <!-- Product details-->
-                            <div class="card-body p-4">
-                                <div class="text-center">
-                                    <!-- Product name-->
-                                    <h5 class="fw-bolder">{{ product.name }}</h5>
-                                    <!-- Product price-->
-                                    ${{ product.price }}
-                                    <!-- Product description-->
-                                </div>
-                            </div>
-                            <!-- Product actions-->
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View Product</a></div>
-                            </div>
-                        </div>
+                <!-- Category Stats -->
+                <div class="d-flex flex-wrap justify-content-center gap-4 text-muted mt-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-check text-success me-2"></i>
+                        <small>Verified Products</small>
                     </div>
-                        {% endif %}
-                    {% endfor %}
-
-                   
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-truck text-success me-2"></i>
+                        <small>Nationwide Delivery</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-award text-success me-2"></i>
+                        <small>Quality Guaranteed</small>
+                    </div>
                 </div>
             </div>
-        </section>
-       
+        </div>
+    </div>
+</section>
 
+<!-- Products Grid Section -->
+<section class="products-section py-5 bg-white">
+    <div class="container">
+        <!-- Results Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-2">{{ products.count }} Products Found</h3>
+                        <p class="text-muted mb-0">Showing all {{ category|lower }} products</p>
+                    </div>
+                    <div class="d-none d-md-block">
+                        <a href="{% url 'category_summary' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-grid-3x3 me-2"></i>Browse All Categories
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card product-card h-100 border-0 shadow-sm">
+                    <!-- Sale Badge -->
+                    {% if product.is_sale %}
+                    <div class="position-absolute top-0 start-0 m-3">
+                        <span class="badge bg-warning text-dark shadow-sm">
+                            <i class="bi bi-lightning-fill me-1"></i>SALE
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Product Image -->
+                    <div class="product-image-wrapper position-relative">
+                        <img src="{{ product.image.url }}" 
+                             class="card-img-top" 
+                             alt="{{ product.name }}"
+                             style="height: 200px; object-fit: cover;">
+                        
+                        <!-- Quick View Overlay -->
+                        <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-10 
+                                    d-flex align-items-center justify-content-center opacity-0">
+                            <a href="{% url 'product' product.id %}" 
+                               class="btn btn-primary btn-sm rounded-pill px-3">
+                                Quick View
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="card-body d-flex flex-column p-4">
+                        <h6 class="card-title fw-bold text-dark mb-2">{{ product.name }}</h6>
+                        <p class="text-muted small mb-3 flex-grow-1">
+                            {{ product.description|truncatewords:15 }}
+                        </p>
+                        
+                        <!-- Seller Info -->
+                        {% if product.seller %}
+                        <div class="mb-3">
+                            <small class="text-primary">
+                                <i class="bi bi-shop me-1"></i>
+                                {{ product.seller.business_name }}
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        <!-- Price -->
+                        <div class="mt-auto">
+                            {% if product.is_sale %}
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span class="text-muted text-decoration-line-through small">
+                                    ZMK {{ product.price|floatformat:2|intcomma }}
+                                </span>
+                                <span class="fw-bold text-danger fs-5">
+                                    ZMK {{ product.sale_price|floatformat:2|intcomma }}
+                                </span>
+                            </div>
+                            {% else %}
+                            <div class="mb-3">
+                                <span class="fw-bold text-dark fs-5">
+                                    ZMK {{ product.price|floatformat:2|intcomma }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Action Button -->
+                            <a href="{% url 'product' product.id %}" 
+                               class="btn btn-primary w-100 py-2 fw-semibold">
+                                <i class="bi bi-eye me-2"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted mb-4"></i>
+                <h3 class="text-dark mb-3">No Products Found</h3>
+                <p class="text-muted mb-4">We couldn't find any products in the {{ category }} category at the moment.</p>
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                    <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-grid-3x3 me-2"></i>Browse All Categories
+                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-house me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Load More / Pagination (Optional) -->
+        {% if products.has_other_pages %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <nav aria-label="Product pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}">
+                                <i class="bi bi-chevron-left me-1"></i>Previous
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for i in products.paginator.page_range %}
+                        <li class="page-item {% if products.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}">
+                                Next<i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Related Categories Section -->
+<section class="related-categories py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary-subtle text-primary mb-3">EXPLORE MORE</span>
+                <h2 class="display-5 fw-bold text-dark mb-3">Related Categories</h2>
+                <p class="lead text-muted">
+                    Discover more solar energy solutions for your needs
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Related Category 1 -->
+            <div class="col-md-4">
+                <div class="card border-0 bg-white shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-sun display-4 text-warning mb-3"></i>
+                        <h5 class="fw-bold text-dark">Solar Panels</h5>
+                        <p class="text-muted small mb-3">High-efficiency panels for residential and commercial use</p>
+                        <a href="{% url 'category' 'Solar-Panels' %}" class="btn btn-outline-primary btn-sm">
+                            Explore Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Category 2 -->
+            <div class="col-md-4">
+                <div class="card border-0 bg-white shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-lightning-charge display-4 text-primary mb-3"></i>
+                        <h5 class="fw-bold text-dark">Inverters</h5>
+                        <p class="text-muted small mb-3">Reliable power conversion systems</p>
+                        <a href="{% url 'category' 'Inverters' %}" class="btn btn-outline-primary btn-sm">
+                            Explore Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Category 3 -->
+            <div class="col-md-4">
+                <div class="card border-0 bg-white shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-battery-charging display-4 text-success mb-3"></i>
+                        <h5 class="fw-bold text-dark">Batteries</h5>
+                        <p class="text-muted small mb-3">Energy storage solutions</p>
+                        <a href="{% url 'category' 'Batteries' %}" class="btn btn-outline-primary btn-sm">
+                            Explore Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <h3 class="display-6 fw-bold mb-3">Need Help Choosing {{ category }} Products?</h3>
+                <p class="lead mb-0">
+                    Our solar experts can help you find the perfect products for your specific energy needs.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="#footer-subscribe" class="btn btn-warning btn-lg px-5 py-3 fw-semibold">
+                    <i class="bi bi-headset me-2"></i>
+                    Contact Expert
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.min-vh-30 {
+    min-height: 30vh;
+}
+
+.bg-primary-subtle {
+    background-color: rgba(0, 26, 51, 0.1) !important;
+}
+
+.product-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1) !important;
+}
+
+.product-image-wrapper:hover .product-overlay {
+    opacity: 1;
+}
+
+.cta-section {
+    background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.pagination .page-link {
+    color: var(--bs-primary);
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+</style>
 {% endblock %}

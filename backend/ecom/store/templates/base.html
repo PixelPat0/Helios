@@ -12,76 +12,174 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
         
-        {# --- Start Custom Solar MVP CSS (Updated Primary Color) --- #}
+        {# --- Cleaned Solar Color Palette --- #}
         <style>
-            /* * Solar MVP Color Palette:
-             * --primary: Darker Navy Blue (#002244) - Trust, Authority
-             * --secondary: Soft Yellow (#FFCC00) - Sun, Energy
-             * --accent: Terracotta (#CC5500) - Warmth
-             */
-
             :root {
-                --bs-primary: #010d1aff; /* Darker Navy Blue */
-                --bs-secondary: #FFCC00; 
-                --bs-success: #3D9970; 
-                --bs-info: #0088AA;
-                --bs-warning: #FFCC00; /* Solar Yellow for warning */
-                --bs-danger: #CC5500; /* Soft Red for danger */
-                --bs-dark: #333333;
+                --bs-primary: #001a33; /* Clean Navy Blue - Better contrast */
+                --bs-secondary: #FFD700; /* Brighter Gold/Yellow */
+                --bs-success: #2E8B57; /* Sea Green */
+                --bs-info: #0077B6; /* Clean Blue */
+                --bs-warning: #FFA500; /* Orange for better visibility */
+                --bs-danger: #D9534F; /* Standard Bootstrap Red */
+                --bs-dark: #212529;
+                --bs-light: #F8F9FA;
                 --bs-body-color: #333333;
-                --bs-body-bg: #F8F9FA;
+                --bs-body-bg: #FFFFFF;
             }
 
             body {
                 background-color: var(--bs-body-bg);
                 color: var(--bs-body-color);
+                font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             }
 
-            /* Customizing color utilities and buttons */
+            /* Enhanced Color Utilities */
             .bg-primary, .btn-primary {
                 background-color: var(--bs-primary) !important;
                 border-color: var(--bs-primary) !important;
             }
             .btn-primary:hover, .btn-primary:focus {
-                background-color: #001122 !important; /* Even darker hover state */
-                border-color: #001122 !important;
+                background-color: #000d1a !important;
+                border-color: #000d1a !important;
+                transform: translateY(-1px);
+                transition: all 0.2s ease;
             }
             .text-primary {
                 color: var(--bs-primary) !important;
             }
 
-            /* Customizing Warning (Yellow) */
+            /* Enhanced Warning Colors */
             .bg-warning, .btn-warning {
                 background-color: var(--bs-warning) !important;
                 border-color: var(--bs-warning) !important;
-                color: var(--bs-dark) !important;
+                color: #000 !important;
+                font-weight: 600;
             }
             .btn-warning:hover {
-                background-color: #E6B800 !important;
-                border-color: #E6B800 !important;
+                background-color: #e69500 !important;
+                border-color: #e69500 !important;
+                transform: translateY(-1px);
             }
 
-            /* Customizing Alerts */
+            /* Enhanced Alert Styling */
             .alert-warning {
-                color: #584B00;
-                background-color: #FFECB3;
-                border-color: #FFD700;
+                color: #664d03;
+                background-color: #fff3cd;
+                border-color: #ffecb5;
+                font-weight: 500;
             }
             .alert-danger {
-                color: #793300;
-                background-color: #F7DED1;
-                border-color: #CC5500;
+                color: #721c24;
+                background-color: #f8d7da;
+                border-color: #f5c6cb;
+                font-weight: 500;
+            }
+            .alert-success {
+                color: #0f5132;
+                background-color: #d1e7dd;
+                border-color: #badbcc;
+                font-weight: 500;
             }
 
-            /* Footer Styling */
+            /* Enhanced Footer Styling */
             .footer-solar {
                 background-color: var(--bs-primary) !important;
+                color: #ffffff;
             }
             .footer-solar h5 {
-                color: var(--bs-secondary) !important;
+                color: var(--bs-warning) !important;
+                font-weight: 700;
+                margin-bottom: 1rem;
+            }
+            .footer-solar .text-white {
+                color: #ffffff !important;
+                opacity: 0.95;
+            }
+            .footer-solar .text-white-50 {
+                color: rgba(255, 255, 255, 0.8) !important;
+            }
+
+            /* Enhanced Contact Section */
+            .contact-icon {
+                width: 44px;
+                height: 44px;
+                background: rgba(255, 215, 0, 0.15);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                border: 1px solid rgba(255, 215, 0, 0.3);
+            }
+            .contact-icon:hover {
+                background: rgba(255, 215, 0, 0.25);
+                transform: scale(1.1);
+                border-color: var(--bs-warning);
+            }
+            .contact-link {
+                text-decoration: none;
+                transition: all 0.3s ease;
+                color: #ffffff !important;
+            }
+            .contact-link:hover {
+                color: var(--bs-warning) !important;
+                transform: translateX(5px);
+            }
+            .contact-link .fw-semibold {
+                font-weight: 600;
+                color: #ffffff;
+            }
+            .business-hours {
+                font-size: 0.9rem;
+                color: #ffffff;
+            }
+            .business-hours .fw-semibold {
+                color: var(--bs-warning);
+                font-weight: 600;
+            }
+
+            /* Enhanced Form Styling */
+            .input-group .form-control {
+                border: 1px solid #dee2e6;
+                font-weight: 500;
+            }
+            .input-group .form-control:focus {
+                border-color: var(--bs-warning);
+                box-shadow: 0 0 0 0.2rem rgba(255, 165, 0, 0.25);
+            }
+
+            /* Enhanced Button Styling */
+            .btn-outline-warning {
+                color: var(--bs-warning);
+                border-color: var(--bs-warning);
+                font-weight: 500;
+            }
+            .btn-outline-warning:hover {
+                background-color: var(--bs-warning);
+                border-color: var(--bs-warning);
+                color: #000;
+                transform: translateY(-1px);
+            }
+
+            /* Better Borders */
+            .border-white-50 {
+                border-color: rgba(255, 255, 255, 0.3) !important;
+            }
+
+            /* Typography Enhancements */
+            .fw-semibold {
+                font-weight: 600 !important;
+            }
+            .lead {
+                font-weight: 400;
+                line-height: 1.6;
+            }
+
+            /* Content Area Enhancement */
+            #content-wrap {
+                background-color: #ffffff;
             }
         </style>
-        {# --- End Custom Solar MVP CSS --- #}
         
         <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
@@ -112,34 +210,112 @@
         
         <footer class="py-5 footer-solar" id="footer-subscribe"> 
             <div class="container">
-                
-                {% if newsletter_form %}
-            <div class="row justify-content-center mb-4">
-                <div class="col-lg-6 col-md-8 text-center">
-                    <h5 class="fw-bold mb-3">Join Our Stakeholder List</h5>
-                    
-                    <form action="{% url 'newsletter_subscribe' %}" method="POST" class="d-flex justify-content-center">
-                        {% csrf_token %}
-                        <div class="input-group" style="max-width: 400px;">
-                            {{ newsletter_form.email }} 
-                            <button class="btn btn-warning" type="submit">Subscribe</button>
+                <div class="row g-4">
+                    <!-- Newsletter Section -->
+                    {% if newsletter_form %}
+                    <div class="col-lg-6 col-md-12">
+                        <div class="text-center text-md-start">
+                            <h5 class="fw-bold mb-3">Join Our Stakeholder List</h5>
+                            <p class="text-white mb-3">Get updates on our impact projects and community solar installations.</p>
+                            
+                            <form action="{% url 'newsletter_subscribe' %}" method="POST" class="d-flex">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    {{ newsletter_form.email }} 
+                                    <button class="btn btn-warning fw-semibold" type="submit">Subscribe</button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
-                    <small class="text-white-50 mt-1 d-block">Get updates on our impact projects and community solar installations.</small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Contact Information Section -->
+                    <div class="col-lg-6 col-md-12">
+                        <div class="text-center text-md-end">
+                            <h5 class="fw-bold mb-3">Contact Us</h5>
+                            
+                            <div class="row g-3 justify-content-center justify-content-md-end">
+                                <!-- Phone -->
+                                <div class="col-auto">
+                                    <a href="tel:+260123456789" class="d-flex align-items-center text-decoration-none contact-link">
+                                        <div class="contact-icon me-3">
+                                            <i class="bi bi-telephone text-warning"></i>
+                                        </div>
+                                        <div class="text-start">
+                                            <small class="text-warning d-block fw-semibold">Phone</small>
+                                            <span class="fw-semibold">+260 123 456 789</span>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-auto">
+                                    <a href="mailto:info@helios.com" class="d-flex align-items-center text-decoration-none contact-link">
+                                        <div class="contact-icon me-3">
+                                            <i class="bi bi-envelope text-warning"></i>
+                                        </div>
+                                        <div class="text-start">
+                                            <small class="text-warning d-block fw-semibold">Email</small>
+                                            <span class="fw-semibold">info@helios.com</span>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- WhatsApp -->
+                                <div class="col-auto">
+                                    <a href="https://wa.me/260987654321" target="_blank" class="d-flex align-items-center text-decoration-none contact-link">
+                                        <div class="contact-icon me-3">
+                                            <i class="bi bi-whatsapp text-warning"></i>
+                                        </div>
+                                        <div class="text-start">
+                                            <small class="text-warning d-block fw-semibold">WhatsApp</small>
+                                            <span class="fw-semibold">+260 987 654 321</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Business Hours -->
+                            <div class="mt-4 pt-2 border-top border-white-50">
+                                <div class="d-flex align-items-center justify-content-center justify-content-md-end">
+                                    <i class="bi bi-clock me-2 text-warning"></i>
+                                    <div class="business-hours text-start">
+                                        <div class="fw-semibold">Business Hours</div>
+                                        <small class="text-white">Mon - Fri: 8:00 AM - 5:00 PM</small><br>
+                                        <small class="text-white">Sat: 9:00 AM - 1:00 PM</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Action Buttons -->
+                            <div class="mt-3 d-flex gap-2 justify-content-center justify-content-md-end">
+                                <a href="tel:+260123456789" class="btn btn-sm btn-outline-warning fw-semibold">
+                                    <i class="bi bi-telephone me-1"></i> Call
+                                </a>
+                                <a href="https://wa.me/260987654321" target="_blank" class="btn btn-sm btn-outline-warning fw-semibold">
+                                    <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                                </a>
+                                <a href="mailto:info@helios.com" class="btn btn-sm btn-outline-warning fw-semibold">
+                                    <i class="bi bi-envelope me-1"></i> Email
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        {% endif %}
         
-        <div class="row mt-4 pt-3 border-top border-white-50">
-            <div class="col text-center">
-                <p class="m-0 text-white-50 small">&copy; {% now "Y" %} HELIOS. Powering the future.</p>
-            </div>
-        </div>
-        
+                <!-- Copyright Section -->
+                <div class="row mt-5 pt-4 border-top border-white-50">
+                    <div class="col-12 text-center">
+                        <p class="m-0 text-white small fw-semibold">&copy; {% now "Y" %} HELIOS Energy Solutions. Powering Zambia's Future.</p>
+                        <p class="m-0 text-warning small mt-1 fw-semibold">Lusaka, Zambia | Renewable Energy Specialists</p>
+                    </div>
+                </div>
             </div>
         </footer>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="{% static 'js/scripts.js' %}"></script>
+
+        {% block extra_js %}{% endblock %}
     </body>
 </html>

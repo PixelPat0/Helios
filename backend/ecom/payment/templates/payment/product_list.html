@@ -1,57 +1,212 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Your Products</h1>
-        <a href="{% url 'product_add' %}" class="btn btn-primary">
-            <i class="fas fa-plus-circle"></i> Add New Product
-        </a>
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary mb-2">PRODUCT MANAGEMENT</span>
+                    <h1 class="display-6 fw-bold text-dark mb-0">Your Products</h1>
+                    <p class="text-muted mt-2">Manage your solar product listings</p>
+                </div>
+                <a href="{% url 'product_add' %}" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-plus-circle me-2"></i> Add New Product
+                </a>
+            </div>
+        </div>
     </div>
 
+    <!-- Messages -->
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
+            <div class="alert alert-{{ message.tags|default:'warning' }} alert-dismissible fade show mb-4" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi 
+                        {% if message.tags == 'success' %}bi-check-circle-fill text-success
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}bi-exclamation-circle-fill text-danger
+                        {% elif message.tags == 'warning' %}bi-exclamation-triangle-fill text-warning
+                        {% else %}bi-info-circle-fill text-info{% endif %} 
+                        me-2"></i>
+                    <span class="fw-semibold">{{ message }}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
     {% endif %}
 
+    <!-- Products Table -->
     {% if products %}
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th scope="col">Image</th>
-                <th scope="col">Name</th>
-                <th scope="col">Price</th>
-                <th scope="col">Category</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-            <tr>
-                <td>
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
-                    {% else %}
-                        No Image
-                    {% endif %}
-                </td>
-                <td>{{ product.name }}</td>
-                <td>ZMK {{ product.price }}</td>
-                <td>{{ product.category.name }}</td>
-                <td>
-                    <a href="{% url 'product_edit' product.pk %}" class="btn btn-sm btn-info">Edit</a>
-                    <a href="{% url 'product_delete' product.pk %}" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-        <div class="alert alert-info">
-            You haven't added any products yet.
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="ps-4 py-3 fw-semibold text-dark border-0">Product</th>
+                            <th scope="col" class="py-3 fw-semibold text-dark border-0">Details</th>
+                            <th scope="col" class="py-3 fw-semibold text-dark border-0">Category</th>
+                            <th scope="col" class="py-3 fw-semibold text-dark border-0">Status</th>
+                            <th scope="col" class="text-end pe-4 py-3 fw-semibold text-dark border-0">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr class="border-top">
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}" 
+                                             class="img-thumbnail rounded me-3" 
+                                             style="width: 60px; height: 60px; object-fit: cover;"
+                                             alt="{{ product.name }}">
+                                    {% else %}
+                                        <div class="bg-secondary bg-opacity-10 rounded d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 60px; height: 60px;">
+                                            <i class="bi bi-image text-muted fs-4"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="fw-semibold text-dark mb-1">{{ product.name }}</h6>
+                                        <small class="text-muted">ID: {{ product.id }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark fs-5">ZMK {{ product.price|floatformat:2|intcomma }}</span>
+                                    {% if product.is_sale %}
+                                    <span class="badge bg-warning text-dark small mt-1">
+                                        <i class="bi bi-tag-fill me-1"></i>On Sale
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <span class="badge bg-primary-subtle text-primary">
+                                    {{ product.category.name }}
+                                </span>
+                            </td>
+                            <td class="py-3">
+                                {% if product.is_available %}
+                                <span class="badge bg-success-subtle text-success">
+                                    <i class="bi bi-check-circle me-1"></i>Active
+                                </span>
+                                {% else %}
+                                <span class="badge bg-danger-subtle text-danger">
+                                    <i class="bi bi-x-circle me-1"></i>Inactive
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4 py-3">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'product_edit' product.pk %}" 
+                                       class="btn btn-outline-primary btn-sm px-3">
+                                        <i class="bi bi-pencil me-1"></i> Edit
+                                    </a>
+                                    <a href="{% url 'product_delete' product.pk %}" 
+                                       class="btn btn-outline-danger btn-sm px-3">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary-subtle">
+                <div class="card-body text-center py-3">
+                    <h4 class="fw-bold text-primary mb-1">{{ products.count }}</h4>
+                    <small class="text-muted">Total Products</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning-subtle">
+                <div class="card-body text-center py-3">
+                    <h4 class="fw-bold text-warning mb-1">{{ products|length }}</h4>
+                    <small class="text-muted">Active Listings</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success-subtle">
+                <div class="card-body text-center py-3">
+                    <h4 class="fw-bold text-success mb-1">{{ products|length }}</h4>
+                    <small class="text-muted">In Stock</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info-subtle">
+                <div class="card-body text-center py-3">
+                    <h4 class="fw-bold text-info mb-1">{{ products|length }}</h4>
+                    <small class="text-muted">Categories</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="card border-0 bg-light">
+            <div class="card-body py-5">
+                <i class="bi bi-inbox display-1 text-muted mb-4"></i>
+                <h3 class="text-dark mb-3">No Products Yet</h3>
+                <p class="text-muted mb-4">Start building your solar product catalog by adding your first product.</p>
+                <a href="{% url 'product_add' %}" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-plus-circle me-2"></i> Add Your First Product
+                </a>
+            </div>
+        </div>
+    </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.bg-primary-subtle {
+    background-color: rgba(0, 26, 51, 0.08) !important;
+}
+.bg-warning-subtle {
+    background-color: rgba(255, 165, 0, 0.08) !important;
+}
+.bg-success-subtle {
+    background-color: rgba(46, 139, 87, 0.08) !important;
+}
+.bg-info-subtle {
+    background-color: rgba(0, 119, 182, 0.08) !important;
+}
+.bg-danger-subtle {
+    background-color: rgba(217, 83, 79, 0.08) !important;
+}
+
+.table > :not(caption) > * > * {
+    padding: 1rem 0.5rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 26, 51, 0.02);
+}
+
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
 {% endblock %}

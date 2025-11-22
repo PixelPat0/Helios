@@ -1,48 +1,151 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
-    <!-- Header-->
-    <header class="py-5 text-white" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
-    <div class="container px-4 px-lg-5 my-5">
-        <div class="text-center">
-            <h1 class="display-5 fw-bold text-warning">Welcome Back! 👋</h1>
-            <p class="lead fw-normal text-light mb-0">Sign in to your HELIOS account.</p>
-        </div>
-    </div>
-</header>
-
+<!-- Hero Section -->
+<section class="hero-section bg-light">
     <div class="container">
-        <div class="row">
-            <center>
-                <div class="col-8">
-
-                </br></br>
-
-                
-<form method="POST" action="{% url 'login' %}">
-    {% csrf_token %}
-    
-  <div class="mb-3">
-    
-    <input type="text" class="form-control" name="username" placeholder="Enter your username">
-  </div>
-  <div class="mb-3">
-    <input type="password" class="form-control" name="password" placeholder="Enter your Password">
-  </div>
-</br></br>
-  <button type="submit" class="btn btn-secondary">Login</button>
-</form>
-
-</br></br></br></br>
-                
+        <div class="row align-items-center min-vh-50 py-5">
+            <div class="col-lg-6 mx-auto">
+                <div class="text-center mb-5">
+                    <span class="badge bg-primary-subtle text-primary mb-3">ACCOUNT ACCESS</span>
+                    <h1 class="display-5 fw-bold text-dark mb-3">
+                        Welcome Back! 
+                        <span class="text-primary">👋</span>
+                    </h1>
+                    <p class="lead text-muted">
+                        Sign in to your HELIOS account to manage your solar products and track orders.
+                    </p>
                 </div>
-            </center>  
+
+                <!-- Login Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-5">
+                        <form method="POST" action="{% url 'login' %}">
+                            {% csrf_token %}
+                            
+                            <!-- Username Field -->
+                            <div class="mb-4">
+                                <label for="username" class="form-label fw-semibold text-dark">
+                                    <i class="bi bi-person me-2 text-primary"></i>Username
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="username" 
+                                       name="username" 
+                                       placeholder="Enter your username"
+                                       required>
+                                <div class="form-text">Enter your registered username</div>
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold text-dark">
+                                    <i class="bi bi-lock me-2 text-primary"></i>Password
+                                </label>
+                                <input type="password" 
+                                       class="form-control form-control-lg" 
+                                       id="password" 
+                                       name="password" 
+                                       placeholder="Enter your password"
+                                       required>
+                                <div class="form-text">
+                                    <a href="#" class="text-decoration-none text-primary">Forgot password?</a>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2 mb-4">
+                                <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                                </button>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="position-relative text-center mb-4">
+                                <hr>
+                                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                                    New to HELIOS?
+                                </span>
+                            </div>
+
+                            <!-- Register Link -->
+                            <div class="text-center">
+                                <p class="text-muted mb-0">Don't have an account?</p>
+                                <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg mt-3 px-4">
+                                    <i class="bi bi-person-plus me-2"></i>Create Account
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Trust Indicators -->
+                <div class="row mt-4 text-center">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap justify-content-center gap-4 text-muted">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shield-check text-success me-2"></i>
+                                <small>Secure Login</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-lightning-charge text-warning me-2"></i>
+                                <small>Solar Specialists</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-award text-primary me-2"></i>
+                                <small>Trusted Platform</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</br></br>
+</section>
 
+{% endblock %}
 
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
 
+.min-vh-50 {
+    min-height: 50vh;
+}
 
+.bg-primary-subtle {
+    background-color: rgba(0, 26, 51, 0.1) !important;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.form-control {
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 26, 51, 0.25);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
 {% endblock %}

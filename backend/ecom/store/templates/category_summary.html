@@ -1,38 +1,236 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
-    <!-- Header-->
-    <header class="py-5 text-white" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
-    <div class="container px-4 px-lg-5 my-5">
-        <div class="text-center">
-            <h1 class="display-5 fw-bold text-warning">Browse Categories 🗂️</h1>
-            <p class="lead fw-normal text-light mb-0">Find the right solar solution for your needs.</p>
-        </div>
-    </div>
-</header>
-
-
-</br></br>
+<!-- Hero Section -->
+<section class="hero-section bg-light">
     <div class="container">
-        <div class="row">
-            <center>
-                <div class="col-md-8">
-                  <br/><br/><br/><br/>
-
-                  {% for category in categories %}
-
-                  <h3><a href="{% url 'category' category %}"> {{ category }}</a> </h3>
-
-
-                  {% endfor %}
+        <div class="row align-items-center min-vh-50 py-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary-subtle text-primary mb-3">SOLAR SOLUTIONS</span>
+                <h1 class="display-4 fw-bold text-dark mb-4">
+                    Browse <span class="text-primary">Categories</span> 🗂️
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Explore our comprehensive range of solar energy products and solutions 
+                    tailored for every need across Zambia.
+                </p>
+                
+                <!-- Trust Indicators -->
+                <div class="d-flex flex-wrap justify-content-center gap-4 text-muted mt-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-check text-success me-2"></i>
+                        <small>Verified Suppliers</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-truck text-success me-2"></i>
+                        <small>Nationwide Delivery</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-award text-success me-2"></i>
+                        <small>Quality Guaranteed</small>
+                    </div>
                 </div>
-            </center>  
+            </div>
         </div>
     </div>
-</br></br>
+</section>
 
+<!-- Categories Grid -->
+<section class="categories-section py-5 bg-white">
+    <div class="container">
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card category-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <!-- Category Icon -->
+                        <div class="category-icon mb-3">
+                            <i class="bi 
+                                {% if 'panel' in category.name|lower %}bi-sun
+                                {% elif 'inverter' in category.name|lower %}bi-lightning-charge
+                                {% elif 'batter' in category.name|lower %}bi-battery-charging
+                                {% elif 'light' in category.name|lower %}bi-lamp
+                                {% elif 'cable' in category.name|lower %}bi-plug
+                                {% elif 'mount' in category.name|lower %}bi-wrench
+                                {% elif 'charge' in category.name|lower %}bi-bolt
+                                {% elif 'kit' in category.name|lower %}bi-box
+                                {% else %}bi-grid-3x3{% endif %} 
+                                display-4 text-primary"></i>
+                        </div>
+                        
+                        <!-- Category Name -->
+                        <h4 class="fw-bold text-dark mb-3">{{ category.name }}</h4>
+                        
+                        <!-- Category Description -->
+                        <p class="text-muted small mb-4">
+                            {% if 'panel' in category.name|lower %}
+                            High-efficiency solar panels for residential and commercial use
+                            {% elif 'inverter' in category.name|lower %}
+                            Reliable power conversion systems for your solar setup
+                            {% elif 'batter' in category.name|lower %}
+                            Energy storage solutions for uninterrupted power supply
+                            {% elif 'light' in category.name|lower %}
+                            Solar-powered lighting solutions for homes and streets
+                            {% elif 'cable' in category.name|lower %}
+                            Quality wiring and connectors for solar installations
+                            {% elif 'mount' in category.name|lower %}
+                            Professional mounting systems and installation hardware
+                            {% elif 'charge' in category.name|lower %}
+                            Advanced charge controllers for optimal performance
+                            {% elif 'kit' in category.name|lower %}
+                            Complete solar system packages for easy installation
+                            {% else %}
+                            Quality solar products and components
+                            {% endif %}
+                        </p>
+                        
+                        <!-- Action Button -->
+                        <a href="{% url 'category' category.name %}" 
+                           class="btn btn-primary w-100 py-2 fw-semibold">
+                            <i class="bi bi-arrow-right me-2"></i>Explore Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Empty State -->
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-folder-x display-1 text-muted"></i>
+                <h3 class="text-muted mt-3">No Categories Available</h3>
+                <p class="text-muted">Check back soon for new product categories</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
+<!-- CTA Section -->
+<section class="cta-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <h3 class="display-6 fw-bold mb-3">Need Help Choosing?</h3>
+                <p class="lead mb-0">
+                    Our solar experts can help you find the perfect products for your specific needs.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="#footer-subscribe" class="btn btn-warning btn-lg px-5 py-3 fw-semibold">
+                    <i class="bi bi-headset me-2"></i>
+                    Contact Expert
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 
+<!-- Featured Products Preview -->
+<section class="featured-preview py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary-subtle text-primary mb-3">POPULAR CHOICES</span>
+                <h2 class="display-5 fw-bold text-dark mb-3">Customer Favorites</h2>
+                <p class="lead text-muted">
+                    Discover our most popular solar products trusted by customers across Zambia
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Popular Category 1 -->
+            <div class="col-md-4">
+                <div class="card border-0 bg-white shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-sun display-4 text-warning mb-3"></i>
+                        <h5 class="fw-bold text-dark">Solar Panels</h5>
+                        <p class="text-muted small">High-efficiency monocrystalline and polycrystalline panels</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View All</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Popular Category 2 -->
+            <div class="col-md-4">
+                <div class="card border-0 bg-white shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-battery-charging display-4 text-primary mb-3"></i>
+                        <h5 class="fw-bold text-dark">Battery Systems</h5>
+                        <p class="text-muted small">Reliable energy storage for uninterrupted power supply</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View All</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Popular Category 3 -->
+            <div class="col-md-4">
+                <div class="card border-0 bg-white shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-lightning-charge display-4 text-info mb-3"></i>
+                        <h5 class="fw-bold text-dark">Inverters</h5>
+                        <p class="text-muted small">Efficient power conversion for homes and businesses</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View All</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.min-vh-50 {
+    min-height: 50vh;
+}
+
+.bg-primary-subtle {
+    background-color: rgba(0, 26, 51, 0.1) !important;
+}
+
+.category-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1) !important;
+}
+
+.category-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 26, 51, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+    transform: scale(1.1);
+    background: rgba(0, 26, 51, 0.1);
+}
+
+.cta-section {
+    background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
 {% endblock %}

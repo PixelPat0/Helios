@@ -1,113 +1,361 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load widget_tweaks %}
 
 {% block content %}
 
-<header class="py-5 text-white mb-5" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
-    <div class="container px-4 px-lg-5 my-3">
-        <div class="text-center">
-            <h1 class="display-5 fw-bold text-warning">Update Your Details 📝</h1>
-            <p class="lead fw-normal text-light mb-0">Keep your profile and shipping information current for seamless service.</p>
+<!-- Hero Section -->
+<section class="hero-section bg-light">
+    <div class="container">
+        <div class="row align-items-center min-vh-30 py-4">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary-subtle text-primary mb-3">PROFILE MANAGEMENT</span>
+                <h1 class="display-5 fw-bold text-dark mb-3">
+                    Complete Your <span class="text-primary">Profile</span>
+                </h1>
+                <p class="lead text-muted">
+                    Help us serve you better by completing your profile information (all fields optional)
+                </p>
+            </div>
         </div>
     </div>
-</header>
+</section>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-md-12">
-            
-            <form method="POST" action="{% url 'update_info' %}" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                {% if form.non_field_errors or shipping_form.non_field_errors %}
-                    <div class="alert alert-danger mb-4">
-                        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
-                        {% for error in shipping_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+<!-- Profile Update Section -->
+<section class="profile-section py-5 bg-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white py-4">
+                        <h4 class="fw-bold mb-0">
+                            <i class="bi bi-person-badge me-2"></i>Personal Information
+                        </h4>
                     </div>
-                {% endif %}
+                    <div class="card-body p-4">
+                        <form method="POST" action="{% url 'update_info' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
 
-                <div class="card shadow-lg border-primary mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Personal & Account Information</h4>
-                    </div>
-                    <div class="card-body p-5">
-                        
-                        <div class="text-center mb-4">
-                            {% if form.instance.profile_picture %}
-                                <img src="{{ form.instance.profile_picture.url }}" alt="Profile Picture" width="120" height="120" class="rounded-circle border border-3 border-warning shadow-sm"/>
-                            {% else %}
-                                <img src="/media/profile_pics/default.jpg" alt="Default Profile Picture" width="120" height="120" class="rounded-circle border border-3 border-secondary shadow-sm"/>
+                            <!-- Messages -->
+                            {% if messages %}
+                                {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'success' }} alert-dismissible fade show mb-4" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi 
+                                            {% if message.tags == 'success' %}bi-check-circle-fill text-success
+                                            {% elif message.tags == 'error' or message.tags == 'danger' %}bi-exclamation-circle-fill text-danger
+                                            {% elif message.tags == 'warning' %}bi-exclamation-triangle-fill text-warning
+                                            {% else %}bi-info-circle-fill text-info{% endif %} 
+                                            me-2"></i>
+                                        <span class="fw-semibold">{{ message }}</span>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                                {% endfor %}
                             {% endif %}
-                            <p class="mt-2 text-muted small">Update your profile image and account details.</p>
-                        </div>
 
-                        <div class="row g-3">
-                            {% for field in form %}
-                                {% if field.name != 'address' and field.name != 'city' and field.name != 'zip_code' %}
-                                <div class="col-md-6">
-                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                    {{ field|add_class:'form-control' }}
-                                    {% for error in field.errors %}
-                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                            <!-- Form Errors -->
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger mb-4">
+                                    {% for error in form.non_field_errors %}
+                                        <p class="mb-1">{{ error }}</p>
                                     {% endfor %}
                                 </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+                            {% endif %}
 
-                <div class="card shadow-lg border-info mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h4 class="mb-0">Billing Address Details</h4>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-3">
-                            {% for field in form %}
-                                {% if field.name == 'address' or field.name == 'city' or field.name == 'zip_code' %}
+                            <!-- Profile Picture Section -->
+                            <div class="text-center mb-5">
+                                <div class="position-relative d-inline-block">
+                                    {% if form.instance.profile_picture %}
+                                        <img src="{{ form.instance.profile_picture.url }}" 
+                                             alt="Profile Picture" 
+                                             width="120" 
+                                             height="120" 
+                                             class="rounded-circle border border-4 border-warning shadow-sm"/>
+                                    {% else %}
+                                        <div class="bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                                             style="width: 120px; height: 120px;">
+                                            <i class="bi bi-person display-4 text-primary"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="position-absolute bottom-0 end-0 bg-warning rounded-circle p-2 border border-2 border-white">
+                                        <i class="bi bi-camera text-dark"></i>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mt-3">Click below to update your profile image</p>
+                            </div>
+
+                            <!-- Profile Picture Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.profile_picture.id_for_label }}" class="form-label fw-semibold text-dark">
+                                    <i class="bi bi-image me-2 text-primary"></i>Profile Picture
+                                </label>
+                                {{ form.profile_picture|add_class:'form-control' }}
+                                {% for error in form.profile_picture.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Essential Contact Information -->
+                            <div class="row g-3 mb-4">
                                 <div class="col-md-6">
-                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                    {{ field|add_class:'form-control' }}
-                                    {% for error in field.errors %}
-                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label fw-semibold text-dark">
+                                        <i class="bi bi-telephone me-2 text-primary"></i>Phone Number *
+                                    </label>
+                                    {{ form.phone|add_class:'form-control' }}
+                                    {% for error in form.phone.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
                                     {% endfor %}
                                 </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+                            </div>
 
-                <div class="card shadow-lg border-success mb-5">
-                    <div class="card-header bg-success text-white">
-                        <h4 class="mb-0">Shipping Address Details</h4>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-3">
-                            {% for field in shipping_form %}
-                                <div class="col-md-6">
-                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                    {{ field|add_class:'form-control' }}
-                                    {% for error in field.errors %}
-                                        <div class="invalid-feedback d-block">{{ error }}</div>
-                                    {% endfor %}
+                            <!-- Optional Demographic Information -->
+                            <div class="card bg-light border-0 mb-4">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-dark mb-3">
+                                        <i class="bi bi-graph-up me-2 text-primary"></i>Optional Demographic Information
+                                    </h6>
+                                    <p class="text-muted small mb-3">
+                                        Help us understand our community better. This information helps us improve our services 
+                                        and tailor solar solutions to different needs across Zambia.
+                                    </p>
+                                    
+                                    <div class="row g-3">
+                                        <!-- Gender -->
+                                        {% if form.gender %}
+                                        <div class="col-md-6">
+                                            <label for="{{ form.gender.id_for_label }}" class="form-label fw-semibold text-dark">
+                                                Gender
+                                            </label>
+                                            {{ form.gender|add_class:'form-select' }}
+                                            {% for error in form.gender.errors %}
+                                                <div class="text-danger small mt-1">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Marital Status -->
+                                        {% if form.marital_status %}
+                                        <div class="col-md-6">
+                                            <label for="{{ form.marital_status.id_for_label }}" class="form-label fw-semibold text-dark">
+                                                Marital Status
+                                            </label>
+                                            {{ form.marital_status|add_class:'form-select' }}
+                                            {% for error in form.marital_status.errors %}
+                                                <div class="text-danger small mt-1">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Date of Birth -->
+                                        {% if form.date_of_birth %}
+                                        <div class="col-md-6">
+                                            <label for="{{ form.date_of_birth.id_for_label }}" class="form-label fw-semibold text-dark">
+                                                Date of Birth
+                                            </label>
+                                            {{ form.date_of_birth|add_class:'form-control' }}
+                                            {% for error in form.date_of_birth.errors %}
+                                                <div class="text-danger small mt-1">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Occupation -->
+                                        {% if form.occupation %}
+                                        <div class="col-md-6">
+                                            <label for="{{ form.occupation.id_for_label }}" class="form-label fw-semibold text-dark">
+                                                Occupation
+                                            </label>
+                                            {{ form.occupation|add_class:'form-control' }}
+                                            {% for error in form.occupation.errors %}
+                                                <div class="text-danger small mt-1">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </div>
+
+                            <!-- Billing Address Section -->
+                            <div class="border-top pt-4 mt-4">
+                                <h5 class="fw-bold text-dark mb-3">
+                                    <i class="bi bi-credit-card me-2 text-primary"></i>Billing Address
+                                </h5>
+                                <p class="text-muted small mb-4">This address will be used for billing purposes and order confirmations</p>
+                                
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label for="{{ form.address.id_for_label }}" class="form-label fw-semibold text-dark">
+                                            <i class="bi bi-geo-alt me-2 text-primary"></i>Street Address
+                                        </label>
+                                        {{ form.address|add_class:'form-control' }}
+                                        {% for error in form.address.errors %}
+                                            <div class="text-danger small mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="{{ form.city.id_for_label }}" class="form-label fw-semibold text-dark">
+                                            <i class="bi bi-building me-2 text-primary"></i>City
+                                        </label>
+                                        {{ form.city|add_class:'form-control' }}
+                                        {% for error in form.city.errors %}
+                                            <div class="text-danger small mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="{{ form.zip_code.id_for_label }}" class="form-label fw-semibold text-dark">
+                                            <i class="bi bi-postcard me-2 text-primary"></i>ZIP Code
+                                        </label>
+                                        {{ form.zip_code|add_class:'form-control' }}
+                                        {% for error in form.zip_code.errors %}
+                                            <div class="text-danger small mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Privacy Notice -->
+                            <div class="alert alert-info mt-4">
+                                <div class="d-flex">
+                                    <i class="bi bi-shield-check me-2 mt-1"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Your Privacy Matters</h6>
+                                        <p class="small mb-0">
+                                            All demographic information is optional and helps us serve you better. 
+                                            We respect your privacy and handle your data in accordance with our 
+                                            <a href="#" class="text-decoration-none">Privacy Policy</a>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold">
+                                    <i class="bi bi-save me-2"></i>Save Profile Updates
+                                </button>
+                                <a href="{% url 'update_user' %}" class="btn btn-outline-primary py-2">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to Account Settings
+                                </a>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-lg">
-                        Save All Updates
-                    </button>
+                <!-- Quick Links Card -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-lightning me-2 text-primary"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <a href="{% url 'update_user' %}" class="btn btn-outline-primary w-100 py-2 fw-semibold">
+                                    <i class="bi bi-person me-2"></i>Account Details
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{% url 'update_password' %}" class="btn btn-outline-warning w-100 py-2 fw-semibold">
+                                    <i class="bi bi-shield-lock me-2"></i>Update Password
+                                </a>
+                            </div>
+                            {% if user.seller_profile.is_active %}
+                            <div class="col-12">
+                                <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-success w-100 py-2 fw-semibold">
+                                    <i class="bi bi-speedometer2 me-2"></i>Seller Dashboard
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-            </form>
-            
+            </div>
         </div>
     </div>
-</div>
+</section>
 
-</br></br></br>
+{% endblock %}
 
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.min-vh-30 {
+    min-height: 30vh;
+}
+
+.bg-primary-subtle {
+    background-color: rgba(0, 26, 51, 0.1) !important;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.form-control, .form-select {
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 26, 51, 0.25);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add enhanced styling to file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+        fileInput.classList.add('form-control', 'py-2');
+    }
+    
+    // Preview profile picture when selected
+    const profilePictureInput = document.getElementById('{{ form.profile_picture.id_for_label }}');
+    if (profilePictureInput) {
+        profilePictureInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update the profile picture preview
+                    const profileImg = document.querySelector('.rounded-circle');
+                    if (profileImg && profileImg.tagName === 'IMG') {
+                        profileImg.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Date picker for date of birth if field exists
+    const dobField = document.getElementById('{{ form.date_of_birth.id_for_label }}');
+    if (dobField) {
+        dobField.type = 'date';
+    }
+});
+</script>
 {% endblock %}

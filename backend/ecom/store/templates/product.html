@@ -79,39 +79,103 @@
 
 
         
-    <script>
-        $(document).on('click', '#add-cart', function(e) {
-            e.preventDefault();
-            const productId = $(this).val();
-            console.log('Add to Cart button clicked for product:', productId);
+   <script>
+$(document).ready(function() {
+    console.log('Product page loaded, initializing cart functionality...');
+    
+    // Check if jQuery is loaded
+    if (typeof jQuery === 'undefined') {
+        console.error('jQuery is not loaded!');
+        return;
+    }
+    
+    console.log('jQuery version:', jQuery.fn.jquery);
 
-            $.ajax({
-                type: 'POST',
-                url: '{% url 'cart_add' %}',
-                data: {
-            product_id: $('#add-cart').val(),
-            product_qty: $('#qty-cart option:selected').text(),
-            csrfmiddlewaretoken: '{{ csrf_token }}',
-            action: 'post'
-                },
-                success: function(response) {
-                    console.log('AJAX Response:', response);
-                    if (response.qty !== undefined) {
-                        document.getElementById("cart_quantity").textContent = response.qty;
-                        console.log('Product added to cart');
-                        location.reload();
-                    } else {
-                        console.error('Invalid response: qty is undefined');
-                        console.log('Error adding product to cart. Please try again.');
-                        location.reload();
+    $(document).on('click', '#add-cart', function(e) {
+        e.preventDefault();
+        
+        // Get the product ID from the clicked button
+        const productId = $(this).val();
+        const productQty = $('#qty-cart').val();
+        
+        console.log('Add to Cart button clicked');
+        console.log('Product ID:', productId);
+        console.log('Selected quantity:', productQty);
+
+        // Show loading state
+        const button = $(this);
+        const originalText = button.html();
+        button.prop('disabled', true).html('<i class="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i>Adding...');
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'cart_add' %}',
+            data: {
+                product_id: productId,  // Use the variable, not the selector
+                product_qty: productQty,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: 'post'
+            },
+            success: function(response) {
+                console.log('AJAX Response:', response);
+                
+                if (response.qty !== undefined) {
+                    // Update cart count in navbar if element exists
+                    const cartQuantityElement = document.getElementById("cart_quantity");
+                    if (cartQuantityElement) {
+                        cartQuantityElement.textContent = response.qty;
                     }
-                },
-                error: function(xhr, textStatus, errorThrown) {
-                    console.error('AJAX Error:', textStatus, errorThrown);
-                    console.log('Error adding product to cart. Please try again.');
+                    
+                    // Show success message
+                    showNotification('Product added to cart successfully!', 'success');
+                    
+                    // Reset button after short delay
+                    setTimeout(() => {
+                        button.prop('disabled', false).html(originalText);
+                    }, 1500);
+                    
+                } else {
+                    console.error('Invalid response: qty is undefined');
+                    showNotification('Error adding product to cart. Please try again.', 'error');
+                    button.prop('disabled', false).html(originalText);
                 }
-            });
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                console.error('AJAX Error:', textStatus, errorThrown);
+                console.error('Response:', xhr.responseText);
+                
+                showNotification('Error adding product to cart. Please try again.', 'error');
+                button.prop('disabled', false).html(originalText);
+            }
         });
-    </script>
+    });
 
+    // Notification function
+    function showNotification(message, type) {
+        // Remove any existing notifications
+        $('.cart-notification').remove();
+        
+        // Create notification element
+        const notification = $(`
+            <div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed cart-notification" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        
+        $('body').append(notification);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.alert('close');
+        }, 3000);
+    }
+
+    console.log('Product page cart functionality initialized');
+});
+</script>
+
+    
 {% endblock %}

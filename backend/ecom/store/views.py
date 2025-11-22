@@ -34,6 +34,16 @@ from payment.models import ShippingAddress # <-- This import is crucial and now 
 User = get_user_model()
 
 
+
+
+def contact(request):
+    """
+    Contact page with form and business information
+    """
+    # You can add contact form handling here later
+    return render(request, 'contact.html')
+
+    
 # -------------------------
 # Notifications / Newsletter
 # -------------------------
@@ -296,8 +306,51 @@ def home(request):
     return render(request, 'home.html', {'products': products})
 
 
+def solutions_view(request):
+    """
+    Solutions page showing residential, commercial, agricultural solar solutions
+    """
+    return render(request, 'solutions.html')
+
 def about(request):
-    return render(request, 'about.html')
+    """
+    About page with impact data merged from public_impact
+    """
+    try:
+        seller_count = Seller.objects.filter(is_active=True).count()
+    except Exception:
+        seller_count = 0
+
+    # Sum transactions (expenses can be negative)
+    try:
+        funds_collected_result = ImpactFundTransaction.objects.filter(is_active=True).aggregate(total=Sum('amount'))
+        total_funds_collected = funds_collected_result['total'] or Decimal('0.00')
+    except Exception:
+        total_funds_collected = Decimal('0.00')
+
+    # number_of_installations kept manual for MVP
+    number_of_installations = 20
+
+    # A sample project goal (update this to your real target)
+    PROJECT_GOAL = Decimal('100000.00')
+
+    # calculate progress percentage safely
+    try:
+        progress_raw = (Decimal(total_funds_collected) / PROJECT_GOAL) * Decimal('100.00') if PROJECT_GOAL > 0 else Decimal('0')
+        progress_percentage = int(min(progress_raw, Decimal('100.00')).quantize(Decimal('1')))  # integer percent
+    except Exception:
+        progress_percentage = 0
+
+    newsletter_form = NewsletterSubscriberForm()
+
+    context = {
+        'seller_count': seller_count,
+        'total_funds_collected': total_funds_collected,
+        'number_of_installations': number_of_installations,
+        'progress_percentage': progress_percentage,
+        'newsletter_form': newsletter_form,
+    }
+    return render(request, 'about.html', context)
 
 
 def login_user(request):
@@ -357,3 +410,5 @@ def register_user(request):
     else:
         form = SignUpForm()
     return render(request, 'register.html', {'form': form})
+
+

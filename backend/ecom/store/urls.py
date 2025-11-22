@@ -17,9 +17,11 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('seller/<int:pk>/', views.seller_profile_public, name='seller_profile_public'),
-    path('impact/', views.public_impact_view, name='public_impact'),
+    path('solutions/', views.solutions_view, name='solutions'),
     path('donate/', views.donation_page_view, name='donation_page'),
     path('subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
     path('notifications/', views.notifications_list_view, name='user_notifications_list'), # <-- RENAMED
     # path('notifications/read/<int:pk>/', views.mark_notification_read, name='mark_notification_read'), # Optional detail view
+    path('contact/', views.contact, name='contact'),
 ]
+
