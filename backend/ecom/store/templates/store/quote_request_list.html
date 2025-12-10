@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary fw-bold">{{ page_title }}</h2>
+        {% if not user.is_superuser %}
+            <a href="{% url 'request_quote' %}" class="btn btn-warning fw-bold">
+                <i class="bi bi-plus-lg"></i> New Request
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            {% if quotes %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary">
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>Date</th>
+                            {% if user.is_superuser %}
+                            <th>Customer</th>
+                            {% endif %}
+                            <th>Project</th>
+                            <th>Timeline</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for quote in quotes %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-muted">#{{ quote.id }}</td>
+                            <td>{{ quote.created_at|date:"M d, Y" }}</td>
+                            
+                            {% if user.is_superuser %}
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">{{ quote.contact_name }}</span>
+                                    <small class="text-muted">{{ quote.location_city }}</small>
+                                </div>
+                            </td>
+                            {% endif %}
+                            
+                            <td>
+                                <span class="d-block text-dark fw-medium">{{ quote.get_project_type_display }}</span>
+                                <small class="text-muted">{{ quote.get_system_type_display }}</small>
+                            </td>
+                            <td>{{ quote.get_timeline_display }}</td>
+                            <td>
+                                {% if quote.status == 'open' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">Open</span>
+                                {% elif quote.status == 'processing' %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill">Processing</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">Closed</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'quote_request_details' quote.id %}" class="btn btn-sm btn-outline-primary">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+                <h5 class="text-muted">No quote requests found.</h5>
+                {% if not user.is_superuser %}
+                    <a href="{% url 'request_quote' %}" class="btn btn-primary mt-3">Start a Project</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

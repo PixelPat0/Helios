@@ -1,6 +1,6 @@
 # store/admin.py
 from django.contrib import admin
-from .models import Category, Customer, Product, Profile
+from .models import Category, Customer, Product, Profile, QuoteRequest, SellerQuote
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 
@@ -8,7 +8,7 @@ from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 # Register store models safely
 # ---------------------------
 # Register only store-owned models here. Order is registered in payment.admin.
-for model in (Category, Customer, Product, Profile):
+for model in (Category, Customer, Product, Profile, QuoteRequest, SellerQuote):
     if model not in admin.site._registry:
         admin.site.register(model)
 

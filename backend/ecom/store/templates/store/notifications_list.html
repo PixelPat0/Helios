@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %} 
 
 {% block content %}
 <div class="container my-5">
@@ -8,12 +9,23 @@
     {% if notifications %}
         <div class="list-group">
             {% for notification in notifications %}
-                {% comment %} Define the link for the notification {% endcomment %}
-                {% if notification.order_id %}
-                    {% url 'admin:payment_order_change' notification.order_id as link_url %}
+                
+                {% comment %} --- LOGIC TO DETERMINE LINK URL --- {% endcomment %}
+                
+                {% if notification.quote_request %}
+                    {# If it is a Quote Request, go to the custom details page #}
+                    {% url 'quote_request_details' notification.quote_request.id as link_url %}
+                
+                {% elif notification.order_id %}
+                    {# FIX: If the INTEGER FIELD 'order_id' exists, use it directly to build the link #}
+                    {% url 'custom_order_detail' notification.order_id as link_url %}
+                
                 {% else %}
-                    {% url 'seller_dashboard' as link_url %}
+                    {# Fallback #}
+                    {% url 'home' as link_url %}
                 {% endif %}
+                
+                {% comment %} ----------------------------------- {% endcomment %}
 
                 <a href="{{ link_url }}" class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-warning{% endif %}">
                     <div class="d-flex w-100 justify-content-between">
@@ -21,14 +33,15 @@
                         <small>{{ notification.created_at|timesince }} ago</small>
                     </div>
                     {% if not notification.is_read %}
-                        <small class="text-danger">NEW</small>
+                        <small class="text-danger fw-bold">NEW</small>
                     {% endif %}
                 </a>
+                
             {% endfor %}
         </div>
     {% else %}
         <div class="alert alert-info" role="alert">
-            You have no notifications.
+            <i class="bi bi-info-circle me-2"></i> You have no notifications!
         </div>
     {% endif %}
 

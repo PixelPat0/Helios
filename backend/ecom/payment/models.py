@@ -24,6 +24,9 @@ class Notification(models.Model):
     # Using GenericForeignKey is often complex for MVPs, so we'll keep it simple for now.
     order_id = models.IntegerField(null=True, blank=True)
 
+    # Link to QuoteRequest
+    quote_request = models.ForeignKey('store.QuoteRequest', on_delete=models.CASCADE, null=True, blank=True)
+
     # Status
     is_read = models.BooleanField(default=False)
     

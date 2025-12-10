@@ -32,8 +32,6 @@ urlpatterns = [
     
     path('dashboard/update_order_status/<int:pk>/', views.update_order_status, name='update_order_status'),
 
-    # notifications
-    path('notifications/<int:notif_id>/open/', views.notification_redirect_view, name='notification_open'),
-    path('notifications/', views.notifications_list, name='notifications_list'),
-    path('notifications/mark_all_read/', views.mark_all_notifications_read, name='mark_all_notifications_read'), 
+    # Order Details
+    path('order/details/<int:order_id>/', views.order_details_view, name='custom_order_detail'),
 ]

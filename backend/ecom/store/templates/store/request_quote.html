@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h1 class="card-title mb-3">
+                        <i class="bi bi-lightning-charge text-warning fs-2"></i> Request a Solar Quote
+                    </h1>
+                    <p class="card-text text-muted">
+                        Tell us about your solar power needs and our team will provide you with accurate quotations from qualified sellers.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Contact Information Section -->
+                        <div class="mb-4">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-person-circle text-primary"></i> Your Contact Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.contact_name.id_for_label }}" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                    {{ form.contact_name }}
+                                    {% if form.contact_name.errors %}
+                                        <div class="text-danger small mt-1">{{ form.contact_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.contact_email.id_for_label }}" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                    {{ form.contact_email }}
+                                    {% if form.contact_email.errors %}
+                                        <div class="text-danger small mt-1">{{ form.contact_email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.contact_phone.id_for_label }}" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                    {{ form.contact_phone }}
+                                    {% if form.contact_phone.errors %}
+                                        <div class="text-danger small mt-1">{{ form.contact_phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.location_city.id_for_label }}" class="form-label">City <span class="text-danger">*</span></label>
+                                    {{ form.location_city }}
+                                    {% if form.location_city.errors %}
+                                        <div class="text-danger small mt-1">{{ form.location_city.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.location_province.id_for_label }}" class="form-label">Province <span class="text-danger">*</span></label>
+                                    {{ form.location_province }}
+                                    {% if form.location_province.errors %}
+                                        <div class="text-danger small mt-1">{{ form.location_province.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Project Type Section -->
+                        <div class="mb-4">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-building text-primary"></i> Project Type
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.project_type.id_for_label }}" class="form-label">What type of project? <span class="text-danger">*</span></label>
+                                    {{ form.project_type }}
+                                    {% if form.project_type.errors %}
+                                        <div class="text-danger small mt-1">{{ form.project_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.system_type.id_for_label }}" class="form-label">What system type? <span class="text-danger">*</span></label>
+                                    {{ form.system_type }}
+                                    {% if form.system_type.errors %}
+                                        <div class="text-danger small mt-1">{{ form.system_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Technical Requirements Section -->
+                        <div class="mb-4">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-tools text-primary"></i> Technical Requirements
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.daily_energy_usage_kwh.id_for_label }}" class="form-label">
+                                        Daily Energy Usage (kWh) 
+                                        <small class="text-muted">(Check your ZESCO bill)</small>
+                                    </label>
+                                    {{ form.daily_energy_usage_kwh }}
+                                    {% if form.daily_energy_usage_kwh.errors %}
+                                        <div class="text-danger small mt-1">{{ form.daily_energy_usage_kwh.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.current_voltage.id_for_label }}" class="form-label">Current Voltage</label>
+                                    {{ form.current_voltage }}
+                                    {% if form.current_voltage.errors %}
+                                        <div class="text-danger small mt-1">{{ form.current_voltage.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.appliances_to_run.id_for_label }}" class="form-label">
+                                    Appliances You Want to Run <span class="text-danger">*</span>
+                                </label>
+                                {{ form.appliances_to_run }}
+                                <small class="form-text text-muted d-block mt-2">
+                                    Example: 1 Fridge, 5 Lights, 1 TV, Borehole Pump
+                                </small>
+                                {% if form.appliances_to_run.errors %}
+                                    <div class="text-danger small mt-1">{{ form.appliances_to_run.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.roof_type.id_for_label }}" class="form-label">Roof Type</label>
+                                {{ form.roof_type }}
+                                <small class="form-text text-muted d-block mt-2">
+                                    Example: Metal Sheet (ITR), Tile, Concrete Slab
+                                </small>
+                                {% if form.roof_type.errors %}
+                                    <div class="text-danger small mt-1">{{ form.roof_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Budget & Timeline Section -->
+                        <div class="mb-4">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-calendar-event text-primary"></i> Budget & Timeline
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.budget_range.id_for_label }}" class="form-label">Budget Range</label>
+                                    {{ form.budget_range }}
+                                    <small class="form-text text-muted d-block mt-2">
+                                        Example: K20,000 - K50,000
+                                    </small>
+                                    {% if form.budget_range.errors %}
+                                        <div class="text-danger small mt-1">{{ form.budget_range.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.timeline.id_for_label }}" class="form-label">When do you need this? <span class="text-danger">*</span></label>
+                                    {{ form.timeline }}
+                                    {% if form.timeline.errors %}
+                                        <div class="text-danger small mt-1">{{ form.timeline.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Additional Notes Section -->
+                        <div class="mb-4">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-chat-dots text-primary"></i> Additional Information
+                            </h5>
+                            <div class="mb-3">
+                                <label for="{{ form.additional_notes.id_for_label }}" class="form-label">Any Additional Notes?</label>
+                                {{ form.additional_notes }}
+                                {% if form.additional_notes.errors %}
+                                    <div class="text-danger small mt-1">{{ form.additional_notes.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'home' %}" class="btn btn-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i> Submit Quote Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="alert alert-info mt-4" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>What happens next?</strong>
+                We'll review your request and connect you with qualified sellers who can provide competitive quotations. You'll receive quotes within 2-3 business days.
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+</style>
+{% endblock %}

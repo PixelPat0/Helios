@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <h2 class="mb-4 text-primary fw-bold">Order Details #{{ order.id }}</h2>
+            
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-light border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Order Summary</h5>
+                        <span class="badge bg-success fs-6">ZMK{{ order.amount_paid|intcomma }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted border-bottom pb-2">Customer Information</h6>
+                            <p class="mb-1"><strong>Name:</strong> {{ order.full_name }}</p>
+                            <p class="mb-1"><strong>Email:</strong> <a href="mailto:{{ order.email }}">{{ order.email }}</a></p>
+                            <p class="mb-1"><strong>Phone:</strong> {{ order.phone_number|default:"N/A" }}</p>  <!-- Fixed: phone_number -->
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted border-bottom pb-2">Shipping Information</h6>
+                            <address class="mb-0">
+                                <strong>Address:</strong><br>
+                                {{ order.shipping_address|linebreaksbr }}
+                            </address>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-white border-top">
+                    <p class="mb-1"><strong>Date Ordered:</strong> {{ order.date_ordered|date:"F d, Y, h:i A" }}</p>
+                    <p class="mb-0">
+                        <strong>Status:</strong> 
+                        <span class="badge 
+                            {% if order.status == 'shipped' %}bg-success
+                            {% elif order.status == 'delivered' %}bg-info
+                            {% elif order.status == 'cancelled' %}bg-danger
+                            {% elif order.status == 'processing' %}bg-warning text-dark
+                            {% else %}bg-secondary{% endif %}">
+                            {{ order.get_status_display|upper }}
+                        </span>
+                        {% if order.date_shipped %}
+                            <br><small>Shipped on: {{ order.date_shipped|date:"F d, Y" }}</small>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Items in Order</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for item in items %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ item.product.name }}</h6>
+                                <small class="text-muted">Quantity: {{ item.quantity }}</small>
+                            </div>
+                            <span class="fw-bold">ZMK{{ item.price|intcomma }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if request.user.is_superuser %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Fulfillment Actions</h5>
+                </div>
+                <div class="card-body text-center">
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% if order.status != 'shipped' and order.status != 'delivered' and order.status != 'cancelled' %}
+                            <input type="hidden" name="shipping_status" value="true">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-truck me-2"></i> Mark as Shipped
+                            </button> 
+                        {% elif order.status == 'shipped' %}
+                            <input type="hidden" name="shipping_status" value="false">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-arrow-return-left me-2"></i> Mark as Processing
+                            </button> 
+                        {% endif %}
+                    </form>
+
+                    <small class="d-block mt-3 text-muted">
+                        This action will update the shipping status for this order.
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

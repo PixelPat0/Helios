@@ -4,74 +4,116 @@
 
 {% block content %}
 
-<!-- Hero Section -->
-<section class="hero-section bg-light">
-    <div class="container">
-        <div class="row align-items-center min-vh-50 py-5">
+<!-- Hero Section with Modern Gradient -->
+<section class="hero-section position-relative overflow-hidden" style="
+    background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
+    min-height: 85vh;
+    padding-top: 80px;
+">
+    <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block">
+        <div class="position-relative h-100">
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-warning opacity-10" style="clip-path: polygon(100% 0, 0% 100%, 100% 100%);"></div>
+        </div>
+    </div>
+    
+    <div class="container position-relative z-1">
+        <div class="row align-items-center min-vh-85 py-5">
             <!-- Left Column: Content -->
-            <div class="col-lg-6 mb-5 mb-lg-0">
-                <span class="badge bg-primary-subtle text-primary mb-3">Solar Solutions</span>
-                <h1 class="display-4 fw-bold text-dark mb-4">
-                    Complete Solar 
-                    <span class="text-primary">Solutions</span>
+            <div class="col-lg-6 mb-5 mb-lg-0 text-white">
+                <span class="badge bg-warning text-dark mb-3 px-3 py-2 fw-semibold">Mapping your solar journey</span>
+                <h1 class="display-3 fw-bold mb-4">
+                    Power Your Future With 
+                    <span class="text-warning">Clean Energy</span>
                 </h1>
-                <p class="lead text-muted mb-4">
-                    From residential installations to large-scale commercial projects, 
-                    we provide comprehensive solar energy solutions tailored to your needs.
+                <p class="lead mb-4 opacity-90">
+                    Complete solar solutions for residential, commercial, and agricultural needs. 
+                    Cutting-edge technology, expert installation, and unmatched reliability.
                 </p>
                 
-                <div class="d-flex flex-wrap gap-3 mb-4">
-                    <a href="#residential" class="btn btn-primary btn-lg px-4 py-3">
-                        <i class="bi bi-house me-2"></i>
-                        Residential
+                <div class="d-flex flex-wrap gap-3 mb-5">
+                    <a href="#residential" class="btn btn-warning btn-lg px-5 py-3 fw-semibold">
+                        <i class="bi bi-house-door me-2"></i>
+                        Residential Solutions
                     </a>
-                    <a href="#commercial" class="btn btn-outline-primary btn-lg px-4 py-3">
-                        <i class="bi bi-building me-2"></i>
-                        Commercial
+                    <a href="{% url 'category_summary' %}" class="btn btn-outline-warning btn-lg px-5 py-3">
+                        <i class="bi bi-shop me-2"></i>
+                        Shop Solar Products
                     </a>
                 </div>
 
                 <!-- Trust Indicators -->
-                <div class="d-flex flex-wrap gap-4 text-muted">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-award text-success me-2"></i>
-                        <small>Certified Installers</small>
+                <div class="row g-4 text-white opacity-90">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-award fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">500+</h5>
+                                <small>Installations</small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-tools text-success me-2"></i>
-                        <small>Maintenance Services</small>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-shield-check fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">5+ Years</h5>
+                                <small>Experience</small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-graph-up text-success me-2"></i>
-                        <small>ROI Analysis</small>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-people fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">24/7</h5>
+                                <small>Support</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Visual -->
-            <div class="col-lg-6">
+            <!-- Right Column: Hero Image -->
+            <div class="col-lg-6 position-relative">
                 <div class="position-relative">
                     <!-- Main Hero Image -->
-                    <img src="{% static 'images/solar-solutions-hero.jpg' %}" 
-                         alt="Solar Energy Solutions" 
-                         class="img-fluid rounded-3 shadow-lg">
-                    
-                    <!-- Floating Stats Card -->
-                    <div class="card position-absolute top-0 end-0 shadow border-0" 
-                         style="transform: translate(20%, -20%); max-width: 200px;">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-sun text-warning display-6"></i>
-                            <h5 class="mb-0 mt-2">500+</h5>
-                            <small class="text-muted">Installations</small>
+                    <div class="rounded-4 overflow-hidden shadow-lg position-relative">
+                        <img src="{% static 'images/solar-hero.jpg' %}" 
+                             alt="Solar Installation" 
+                             class="img-fluid w-100"
+                             style="height: 500px; object-fit: cover;">
+                        <div class="position-absolute bottom-0 start-0 w-100 p-4" style="
+                            background: linear-gradient(transparent, rgba(0, 26, 51, 0.9));
+                        ">
+                            <div class="text-white">
+                                <i class="bi bi-play-circle-fill fs-1 text-warning me-3"></i>
+                                <span class="h5 fw-semibold">See Our Work in Action</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Floating Trust Badge -->
-                    <div class="card position-absolute bottom-0 start-0 shadow border-0 bg-primary text-white"
-                         style="transform: translate(-10%, 20%); max-width: 180px;">
-                        <div class="card-body p-2 text-center">
-                            <i class="bi bi-award-fill me-1"></i>
-                            <small>5+ Years Experience</small>
+                    <!-- Floating Stats Cards -->
+                    <div class="position-absolute top-0 start-0 translate-middle shadow-lg rounded-3 bg-white p-3 d-none d-xl-block"
+                         style="transform: translate(-50%, -50%);">
+                        <div class="text-center">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-2 mb-2"></i>
+                            <h4 class="mb-0">80%</h4>
+                            <small class="text-muted">Energy Savings</small>
+                        </div>
+                    </div>
+
+                    <div class="position-absolute bottom-0 end-0 translate-middle shadow-lg rounded-3 bg-white p-3 d-none d-xl-block"
+                         style="transform: translate(50%, 50%);">
+                        <div class="text-center">
+                            <i class="bi bi-graph-up-arrow text-success fs-2 mb-2"></i>
+                            <h4 class="mb-0">25 Years</h4>
+                            <small class="text-muted">Warranty</small>
                         </div>
                     </div>
                 </div>
@@ -80,277 +122,316 @@
     </div>
 </section>
 
-<!-- Solutions Overview -->
-<section class="solutions-overview py-5 bg-white">
+<!-- Residential Solutions Section -->
+<section class="py-5 bg-white" id="residential">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <!-- Image Column -->
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <img src="{% static 'images/homesolar.jpg' %}" 
+                         alt="Residential Solar Installation" 
+                         class="img-fluid rounded-4 shadow-lg">
+                    <div class="position-absolute bottom-0 end-0 bg-warning text-dark p-3 rounded-start shadow"
+                         style="transform: translateY(50%);">
+                        <h4 class="mb-0"><i class="bi bi-house-heart me-2"></i>Home Solutions</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Column -->
+            <div class="col-lg-6">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">RESIDENTIAL SOLUTIONS</span>
+                <h2 class="display-5 fw-bold text-dark mb-4">
+                    Power Your Home with <span class="text-primary">Solar Energy</span>
+                </h2>
+                <p class="lead text-muted mb-4">
+                    Reduce electricity bills and gain energy independence with our 
+                    comprehensive residential solar solutions. Perfect for homes, 
+                    apartments, and residential complexes.
+                </p>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold">Rooftop Installations</h6>
+                                <small class="text-muted">Professional installation on any roof type</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold">Battery Backup</h6>
+                                <small class="text-muted">24/7 power with energy storage</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold">Smart Monitoring</h6>
+                                <small class="text-muted">Real-time energy tracking</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold">Maintenance Plans</h6>
+                                <small class="text-muted">Regular service & optimization</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <a href="{% url 'request_quote' %}" class="btn btn-primary btn-lg px-4 py-3">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Get Free Assessment
+                    </a>
+                    <a href="{% url 'category' 'Solar-Panels' %}" class="btn btn-outline-primary btn-lg px-4 py-3">
+                        <i class="bi bi-cart me-2"></i>
+                        Shop Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Commercial Solutions Section -->
+<section class="py-5 bg-light" id="commercial">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <!-- Content Column -->
+            <div class="col-lg-6 order-2 order-lg-1">
+                <span class="badge bg-warning bg-opacity-20 text-dark mb-3 px-3 py-2">COMMERCIAL SOLUTIONS</span>
+                <h2 class="display-5 fw-bold text-dark mb-4">
+                    Solar Solutions for <span class="text-warning">Business Growth</span>
+                </h2>
+                <p class="lead text-muted mb-4">
+                    Lower operational costs and demonstrate environmental leadership 
+                    with our commercial solar installations for businesses, offices, 
+                    and industrial facilities.
+                </p>
+                
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3">Commercial Applications:</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Office Buildings</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Shopping Malls</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Hotels & Resorts</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Factories</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Schools & Universities</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Hospitals</span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <a href="{% url 'request_quote' %}" class="btn btn-warning btn-lg px-4 py-3">
+                        <i class="bi bi-briefcase me-2"></i>
+                        Business Inquiry
+                    </a>
+                    <a href="{% url 'category' 'Inverters' %}" class="btn btn-outline-warning btn-lg px-4 py-3">
+                        <i class="bi bi-gear me-2"></i>
+                        View Equipment
+                    </a>
+                </div>
+            </div>
+
+            <!-- Image Column -->
+            <div class="col-lg-6 order-1 order-lg-2">
+                <div class="position-relative">
+                    <img src="{% static 'images/commercialsolar.jpg' %}" 
+                         alt="Commercial Solar Installation" 
+                         class="img-fluid rounded-4 shadow-lg">
+                    <div class="position-absolute top-0 start-0 bg-primary text-white p-3 rounded-end shadow"
+                         style="transform: translateY(-50%);">
+                        <h4 class="mb-0"><i class="bi bi-building me-2"></i>Commercial Grade</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Agricultural Solutions Section -->
+<section class="py-5 bg-white" id="agricultural">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <!-- Image Column -->
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <img src="{% static 'images/agrisolar1.jpg' %}" 
+                         alt="Agricultural Solar Solutions" 
+                         class="img-fluid rounded-4 shadow-lg">
+                    <div class="position-absolute bottom-0 end-0 bg-success text-white p-3 rounded-start shadow"
+                         style="transform: translateY(50%);">
+                        <h4 class="mb-0"><i class="bi bi-tree me-2"></i>Farm Solutions</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Column -->
+            <div class="col-lg-6">
+                <span class="badge bg-success bg-opacity-10 text-success mb-3 px-3 py-2">AGRICULTURAL SOLUTIONS</span>
+                <h2 class="display-5 fw-bold text-dark mb-4">
+                    Solar Power for <span class="text-success">Farming Excellence</span>
+                </h2>
+                <p class="lead text-muted mb-4">
+                    Power irrigation systems, farm operations, and remote facilities 
+                    with reliable solar energy. Reduce operational costs and increase 
+                    agricultural productivity.
+                </p>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <i class="bi bi-droplet text-primary fs-2 mb-3"></i>
+                                <h6 class="fw-bold">Solar Water Pumping</h6>
+                                <small class="text-muted">Efficient irrigation without grid power</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <i class="bi bi-lightbulb text-warning fs-2 mb-3"></i>
+                                <h6 class="fw-bold">Farm Lighting</h6>
+                                <small class="text-muted">Security & operational lighting</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <i class="bi bi-fan text-success fs-2 mb-3"></i>
+                                <h6 class="fw-bold">Cold Storage</h6>
+                                <small class="text-muted">Solar-powered refrigeration</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <i class="bi bi-building text-info fs-2 mb-3"></i>
+                                <h6 class="fw-bold">Remote Power</h6>
+                                <small class="text-muted">Off-grid farm operations</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <a href="{% url 'request_quote' %}" class="btn btn-success btn-lg px-4 py-3">
+                        <i class="bi bi-tree me-2"></i>
+                        Farm Assessment
+                    </a>
+                    <a href="{% url 'category' 'Batteries' %}" class="btn btn-outline-success btn-lg px-4 py-3">
+                        <i class="bi bi-battery-charging me-2"></i>
+                        View Storage
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Products Showcase Section -->
+<section class="py-5 bg-primary bg-opacity-5">
     <div class="container">
         <div class="row mb-5">
             <div class="col-lg-8 mx-auto text-center">
-                <span class="badge bg-primary-subtle text-primary mb-2">OUR SOLUTIONS</span>
-                <h2 class="display-5 fw-bold text-dark mb-3">Tailored Solar Solutions</h2>
+                <span class="badge bg-primary mb-3 px-3 py-2">OUR PRODUCTS</span>
+                <h2 class="display-5 fw-bold text-dark mb-3">Premium Solar Equipment</h2>
                 <p class="lead text-muted">
-                    We design and implement solar energy systems for various applications, 
-                    ensuring optimal performance and maximum return on investment.
+                    Browse our selection of high-quality solar products from leading manufacturers.
                 </p>
             </div>
         </div>
 
         <div class="row g-4">
-            <!-- Residential Solution -->
-            <div class="col-lg-4 col-md-6" id="residential">
-                <div class="card solution-card h-100 border-0 shadow-sm">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100 text-center">
                     <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <i class="bi bi-house display-4 text-primary"></i>
-                        </div>
-                        <h3 class="h4 fw-bold text-dark mb-3">Residential Solar</h3>
-                        <p class="text-muted mb-4">
-                            Power your home with clean, renewable energy. Reduce electricity bills 
-                            and gain energy independence with our residential solar solutions.
-                        </p>
-                        <ul class="list-unstyled mb-4">
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Rooftop solar installations
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Battery backup systems
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Grid-tied and off-grid options
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Smart home energy management
-                            </li>
-                        </ul>
-                        <button class="btn btn-outline-primary w-100" onclick="showContactInfo()">
-                            Get Residential Quote
-                        </button>
+                        <i class="bi bi-sun text-warning display-4 mb-3"></i>
+                        <h5 class="fw-bold">Solar Panels</h5>
+                        <p class="text-muted small">High-efficiency panels for maximum output</p>
+                        <a href="{% url 'category' 'Solar-Panels' %}" class="btn btn-outline-primary btn-sm">
+                            Browse Products
+                        </a>
                     </div>
                 </div>
             </div>
-
-            <!-- Commercial Solution -->
-            <div class="col-lg-4 col-md-6" id="commercial">
-                <div class="card solution-card h-100 border-0 shadow-sm">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100 text-center">
                     <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <i class="bi bi-building display-4 text-primary"></i>
-                        </div>
-                        <h3 class="h4 fw-bold text-dark mb-3">Commercial Solar</h3>
-                        <p class="text-muted mb-4">
-                            Lower operational costs and demonstrate environmental commitment 
-                            with our commercial solar solutions for businesses and organizations.
-                        </p>
-                        <ul class="list-unstyled mb-4">
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Commercial rooftop systems
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Ground-mounted solar farms
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Solar carports and shade structures
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Energy performance monitoring
-                            </li>
-                        </ul>
-                        <button class="btn btn-outline-primary w-100" onclick="showContactInfo()">
-                            Get Commercial Quote
-                        </button>
+                        <i class="bi bi-lightning-charge text-warning display-4 mb-3"></i>
+                        <h5 class="fw-bold">Inverters</h5>
+                        <p class="text-muted small">Reliable power conversion systems</p>
+                        <a href="{% url 'category' 'Inverters' %}" class="btn btn-outline-primary btn-sm">
+                            Browse Products
+                        </a>
                     </div>
                 </div>
             </div>
-
-            <!-- Agricultural Solution -->
-            <div class="col-lg-4 col-md-6" id="agricultural">
-                <div class="card solution-card h-100 border-0 shadow-sm">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100 text-center">
                     <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <i class="bi bi-tree display-4 text-primary"></i>
-                        </div>
-                        <h3 class="h4 fw-bold text-dark mb-3">Agricultural Solar</h3>
-                        <p class="text-muted mb-4">
-                            Power irrigation systems, farm operations, and remote agricultural 
-                            facilities with reliable solar energy solutions.
-                        </p>
-                        <ul class="list-unstyled mb-4">
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Solar water pumping systems
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Farm building solar installations
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Remote area power solutions
-                            </li>
-                            <li class="mb-2">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                Livestock water system power
-                            </li>
-                        </ul>
-                        <button class="btn btn-outline-primary w-100" onclick="showContactInfo()">
-                            Get Agricultural Quote
-                        </button>
+                        <i class="bi bi-battery-charging text-warning display-4 mb-3"></i>
+                        <h5 class="fw-bold">Batteries</h5>
+                        <p class="text-muted small">Energy storage solutions</p>
+                        <a href="{% url 'category' 'Batteries' %}" class="btn btn-outline-primary btn-sm">
+                            Browse Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100 text-center">
+                    <div class="card-body p-4">
+                        <i class="bi bi-lamp text-warning display-4 mb-3"></i>
+                        <h5 class="fw-bold">Lighting</h5>
+                        <p class="text-muted small">Solar-powered lighting solutions</p>
+                        <a href="{% url 'category' 'Lighting' %}" class="btn btn-outline-primary btn-sm">
+                            Browse Products
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg px-5 py-3">
+                <i class="bi bi-shop me-2"></i>
+                Visit Our Store
+            </a>
+        </div>
     </div>
 </section>
 
-<!-- Installations & Maintenance Section -->
-<section class="install-maintenance py-5 bg-light" id="installations">
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6 mb-5 mb-lg-0">
-                <span class="badge bg-primary-subtle text-primary mb-3">INSTALLATIONS & MAINTENANCE</span>
-                <h2 class="display-5 fw-bold text-dark mb-4">
-                    Professional Installation & Ongoing Support
-                </h2>
-                <p class="lead text-muted mb-4">
-                    Our certified technicians ensure proper installation and provide 
-                    comprehensive maintenance services to keep your system performing optimally.
+            <div class="col-lg-8">
+                <h2 class="display-6 fw-bold mb-3">Ready to Start Your Solar Journey?</h2>
+                <p class="lead mb-0 opacity-90">
+                    Get a free consultation and customized quote for your solar project.
                 </p>
-                
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="d-flex">
-                            <i class="bi bi-tools text-primary me-3 display-6"></i>
-                            <div>
-                                <h5 class="fw-bold">Expert Installation</h5>
-                                <p class="text-muted mb-0">
-                                    Certified technicians with industry-leading expertise
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-flex">
-                            <i class="bi bi-shield-check text-primary me-3 display-6"></i>
-                            <div>
-                                <h5 class="fw-bold">Quality Assurance</h5>
-                                <p class="text-muted mb-0">
-                                    Rigorous testing and quality control procedures
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-flex">
-                            <i class="bi bi-gear text-primary me-3 display-6"></i>
-                            <div>
-                                <h5 class="fw-bold">Maintenance Plans</h5>
-                                <p class="text-muted mb-0">
-                                    Regular inspections and performance optimization
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                </div>
-                
-                <div class="mt-4">
-                    <button class="btn btn-primary btn-lg px-4 py-3" onclick="showContactInfo()">
-                        <i class="bi bi-calendar-check me-2"></i>
-                        Schedule Consultation
-                    </button>
-                </div>
             </div>
-            
-            <div class="col-lg-6">
-                <div class="bg-white rounded-3 shadow-sm p-4">
-                    <h4 class="fw-bold mb-4">Our Installation Process</h4>
-                    
-                    <div class="process-step mb-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-primary rounded-circle me-3">1</span>
-                            <h5 class="mb-0 fw-bold">Site Assessment</h5>
-                        </div>
-                        <p class="text-muted ps-5">
-                            Comprehensive evaluation of your location, energy needs, and solar potential.
-                        </p>
-                    </div>
-                    
-                    <div class="process-step mb-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-primary rounded-circle me-3">2</span>
-                            <h5 class="mb-0 fw-bold">System Design</h5>
-                        </div>
-                        <p class="text-muted ps-5">
-                            Custom design optimized for your specific requirements and budget.
-                        </p>
-                    </div>
-                    
-                    <div class="process-step mb-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-primary rounded-circle me-3">3</span>
-                            <h5 class="mb-0 fw-bold">Professional Installation</h5>
-                        </div>
-                        <p class="text-muted ps-5">
-                            Expert installation by certified technicians following industry best practices.
-                        </p>
-                    </div>
-                    
-                    <div class="process-step">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-primary rounded-circle me-3">4</span>
-                            <h5 class="mb-0 fw-bold">Commissioning & Support</h5>
-                        </div>
-                        <p class="text-muted ps-5">
-                            System activation, customer training, and ongoing maintenance support.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Contact Information Section -->
-<section class="contact-section py-5 bg-white" id="contact-info">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <span class="badge bg-primary-subtle text-primary mb-2">GET IN TOUCH</span>
-                <h2 class="display-5 fw-bold text-dark mb-4">Ready to Power Your Future with Solar?</h2>
-                <p class="lead text-muted mb-5">
-                    Contact us today for a free consultation and customized solar solution quote.
-                </p>
-                
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="p-4">
-                            <i class="bi bi-telephone display-4 text-primary mb-3"></i>
-                            <h5>Call Us</h5>
-                            <p class="text-muted">+260 123 456 789</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-4">
-                            <i class="bi bi-envelope display-4 text-primary mb-3"></i>
-                            <h5>Email Us</h5>
-                            <p class="text-muted">info@helios.com</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-4">
-                            <i class="bi bi-whatsapp display-4 text-primary mb-3"></i>
-                            <h5>WhatsApp</h5>
-                            <p class="text-muted">+260 987 654 321</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{% url 'request_quote' %}" class="btn btn-warning btn-lg px-5 py-3">
+                    <i class="bi bi-chat-dots me-2"></i>
+                    Request Quote
+                </a>
             </div>
         </div>
     </div>
@@ -361,45 +442,111 @@
 {% block extra_css %}
 <style>
 .hero-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    position: relative;
+    overflow: hidden;
 }
 
-.min-vh-50 {
-    min-height: 50vh;
+.min-vh-85 {
+    min-height: 85vh;
 }
 
-.solution-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
 }
 
-.solution-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+/* Card hover effects */
+.card-hover:hover {
+    transform: translateY(-10px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
 }
 
-.bg-primary-subtle {
-    background-color: rgba(13, 110, 253, 0.1) !important;
+/* Section spacing */
+section {
+    scroll-margin-top: 80px;
 }
 
-.process-step {
-    border-left: 2px solid #e9ecef;
-    padding-left: 1rem;
+/* Gradient backgrounds */
+.bg-primary-gradient {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #0059b3 100%);
+}
+
+.bg-warning-gradient {
+    background: linear-gradient(135deg, var(--bs-warning) 0%, #ffd700 100%);
+}
+
+/* Image overlays */
+.img-overlay {
+    position: relative;
+}
+
+.img-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(0,0,0,0.3), transparent);
+    border-radius: inherit;
 }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function showContactInfo() {
-    // Scroll to contact section
-    document.getElementById('contact-info').scrollIntoView({
-        behavior: 'smooth'
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
     });
-    
-    // Optional: Show a temporary alert
-    setTimeout(function() {
-        alert('Please use our contact information below to get in touch with our solar experts. We look forward to helping you with your solar solution!');
-    }, 800);
-}
+});
+
+// Add active class to navigation items
+const sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (scrollY >= (sectionTop - 150)) {
+            current = section.getAttribute('id');
+        }
+    });
+
+    // Update navigation active state
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+        }
+    });
+});
+
+// Animation on scroll
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('animated');
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.card, .img-fluid').forEach(el => {
+    observer.observe(el);
+});
 </script>
 {% endblock %}

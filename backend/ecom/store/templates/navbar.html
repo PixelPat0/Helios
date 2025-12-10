@@ -1,14 +1,14 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm" style="font-size: 1.1em;">
-    <div class="container px-4 px-lg-5">
-        <!-- Professional Brand - 10% Larger -->
-        <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="{% url 'home' %}" style="font-size: 1.3em;">
-            <i class="bi bi-lightning-charge fs-3 me-2"></i> 
-            <span class="d-none d-sm-inline">HELIOS</span>
-            <span class="d-sm-none">HELIOS SOLAR</span>
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm fixed-top">
+    <div class="container px-3 px-lg-4">
+        <!-- Brand Logo - Cleaner Design -->
+        <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="{% url 'home' %}">
+            <i class="bi bi-lightning-charge fs-4 me-2 text-warning"></i> 
+            <span class="d-none d-sm-inline">Solchart</span>
+            <span class="d-sm-none">HELIOS</span>
         </a>
 
         <!-- Mobile Toggle -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" style="transform: scale(1.1);">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -16,75 +16,105 @@
         <div class="collapse navbar-collapse" id="navbarMain">
             <!-- Left Navigation -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- Home -->
+                <!-- Home (Now Solutions Page) -->
                 <li class="nav-item">
-                    <a class="nav-link px-3" href="{% url 'home' %}">
-                        <i class="bi bi-house d-lg-none me-2"></i>Home
+                    <a class="nav-link px-3 position-relative" href="{% url 'home' %}">
+                        <i class="bi bi-house d-lg-none me-2"></i>
+                        Solutions
+                        <span class="nav-link-underline"></span>
                     </a>
                 </li>
 
-                <!-- Products Dropdown -->
+                <!-- Store Dropdown -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle px-3" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-grid d-lg-none me-2"></i>Products
+                    <a class="nav-link dropdown-toggle px-3 position-relative" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-shop d-lg-none me-2"></i>
+                        Store
+                        <span class="nav-link-underline"></span>
                     </a>
-                    <ul class="dropdown-menu" style="font-size: 1.05em;">
-                        <li><a class="dropdown-item py-2" href="{% url 'category_summary' %}">
-                            <i class="bi bi-grid-3x3 me-2"></i>All Categories
+                    <ul class="dropdown-menu shadow border-0" style="min-width: 220px;">
+                        <li><h6 class="dropdown-header text-primary fw-semibold">Solar Products</h6></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'store' %}">
+                            <i class="bi bi-house-door me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Store Home</div>
+                                <small class="text-muted">Browse all products</small>
+                            </div>
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'category' 'Solar-Panels' %}">
-                            <i class="bi bi-sun me-2"></i>Solar Panels
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'category_summary' %}">
+                            <i class="bi bi-grid me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">All Categories</div>
+                                <small class="text-muted">Product categories</small>
+                            </div>
                         </a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'category' 'Inverters' %}">
-                            <i class="bi bi-lightning-charge me-2"></i>Inverters
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'category' 'Solar-Panels' %}">
+                            <i class="bi bi-sun me-3 text-warning"></i>
+                            <div>
+                                <div class="fw-medium">Solar Panels</div>
+                                <small class="text-muted">High-efficiency panels</small>
+                            </div>
                         </a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'category' 'Batteries' %}">
-                            <i class="bi bi-battery-charging me-2"></i>Batteries
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'category' 'Inverters' %}">
+                            <i class="bi bi-lightning-charge me-3 text-warning"></i>
+                            <div>
+                                <div class="fw-medium">Inverters</div>
+                                <small class="text-muted">Power conversion</small>
+                            </div>
                         </a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'category' 'Lighting' %}">
-                            <i class="bi bi-lamp me-2"></i>Lighting
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'category' 'Batteries' %}">
+                            <i class="bi bi-battery-charging me-3 text-warning"></i>
+                            <div>
+                                <div class="fw-medium">Batteries</div>
+                                <small class="text-muted">Energy storage</small>
+                            </div>
+                        </a></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'category' 'Lighting' %}">
+                            <i class="bi bi-lamp me-3 text-warning"></i>
+                            <div>
+                                <div class="fw-medium">Lighting</div>
+                                <small class="text-muted">Solar lighting</small>
+                            </div>
                         </a></li>
                     </ul>
                 </li>
 
-                <!-- Solutions -->
-                <li class="nav-item">
-                    <a class="nav-link px-3" href="{% url 'solutions' %}">
-                        <i class="bi bi-tools d-lg-none me-2"></i>Solutions
-                    </a>
-                </li>
 
                 <!-- About -->
                 <li class="nav-item">
-                    <a class="nav-link px-3" href="{% url 'about' %}">
-                        <i class="bi bi-info-circle d-lg-none me-2"></i>About
+                    <a class="nav-link px-3 position-relative" href="{% url 'about' %}">
+                        <i class="bi bi-info-circle d-lg-none me-2"></i>
+                        About
+                        <span class="nav-link-underline"></span>
                     </a>
                 </li>
 
                 <!-- Contact -->
                 <li class="nav-item">
-                    <a class="nav-link px-3" href="{% url 'contact' %}">
-                        <i class="bi bi-telephone d-lg-none me-2"></i>Contact
+                    <a class="nav-link px-3 position-relative" href="{% url 'contact' %}">
+                        <i class="bi bi-telephone d-lg-none me-2"></i>
+                        Contact
+                        <span class="nav-link-underline"></span>
                     </a>
                 </li>
 
-                <!-- Dashboard (Visible to active sellers) -->
-                {% if user.is_authenticated and user.seller_profile.is_active %}
-                <li class="nav-item">
-                    <a class="nav-link px-3 text-success fw-semibold" href="{% url 'seller_dashboard' %}">
-                        <i class="bi bi-speedometer2 me-1"></i>
-                        <span class="d-none d-lg-inline">Dashboard</span>
-                        <span class="d-lg-none">Seller Dashboard</span>
+                <!-- Request Quote -->
+                <li class="nav-item d-none d-lg-block">
+                    <a class="nav-link px-3 fw-semibold text-warning bg-warning bg-opacity-10 rounded-pill" 
+                       href="{% url 'request_quote' %}" 
+                       style="padding: 0.4rem 1.2rem !important;">
+                        <i class="bi bi-lightning-charge me-1"></i>
+                        Get Quote
                     </a>
                 </li>
-                {% endif %}
 
-                <!-- Seller Products Link (Mobile Only) -->
+                <!-- Dashboard (Visible to active sellers - Mobile Only) -->
                 {% if user.is_authenticated and user.seller_profile.is_active %}
                 <li class="nav-item d-lg-none">
-                    <a class="nav-link" href="{% url 'product_list' %}">
-                        <i class="bi bi-box-seam me-2"></i>My Products
+                    <a class="nav-link px-3 text-success fw-semibold" href="{% url 'seller_dashboard' %}">
+                        <i class="bi bi-speedometer2 me-1"></i>
+                        Dashboard
                     </a>
                 </li>
                 {% endif %}
@@ -93,47 +123,52 @@
             <!-- Right Navigation -->
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                 <!-- Search -->
-                <li class="nav-item me-3">
-                    <a class="nav-link px-2" href="{% url 'search' %}" title="Search Products">
-                        <i class="bi bi-search fs-5"></i>
-                        <span class="d-lg-none ms-2">Search</span>
+                <li class="nav-item me-2">
+                    <a class="nav-link px-2 rounded-circle bg-light" href="{% url 'search' %}" title="Search Products">
+                        <i class="bi bi-search"></i>
                     </a>
                 </li>
 
                 <!-- Notifications -->
                 {% if user.is_authenticated %}
-                <li class="nav-item dropdown me-3">
-                    <a class="nav-link position-relative px-2" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell fs-5"></i>
+                <li class="nav-item dropdown me-2">
+                    <a class="nav-link px-2 position-relative rounded-circle bg-light" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-bell"></i>
                         {% if unread_notification_count and unread_notification_count > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">
                                 {{ unread_notification_count }}
                             </span>
                         {% endif %}
-                        <span class="d-lg-none ms-2">Notifications</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" style="font-size: 1.05em;">
-                        <li><h6 class="dropdown-header">Notifications</h6></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 300px;">
+                        <li><h6 class="dropdown-header text-primary fw-semibold">Notifications</h6></li>
                         {% if unread_notifications %}
                             {% for notification in unread_notifications %}
                             <li>
-                                <a class="dropdown-item py-2 {% if not notification.is_read %}fw-bold{% endif %}" 
+                                <a class="dropdown-item py-3 {% if not notification.is_read %}bg-light{% endif %}" 
                                    href="{% url 'notification_open' notification.id %}">
-                                    <small>{{ notification.message|truncatechars:50 }}</small>
-                                    <br>
-                                    <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                    <div class="d-flex">
+                                        <i class="bi bi-info-circle text-primary mt-1 me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <div class="{% if not notification.is_read %}fw-medium{% endif %}">
+                                                {{ notification.message|truncatechars:60 }}
+                                            </div>
+                                            <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                        </div>
+                                    </div>
                                 </a>
                             </li>
-                            {% if not forloop.last %}<li><hr class="dropdown-divider my-1"></li>{% endif %}
+                            {% if not forloop.last %}<li><hr class="dropdown-divider my-0"></li>{% endif %}
                             {% endfor %}
                         {% else %}
-                            <li><a class="dropdown-item text-muted py-2" href="#">
-                                <small>No new notifications</small>
+                            <li><a class="dropdown-item py-3 text-center text-muted" href="#">
+                                <i class="bi bi-bell-slash fs-4 mb-2"></i>
+                                <div>No new notifications</div>
                             </a></li>
                         {% endif %}
-                        <li><hr class="dropdown-divider"></li>
+                        <li><hr class="dropdown-divider my-0"></li>
                         <li><a class="dropdown-item text-center text-primary py-2" href="{% url 'notifications_list' %}">
-                            View All Notifications
+                            <i class="bi bi-list me-1"></i> View All Notifications
                         </a></li>
                     </ul>
                 </li>
@@ -141,15 +176,11 @@
 
                 <!-- Cart -->
                 <li class="nav-item me-3">
-                    <a class="nav-link position-relative px-2" href="{% url 'cart_summary' %}">
-                        <i class="bi bi-cart3 fs-5"></i>
-                        <span class="d-lg-none ms-2">Cart</span>
-                        <span id="cart_quantity" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" style="font-size: 0.7rem;">
-                            {% if cart_quantity %}
-                                {{ cart_quantity }}
-                            {% else %}
-                                0
-                            {% endif %}
+                    <a class="nav-link px-2 position-relative rounded-circle bg-light" href="{% url 'cart_summary' %}">
+                        <i class="bi bi-cart3"></i>
+                        <span id="cart_quantity" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" 
+                              style="font-size: 0.65rem; padding: 0.25rem 0.5rem; min-width: 1.5rem;">
+                            {{ cart_quantity|default:0 }}
                         </span>
                     </a>
                 </li>
@@ -158,71 +189,101 @@
                 {% if user.is_authenticated %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center px-2" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle me-2 fs-5"></i>
-                        <span class="d-none d-lg-inline">Account</span>
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 me-2">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <span class="d-none d-lg-inline">{{ user.first_name|default:user.username|truncatechars:12 }}</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" style="font-size: 1.05em;">
-                        <!-- Seller Links (without Dashboard since it's in main nav now) -->
-                        {% if user.seller_profile.is_active or user.is_superuser %}
-                            {% if user.seller_profile.is_active %}
-                                <li><a class="dropdown-item py-2" href="{% url 'seller_profile_public' user.seller_profile.pk %}">
-                                    <i class="bi bi-globe me-2"></i>Public Profile
-                                </a></li>
-                                <li><a class="dropdown-item py-2" href="{% url 'seller_profile' %}">
-                                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
-                                </a></li>
-                                <li class="d-lg-none"><a class="dropdown-item py-2" href="{% url 'product_list' %}">
-                                    <i class="bi bi-box-seam me-2"></i>My Products
-                                </a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 250px;">
+                        <!-- User Info -->
+                        <li class="px-3 py-2">
+                            <div class="fw-medium text-primary">{{ user.get_full_name|default:user.username }}</div>
+                            <small class="text-muted">{{ user.email|truncatechars:20 }}</small>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        
+                        <!-- Seller Links -->
+                        {% if user.seller_profile.is_active %}
+                        <li><h6 class="dropdown-header text-primary fw-semibold">Seller Tools</h6></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'seller_dashboard' %}">
+                            <i class="bi bi-speedometer2 me-3 text-success"></i>
+                            Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'product_list' %}">
+                            <i class="bi bi-box-seam me-3 text-success"></i>
+                            My Products
+                        </a></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'seller_profile' %}">
+                            <i class="bi bi-pencil-square me-3 text-success"></i>
+                            Edit Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
                         {% endif %}
-
+                        
                         <!-- Admin Links -->
                         {% if user.is_superuser %}
-                            <li><a class="dropdown-item py-2" href="{% url 'shipped_dash' %}">
-                                <i class="bi bi-truck me-2"></i>Shipped Orders
-                            </a></li>
-                            <li><a class="dropdown-item py-2" href="{% url 'not_shipped_dash' %}">
-                                <i class="bi bi-clock me-2"></i>Pending Orders
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item py-2" href="{% url 'admin:index' %}">
-                                <i class="bi bi-gear me-2"></i>Admin Panel
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header text-primary fw-semibold">Admin Tools</h6></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'not_shipped_dash' %}">
+                            <i class="bi bi-clock me-3 text-warning"></i>
+                            Pending Orders
+                        </a></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'shipped_dash' %}">
+                            <i class="bi bi-truck me-3 text-success"></i>
+                            Shipped Orders
+                        </a></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'quote_request_list' %}">
+                            <i class="bi bi-file-earmark-text me-3 text-info"></i>
+                            Manage Quotes
+                        </a></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'admin:index' %}">
+                            <i class="bi bi-gear me-3"></i>
+                            Admin Panel
+                        </a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
                         {% endif %}
-
+                        
                         <!-- User Links -->
-                        <li><a class="dropdown-item py-2" href="{% url 'update_user' %}">
-                            <i class="bi bi-person me-2"></i>Profile
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'update_user' %}">
+                            <i class="bi bi-person me-3"></i>
+                            Profile
                         </a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'update_info' %}">
-                            <i class="bi bi-info-circle me-2"></i>Information
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'update_info' %}">
+                            <i class="bi bi-info-circle me-3"></i>
+                            Information
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger py-2" href="{% url 'logout' %}">
-                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'quote_request_list' %}">
+                            <i class="bi bi-file-earmark me-3"></i>
+                            My Quotes
+                        </a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center text-danger" href="{% url 'logout' %}">
+                            <i class="bi bi-box-arrow-right me-3"></i>
+                            Logout
                         </a></li>
                     </ul>
                 </li>
                 {% else %}
                 <!-- Guest User Links -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle px-2" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person me-1 fs-5"></i>
+                    <a class="nav-link dropdown-toggle d-flex align-items-center px-2" href="#" role="button" data-bs-toggle="dropdown">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 me-2">
+                            <i class="bi bi-person"></i>
+                        </div>
                         <span class="d-none d-lg-inline">Account</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" style="font-size: 1.05em;">
-                        <li><a class="dropdown-item py-2" href="{% url 'login' %}">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-3"></i>
+                            Login
                         </a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'register' %}">
-                            <i class="bi bi-person-plus me-2"></i>Sign Up
+                        <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus me-3"></i>
+                            Sign Up
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-success fw-semibold py-2" href="{% url 'seller_signup' %}">
-                            <i class="bi bi-bag-plus me-2"></i>Sell on Helios
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item py-2 d-flex align-items-center text-success" href="{% url 'seller_signup' %}">
+                            <i class="bi bi-bag-plus me-3"></i>
+                            Sell on Helios
                         </a></li>
                     </ul>
                 </li>

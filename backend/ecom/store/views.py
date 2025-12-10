@@ -7,7 +7,7 @@ Replace your existing store/views.py with this (backup first).
 from decimal import Decimal
 import json
 from django.conf import settings
-
+from django.http import JsonResponse # <-- ADDED: Needed for AJAX endpoint
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -19,21 +19,19 @@ from django.core.mail import send_mail
 from django.db.models import Q, Sum
 
 from cart.cart import Cart
-from .models import Product, Category, Profile
-from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
+from .models import Product, Category, Profile, QuoteRequest
+from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm, QuoteRequestForm
 
 # Import newsletter form + models and notification model from payment app
 from payment.forms import NewsletterSubscriberForm, ShippingForm
 from payment.models import NewsletterSubscriber, Notification, Seller, ImpactFundTransaction
+from payment.models import ShippingAddress # This import is crucial and now required
 
 # Tokens for activation
 from .tokens import account_activation_token
-from payment.models import ShippingAddress # <-- This import is crucial and now required
 
 
 User = get_user_model()
-
-
 
 
 def contact(request):
@@ -43,7 +41,6 @@ def contact(request):
     # You can add contact form handling here later
     return render(request, 'contact.html')
 
-    
 # -------------------------
 # Notifications / Newsletter
 # -------------------------
@@ -54,15 +51,60 @@ def notifications_list_view(request):
     Mark currently displayed notifications as read (MVP behaviour).
     """
     user_notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    
     # Mark displayed notifications read
-    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    # Optimization: Only update if there are unread ones to save DB queries
+    if user_notifications.filter(is_read=False).exists():
+        user_notifications.filter(is_read=False).update(is_read=True)
+        
     return render(request, 'store/notifications_list.html', {'notifications': user_notifications})
 
+@login_required
+def notification_open(request, pk):
+    """
+    Handles clicking a single notification in the dropdown.
+    Marks it as read and redirects the user.
+    """
+    notification = get_object_or_404(Notification, pk=pk, user=request.user)
+    
+    # Mark as read
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save()
+    
+    # Logic to decide where to go. 
+    # For MVP, if the message mentions a Quote, go to quote list.
+    if 'quote' in notification.message.lower():
+        # Ensure 'quote_request_list' URL exists in your urls.py, otherwise fallback
+        try:
+            return redirect('quote_request_list') 
+        except:
+            # Fallback if the quote_request_list URL name hasn't been defined yet
+            messages.info(request, "Quote request functionality coming soon!") 
+            pass 
+            
+    # FIXED: Redirect uses the correct URL name defined in store/urls.py
+    return redirect('notifications_list')
+
+@login_required
+def notification_redirect_view(request, notif_id):
+    """Backward-compatible wrapper — just call notification_open."""
+    # The wrapper exists because some templates used this name earlier.
+    return notification_open(request, notif_id)
+
+
+@login_required
+def mark_all_notifications_read(request):
+    """Mark all unread notifications for the current user as read (POST only)."""
+    # NOTE: This view is now consolidated from payment/views.py
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST required'}, status=400)
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({'ok': True})
 
 def newsletter_subscribe(request):
     """
-    Accept newsletter subscription POST and redirect back to referrer,
-    avoiding disruptive pages (cart/checkout/process_order) where needed.
+    Accept newsletter subscription POST and redirect back to referrer.
     """
     if request.method != 'POST':
         return redirect('home')
@@ -84,7 +126,6 @@ def newsletter_subscribe(request):
     else:
         messages.error(request, "Please enter a valid email address.")
         return redirect(redirect_to)
-
 
 # -------------------------
 # Donation / Public Impact
@@ -110,7 +151,7 @@ def public_impact_view(request):
 
     # Sum transactions (expenses can be negative)
     try:
-        # 🚨 CRITICAL CHANGE: Filter by is_active=True
+        # Filter by is_active=True
         funds_collected_result = ImpactFundTransaction.objects.filter(is_active=True).aggregate(total=Sum('amount'))
         total_funds_collected = funds_collected_result['total'] or Decimal('0.00')
     except Exception:
@@ -197,26 +238,19 @@ def search(request):
     return render(request, "search.html", {})
 
 
-
-
 @login_required
 def update_info(request):
     """
     Update Profile and ShippingInfo for logged-in users.
     """
-    # NOTE: The @login_required decorator already handles the not-logged-in case, 
-    # but the explicit check below is harmless if you want the custom message.
     if not request.user.is_authenticated:
         messages.error(request, 'You must be logged in to update your profile')
         return redirect('home')
 
     # 1. Fetch the user's Profile instance
-    # Assuming Profile is the model tied to the UserInfoForm
     current_user = get_object_or_404(Profile, user=request.user) 
     
     # 2. Get or create the ShippingAddress instance
-    # ***BUG FIX: We delete the buggy line entirely.***
-    # We use the final, reliable model lookup you already had:
     shipping_address, created = ShippingAddress.objects.get_or_create(user=request.user)
 
     # 3. Initialize Forms
@@ -261,7 +295,8 @@ def update_user(request):
         return redirect('home')
 
     current_user = get_object_or_404(User, id=request.user.id)
-    from payment.models import ShippingAddress
+    
+    # Removed redundant import (already at the top)
     shipping_user, _ = ShippingAddress.objects.get_or_create(user=request.user)
 
     user_form = UpdateUserForm(request.POST or None, instance=current_user)
@@ -301,9 +336,22 @@ def product_view(request, pk):
     return render(request, 'product.html', {'product': product})
 
 
+
+def store_home(request):
+    """Store home page - displays featured products."""
+    # Use is_available instead of is_active
+    products = Product.objects.filter(is_available=True).order_by('-id')[:8]
+    
+    context = {
+        'products': products,
+        'page_title': 'Solar Products Store - HELIOS',
+    }
+    return render(request, 'store.html', context)
+
+# Update the existing home function to redirect to store
 def home(request):
-    products = Product.objects.all()
-    return render(request, 'home.html', {'products': products})
+    """Home page is now solutions - redirect to store for legacy links."""
+    return store_home(request) 
 
 
 def solutions_view(request):
@@ -412,3 +460,118 @@ def register_user(request):
     return render(request, 'register.html', {'form': form})
 
 
+# ---------------------------------------------------------
+# QUOTE REQUEST VIEW
+# ---------------------------------------------------------
+
+def request_quote(request):
+    """
+    Handle quote requests from customers/prospects.
+    Admin will be notified when a new quote request is submitted.
+    """
+    if request.method == 'POST':
+        form = QuoteRequestForm(request.POST)
+        if form.is_valid():
+            quote_request = form.save(commit=False)
+            
+            # Link to authenticated user if available
+            if request.user.is_authenticated:
+                quote_request.buyer = request.user
+            
+            quote_request.save()
+
+            # --- 1. NOTIFY ADMINS (Navbar Bell) ---
+            # Get all superusers (admins)
+            admins = User.objects.filter(is_superuser=True)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    message=f"New Quote Request from {quote_request.contact_name}",
+                    quote_request=quote_request  # Link the specific quote object
+                )
+            
+            # Notify admin via email
+            try:
+                send_mail(
+                    subject='New Quote Request Submitted',
+                    message=f"""
+A new quote request has been submitted!
+
+Customer Information:
+- Name: {quote_request.contact_name}
+- Email: {quote_request.contact_email}
+- Phone: {quote_request.contact_phone}
+- Location: {quote_request.location_city}, {quote_request.location_province}
+
+Project Details:
+- Project Type: {quote_request.get_project_type_display()}
+- System Type: {quote_request.get_system_type_display()}
+- Daily Energy Usage: {quote_request.daily_energy_usage_kwh} kWh
+- Current Voltage: {quote_request.current_voltage or 'Not specified'}
+- Roof Type: {quote_request.roof_type or 'Not specified'}
+- Appliances: {quote_request.appliances_to_run}
+- Budget Range: {quote_request.budget_range or 'Not specified'}
+- Timeline: {quote_request.get_timeline_display()}
+
+Additional Notes:
+{quote_request.additional_notes or 'None'}
+
+Quote Request ID: {quote_request.id}
+                    """,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[admin_email for admin_email, _ in settings.ADMINS],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Error sending admin notification: {e}")
+            
+            messages.success(request, 'Your quote request has been submitted successfully! We will get back to you soon.')
+            return redirect('home')
+    else:
+        form = QuoteRequestForm()
+        # Pre-fill with user info if authenticated
+        if request.user.is_authenticated:
+            form.initial = {
+                'contact_name': f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
+                'contact_email': request.user.email,
+            }
+    
+    return render(request, 'store/request_quote.html', {'form': form})
+
+
+@login_required
+def quote_request_details(request, quote_request_id):
+    """
+    Display details of a specific quote request.
+    Restricted to Admins OR the Buyer who created it.
+    """
+    quote = get_object_or_404(QuoteRequest, id=quote_request_id)
+    
+    # Security Check: Only allow Admin or the Owner to view
+    if not request.user.is_superuser and quote.buyer != request.user:
+        messages.error(request, "You do not have permission to view this quote.")
+        return redirect('home')
+
+    # FIX HERE: Change the template path to include the app directory
+    return render(request, 'payment/quote_request_details.html', {'quote': quote})
+
+    
+
+@login_required
+def quote_request_list(request):
+    """
+    List quote requests.
+    - Admins see ALL requests sorted by newest.
+    - Regular users see ONLY their own requests.
+    """
+    if request.user.is_superuser:
+        quotes = QuoteRequest.objects.all().order_by('-created_at')
+        page_title = "Manage Quote Requests (Admin)"
+    else:
+        quotes = QuoteRequest.objects.filter(buyer=request.user).order_by('-created_at')
+        page_title = "My Quote History"
+
+    return render(request, 'store/quote_request_list.html', {
+        'quotes': quotes,
+        'page_title': page_title
+    })

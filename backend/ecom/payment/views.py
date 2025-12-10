@@ -41,107 +41,54 @@ except Exception:
 User = get_user_model()
 
 
-# -------------------------
-# Notifications views
-# -------------------------
 @login_required
-def notifications_list(request):
-    """Full list view of notifications for the logged-in user."""
-    notifs = Notification.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'payment/notifications_list.html', {'notifications': notifs})
-
-
-# payment/views.py (UPDATED notification_open)
-# ...
-
-# payment/views.py (SIMPLIFIED notification_open)
-# ...
-
-# payment/views.py
-
-@login_required
-def notification_open(request, pk):
+def order_details_view(request, order_id):
     """
-    Mark notification read and redirect safely:
-      - If notification has order_id:
-            - If current user is a seller who has items in that order -> seller-facing order view
-            - Else if current user is superuser -> admin change page for the order
-            - Else if current user is the customer who placed the order -> customer/home or a user order page
-            - Otherwise -> notifications list (or home)
+    Displays the details of a specific order and handles shipping status updates.
     """
-    try:
-        notif = get_object_or_404(Notification, pk=pk, user=request.user)
-    except Exception:
-        return HttpResponseForbidden("You cannot access this notification.")
-
-    # mark read (idempotent)
-    if not notif.is_read:
-        notif.is_read = True
-        notif.save(update_fields=['is_read'])
-
-    # If notification links to an order, decide redirect based on role/ownership
-    if notif.order_id:
-        try:
-            order = Order.objects.get(pk=notif.order_id)
-        except Order.DoesNotExist:
-            message.error(request, "The linked order could not be found.")
-            return redirect('notifications_list')
-
-        
-        # --- 1. SELLER CHECK (Redirect to Dashboard with Context) ---
-        seller_profile = getattr(request.user, 'seller_profile', None)
-        if seller_profile is not None:
-            
-            # Check if the seller has any items in this specific order
-            seller_has_items_in_order = OrderItem.objects.filter(
-                order=order, 
-                seller=seller_profile
-            ).exists()
-
-            if seller_has_items_in_order:
-                # 👇 SMART COMPROMISE: Redirect to the dashboard (safer navigation)
-                # The notification alert link (which is not this view) will still work as before.
-                message.info(
-                    request, 
-                    f"Notification for Order #{order.id}. Find your items listed below."
-                )
-                # Ensure 'seller_dashboard' is the correct URL name
-                return redirect('seller_dashboard') 
-
-
-        # --- 2. SUPERUSER/ADMIN CHECK ---
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Check permission
+    if not request.user.is_superuser and order.email != request.user.email and order.user != request.user:
+        message.error(request, "You do not have permission to view this order.")  # Fixed: messages
+        return redirect('home')
+    
+    # --- POST Handling for Shipping Status ---
+    if request.method == 'POST':
+        # Ensure only superusers/staff can change the status
         if request.user.is_superuser:
-            # Redirect admin to Django Admin change page
-            return redirect(reverse('admin:payment_order_change', args=(order.id,)))
-
-
-        # --- 3. CUSTOMER CHECK ---
-        if order.user and request.user == order.user:
-            return redirect('home')
-
-        # --- 4. DEFAULT FALLBACK ---
-        return redirect('notifications_list')
-
-    # If notification didn't link to an order, send to the notifications list
-    return redirect('notifications_list')
-
-
-@login_required
-def notification_redirect_view(request, notif_id):
-    """Backward-compatible wrapper — just call notification_open."""
-    # The wrapper exists because some templates used this name earlier.
-    return notification_open(request, notif_id)
-
-
-
-@login_required
-def mark_all_notifications_read(request):
-    """Mark all unread notifications for the current user as read (POST only)."""
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': 'POST required'}, status=400)
-    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-    return JsonResponse({'ok': True})
-
+            shipping_status = request.POST.get('shipping_status')
+            
+            if shipping_status == 'true':
+                # Mark as Shipped
+                order.status = 'shipped'
+                order.date_shipped = timezone.now()
+                message.success(request, f"Order #{order.id} has been marked as shipped.")  # Fixed: messages
+            
+            elif shipping_status == 'false':
+                # Revert to processing
+                order.status = 'processing'
+                order.date_shipped = None
+                message.warning(request, f"Order #{order.id} status reverted to processing.")  # Fixed: messages
+            
+            # Save changes
+            order.save()
+            return redirect('order_details_view', order_id=order.id)  # Fixed URL name
+        
+        else:
+            message.error(request, "Only authorized staff can change the shipping status.")  # Fixed: messages
+            return redirect('order_details_view', order_id=order.id)  # Fixed URL name
+    
+    # --- GET Rendering ---
+    items = order.orderitem_set.all()
+    
+    context = {
+        'order': order,
+        'items': items,
+        'page_title': f'Order #{order.id}',
+    }
+    
+    return render(request, 'payment/order_details.html', context)
 
 # -------------------------
 # Seller-facing order detail view(s)

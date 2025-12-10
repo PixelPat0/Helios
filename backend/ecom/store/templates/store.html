@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<!-- Professional Hero Section -->
+<section class="hero-section position-relative overflow-hidden" style="
+    background: linear-gradient(135deg, #001a33 0%, #003366 100%);
+    min-height: 60vh;
+    padding-top: 100px;
+">
+    <div class="container position-relative z-1">
+        <div class="row align-items-center py-5">
+            <!-- Left Column: Content -->
+            <div class="col-lg-6 mb-5 mb-lg-0 text-white">
+                <span class="badge bg-warning bg-opacity-20 text-warning mb-3 px-3 py-2">SOLAR PRODUCTS STORE</span>
+                <h1 class="display-3 fw-bold mb-4">
+                    Premium Solar 
+                    <span class="text-warning">Products</span>
+                </h1>
+                <p class="lead mb-4 opacity-90">
+                    Shop high-quality solar panels, inverters, batteries, and accessories 
+                    from trusted suppliers across Zambia. Competitive prices, nationwide delivery.
+                </p>
+                
+                <div class="d-flex flex-wrap gap-3 mb-5">
+                    <a href="#featured-products" class="btn btn-warning btn-lg px-5 py-3 fw-semibold">
+                        <i class="bi bi-lightning-charge me-2"></i>
+                        Shop Now
+                    </a>
+                    <a href="{% url 'category_summary' %}" class="btn btn-outline-warning btn-lg px-5 py-3">
+                        <i class="bi bi-grid me-2"></i>
+                        View Categories
+                    </a>
+                </div>
+
+                <!-- Trust Indicators -->
+                <div class="row g-4 text-white opacity-90">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-shield-check fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Verified</h5>
+                                <small>Suppliers</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-truck fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Nationwide</h5>
+                                <small>Delivery</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-arrow-repeat fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Easy</h5>
+                                <small>Returns</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Store Image -->
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <div class="rounded-4 overflow-hidden shadow-lg">
+                        <img src="{% static 'images/store-hero.jpg' %}" 
+                             alt="Solar Products Store" 
+                             class="img-fluid w-100"
+                             style="height: 400px; object-fit: cover;">
+                        <div class="position-absolute bottom-0 start-0 w-100 p-4" style="
+                            background: linear-gradient(transparent, rgba(0, 26, 51, 0.9));
+                        ">
+                            <div class="text-white">
+                                <i class="bi bi-tag-fill fs-1 text-warning me-3"></i>
+                                <span class="h5 fw-semibold">100+ Products Available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Navigation -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold text-dark mb-3">Shop by Category</h2>
+                <p class="lead text-muted">
+                    Find exactly what you need for your solar project
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <a href="{% url 'category' 'Solar-Panels' %}" class="text-decoration-none">
+                    <div class="card category-card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <div class="category-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 mx-auto mb-3">
+                                <i class="bi bi-sun fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark">Solar Panels</h5>
+                            <p class="text-muted small">High-efficiency panels for maximum output</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'category' 'Inverters' %}" class="text-decoration-none">
+                    <div class="card category-card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <div class="category-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3 mx-auto mb-3">
+                                <i class="bi bi-lightning-charge fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark">Inverters</h5>
+                            <p class="text-muted small">Reliable power conversion systems</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'category' 'Batteries' %}" class="text-decoration-none">
+                    <div class="card category-card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <div class="category-icon bg-success bg-opacity-10 text-success rounded-circle p-3 mx-auto mb-3">
+                                <i class="bi bi-battery-charging fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark">Batteries</h5>
+                            <p class="text-muted small">Energy storage solutions</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'category' 'Lighting' %}" class="text-decoration-none">
+                    <div class="card category-card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <div class="category-icon bg-info bg-opacity-10 text-info rounded-circle p-3 mx-auto mb-3">
+                                <i class="bi bi-lamp fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark">Lighting</h5>
+                            <p class="text-muted small">Solar-powered lighting</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg px-5">
+                View All Categories
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5 bg-light" id="featured-products">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-2">FEATURED PRODUCTS</span>
+                <h2 class="display-5 fw-bold text-dark mb-3">Popular Solar Products</h2>
+                <p class="lead text-muted">
+                    Best-selling products from our verified suppliers
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card product-card h-100 border-0 shadow-sm">
+                    <!-- Product Image -->
+                    <div class="product-image position-relative">
+                        <img src="{{ product.image.url }}" 
+                             class="card-img-top" 
+                             alt="{{ product.name }}"
+                             style="height: 200px; object-fit: cover;">
+                        {% if product.is_sale %}
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-warning text-dark">SALE</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title fw-bold text-dark mb-2">{{ product.name|truncatechars:50 }}</h6>
+                        
+                        <div class="mt-auto">
+                            {% if product.is_sale %}
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="text-muted text-decoration-line-through small">
+                                    ZMK {{ product.price|floatformat:0|intcomma }}
+                                </span>
+                                <span class="fw-bold text-danger fs-5">
+                                    ZMK {{ product.sale_price|floatformat:0|intcomma }}
+                                </span>
+                            </div>
+                            {% else %}
+                            <div class="mb-2">
+                                <span class="fw-bold text-dark fs-5">
+                                    ZMK {{ product.price|floatformat:0|intcomma }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <a href="{% url 'product' product.id %}" 
+                               class="btn btn-outline-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">No Products Available</h4>
+                <p class="text-muted">Check back soon for new solar products</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg px-5">
+                View All Products
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Why Shop With Us -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto text-center">
+                <h2 class="display-5 fw-bold text-dark mb-5">Why Shop With HELIOS</h2>
+                
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="p-4">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 mx-auto mb-3" style="width: 70px; height: 70px;">
+                                <i class="bi bi-shield-check fs-3"></i>
+                            </div>
+                            <h5>Verified Suppliers</h5>
+                            <p class="text-muted">All sellers are vetted for quality and reliability</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 mx-auto mb-3" style="width: 70px; height: 70px;">
+                                <i class="bi bi-truck fs-3"></i>
+                            </div>
+                            <h5>Nationwide Delivery</h5>
+                            <p class="text-muted">Fast delivery across Zambia</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4">
+                            <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 mx-auto mb-3" style="width: 70px; height: 70px;">
+                                <i class="bi bi-headset fs-3"></i>
+                            </div>
+                            <h5>Expert Support</h5>
+                            <p class="text-muted">Solar specialists to guide you</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="display-6 fw-bold mb-3">Ready to Power Up?</h2>
+                <p class="lead mb-0 opacity-90">
+                    Find everything you need for your solar project in one place.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{% url 'category_summary' %}" class="btn btn-warning btn-lg px-5 py-3">
+                    <i class="bi bi-cart me-2"></i>
+                    Start Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    position: relative;
+}
+
+.category-card {
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-10px);
+}
+
+.category-icon {
+    transition: all 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+    background: var(--bs-primary) !important;
+    color: white !important;
+}
+
+.product-card {
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+</style>
+{% endblock %}

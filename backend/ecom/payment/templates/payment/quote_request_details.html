@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="mb-4">
+                <a href="{% url 'notifications_list' %}" class="text-decoration-none text-muted">
+                    <i class="bi bi-arrow-left"></i> Back to Notifications
+                </a>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Quote Request #{{ quote.id }}</h4>
+                        <span class="badge bg-light text-primary">{{ quote.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="alert alert-info d-flex align-items-center mb-4">
+                        <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                        <div>
+                            <strong>Current Status:</strong> {{ quote.status|default:"Pending Review"|title }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary">Customer Information</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4 text-muted">Name</dt>
+                                <dd class="col-sm-8 fw-bold">{{ quote.contact_name }}</dd>
+
+                                <dt class="col-sm-4 text-muted">Email</dt>
+                                <dd class="col-sm-8"><a href="mailto:{{ quote.contact_email }}">{{ quote.contact_email }}</a></dd>
+
+                                <dt class="col-sm-4 text-muted">Phone</dt>
+                                <dd class="col-sm-8">{{ quote.contact_phone }}</dd>
+
+                                <dt class="col-sm-4 text-muted">Location</dt>
+                                <dd class="col-sm-8">{{ quote.location_city }}, {{ quote.location_province }}</dd>
+                            </dl>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2 mb-3 text-primary">Project Specifications</h5>
+                            <dl class="row">
+                                <dt class="col-sm-5 text-muted">Project Type</dt>
+                                <dd class="col-sm-7">{{ quote.get_project_type_display }}</dd>
+
+                                <dt class="col-sm-5 text-muted">System Preference</dt>
+                                <dd class="col-sm-7">{{ quote.get_system_type_display }}</dd>
+
+                                <dt class="col-sm-5 text-muted">Roof Type</dt>
+                                <dd class="col-sm-7">{{ quote.roof_type|default:"Not specified" }}</dd>
+
+                                <dt class="col-sm-5 text-muted">Timeline</dt>
+                                <dd class="col-sm-7">{{ quote.get_timeline_display }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="text-primary mb-3">Technical Requirements</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded h-100">
+                                <small class="text-muted d-block mb-1">Daily Usage</small>
+                                <h5 class="mb-0">{{ quote.daily_energy_usage_kwh|default:"--" }} kWh</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded h-100">
+                                <small class="text-muted d-block mb-1">Current Voltage</small>
+                                <h5 class="mb-0">{{ quote.current_voltage|default:"Not specified" }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded h-100">
+                                <small class="text-muted d-block mb-1">Budget Range</small>
+                                <h5 class="mb-0">{{ quote.budget_range|default:"Not specified" }}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-muted fw-bold mb-2">Appliances List</label>
+                        <div class="p-3 border rounded bg-light">
+                            {{ quote.appliances_to_run|linebreaks }}
+                        </div>
+                    </div>
+
+                    {% if quote.additional_notes %}
+                    <div class="mb-4">
+                        <label class="text-muted fw-bold mb-2">Additional Notes</label>
+                        <div class="p-3 border rounded bg-light text-muted fst-italic">
+                            {{ quote.additional_notes|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+                
+                {% if user.is_superuser %}
+                <div class="card-footer bg-light p-3 text-end">
+                    <a href="mailto:{{ quote.contact_email }}" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-envelope"></i> Email Customer
+                    </a>
+                    <a href="tel:{{ quote.contact_phone }}" class="btn btn-outline-success">
+                        <i class="bi bi-telephone"></i> Call Customer
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
