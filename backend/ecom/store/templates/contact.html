@@ -4,130 +4,183 @@
 
 {% block content %}
 
-<!-- Hero Section -->
-<section class="hero-section bg-light">
-    <div class="container">
-        <div class="row align-items-center min-vh-50 py-5">
-            <div class="col-lg-8 mx-auto text-center">
-                <span class="badge bg-primary-subtle text-primary mb-3">CONTACT US</span>
-                <h1 class="display-4 fw-bold text-dark mb-4">
-                    Get In <span class="text-primary">Touch</span>
+<!-- Hero Section with Modern Gradient -->
+<section class="hero-section position-relative overflow-hidden" style="
+    background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
+    min-height: 85vh;
+    padding-top: 80px;
+">
+    <!-- Background Pattern -->
+    <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block">
+        <div class="position-relative h-100">
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-warning opacity-10" style="clip-path: polygon(100% 0, 0% 100%, 100% 100%);"></div>
+        </div>
+    </div>
+    
+    <!-- Floating Elements for depth -->
+    <div class="position-absolute top-20 start-10 w-20 h-20 rounded-circle bg-warning opacity-5 animate-float-1"></div>
+    <div class="position-absolute bottom-30 end-20 w-15 h-15 rounded-circle bg-primary opacity-5 animate-float-2"></div>
+    
+    <div class="container position-relative z-1">
+        <div class="row align-items-center min-vh-85 py-8">
+            <!-- Left Column: Content -->
+            <div class="col-lg-6 mb-7 mb-lg-0 text-white">
+                <span class="badge bg-warning text-dark mb-4 px-3 py-2 fw-semibold animate-fade-in">We're here to help</span>
+                <h1 class="display-2 fw-bold mb-5 animate-fade-in" style="animation-delay: 0.1s">
+                    Let's Power Your 
+                    <span class="text-warning">Future Together</span>
                 </h1>
-                <p class="lead text-muted mb-4">
-                    Have questions about solar solutions? Our team is here to help you 
-                    find the perfect energy solution for your needs.
+                <p class="lead mb-5 opacity-90 animate-fade-in" style="animation-delay: 0.2s; font-size: 1.25rem;">
+                    Have questions about solar solutions? Our expert team is ready to guide you 
+                    through every step of your clean energy journey with personalized support.
+                </p>
+                
+                <div class="d-flex flex-wrap gap-4 mb-7 animate-fade-in" style="animation-delay: 0.3s">
+                    <a href="#contact-info" class="btn btn-warning btn-lg px-5 py-3 fw-semibold hover-scale">
+                        <i class="bi bi-telephone me-2"></i>
+                        Contact Information
+                    </a>
+                    <a href="#faq" class="btn btn-outline-warning btn-lg px-5 py-3 hover-scale">
+                        <i class="bi bi-question-circle me-2"></i>
+                        View FAQs
+                    </a>
+                </div>
+
+                <!-- Trust Indicators -->
+                <div class="row g-5 text-white opacity-90 animate-fade-in" style="animation-delay: 0.4s">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3 hover-glow">
+                                <i class="bi bi-clock-history fs-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0 fw-bold">24-Hour</h4>
+                                <small>Response Time</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3 hover-glow">
+                                <i class="bi bi-shield-check fs-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0 fw-bold">Expert</h4>
+                                <small>Consultations</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3 hover-glow">
+                                <i class="bi bi-headset fs-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0 fw-bold">Dedicated</h4>
+                                <small>Support Team</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Hero Image -->
+            <div class="col-lg-6 position-relative">
+                <div class="position-relative animate-float-3" style="animation-delay: 0.5s">
+                    <!-- Main Hero Image -->
+                    <div class="rounded-4 overflow-hidden shadow-lg position-relative hover-lift">
+                        <img src="{% static 'images/contact-hero.jpg' %}" 
+                             alt="Helios Solar Support Team" 
+                             class="img-fluid w-100"
+                             style="height: 500px; object-fit: cover;">
+                        <div class="position-absolute bottom-0 start-0 w-100 p-4" style="
+                            background: linear-gradient(transparent, rgba(0, 26, 51, 0.9));
+                        ">
+                            <div class="text-white d-flex align-items-center">
+                                <i class="bi bi-chat-dots-fill fs-1 text-warning me-3 hover-pulse"></i>
+                                <span class="h5 fw-semibold">Expert Support Ready to Assist You</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Contact Information Section -->
+<section id="contact-info" class="py-8 bg-white">
+    <div class="container">
+        <div class="row justify-content-center mb-7">
+            <div class="col-lg-8 text-center">
+                <span class="badge bg-primary-subtle text-primary mb-4 px-3 py-2 fw-semibold animate-badge">GET IN TOUCH</span>
+                <h2 class="display-4 fw-bold mb-5">Contact Information</h2>
+                <p class="lead text-muted" style="font-size: 1.25rem;">
+                    Reach out through any channel below. Our team typically responds within 24 hours.
                 </p>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Contact Information & Form -->
-<section class="contact-section py-5 bg-white">
-    <div class="container">
-        <div class="row g-5">
-            <!-- Contact Information -->
-            <div class="col-lg-4">
-                <div class="pe-lg-4">
-                    <h3 class="fw-bold mb-4">Contact Information</h3>
-                    <p class="text-muted mb-4">
-                        Reach out to us through any of the following channels. 
-                        We typically respond within 24 hours.
-                    </p>
-                    
-                    <div class="contact-info mb-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="contact-icon bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                <i class="bi bi-telephone text-primary fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-1">Phone</h6>
-                                <p class="text-muted mb-0">+260 123 456 789</p>
-                            </div>
+        <div class="row g-6 justify-content-center">
+            <!-- Contact Cards -->
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-5">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card-body p-5 text-center">
+                        <div class="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4 contact-icon-animate" style="width: 80px; height: 80px;">
+                            <i class="bi bi-telephone text-primary fs-2"></i>
                         </div>
-                        
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="contact-icon bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                <i class="bi bi-envelope text-primary fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-1">Email</h6>
-                                <p class="text-muted mb-0">info@helios.com</p>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="contact-icon bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                <i class="bi bi-whatsapp text-primary fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-1">WhatsApp</h6>
-                                <p class="text-muted mb-0">+260 987 654 321</p>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex align-items-center">
-                            <div class="contact-icon bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                <i class="bi bi-clock text-primary fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-1">Business Hours</h6>
-                                <p class="text-muted mb-0">Mon - Fri: 8:00 AM - 5:00 PM</p>
-                                <p class="text-muted mb-0">Sat: 9:00 AM - 1:00 PM</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-5">
-                        <h5 class="fw-bold mb-3">Visit Our Office</h5>
-                        <p class="text-muted">
-                            123 Solar Street<br>
-                            Lusaka, Zambia<br>
-                            P.O. Box 12345
-                        </p>
+                        <h3 class="fw-bold mb-4">Phone</h3>
+                        <p class="text-muted mb-4">Call us directly for immediate assistance</p>
+                        <a href="tel:+260976778519" class="btn btn-outline-primary btn-lg w-100 hover-scale">
+                            <i class="bi bi-telephone me-2"></i>+260 976 778 519
+                        </a>
                     </div>
                 </div>
             </div>
-            
-            <!-- Contact Form -->
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-5">
-                        <h3 class="fw-bold mb-4">Send Us a Message</h3>
-                        <form id="contactForm">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="name" class="form-label">Full Name *</label>
-                                    <input type="text" class="form-control" id="name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="email" class="form-label">Email Address *</label>
-                                    <input type="email" class="form-control" id="email" required>
-                                </div>
-                                <div class="col-12">
-                                    <label for="subject" class="form-label">Subject *</label>
-                                    <input type="text" class="form-control" id="subject" required>
-                                </div>
-                                <div class="col-12">
-                                    <label for="message" class="form-label">Message *</label>
-                                    <textarea class="form-control" id="message" rows="6" required></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="newsletter">
-                                        <label class="form-check-label text-muted" for="newsletter">
-                                            Subscribe to our newsletter for solar tips and updates
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary btn-lg px-5">
-                                        <i class="bi bi-send me-2"></i>
-                                        Send Message
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-5">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card-body p-5 text-center">
+                        <div class="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4 contact-icon-animate" style="width: 80px; height: 80px;">
+                            <i class="bi bi-envelope text-primary fs-2"></i>
+                        </div>
+                        <h3 class="fw-bold mb-4">Email</h3>
+                        <p class="text-muted mb-4">Send detailed inquiries or documents</p>
+                        <a href="mailto:solchartzm@gmail.com" class="btn btn-outline-primary btn-lg w-100 hover-scale">
+                            <i class="bi bi-envelope me-2"></i>solchartzm@gmail.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-5">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card-body p-5 text-center">
+                        <div class="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4 contact-icon-animate" style="width: 80px; height: 80px;">
+                            <i class="bi bi-whatsapp text-primary fs-2"></i>
+                        </div>
+                        <h3 class="fw-bold mb-4">WhatsApp</h3>
+                        <p class="text-muted mb-4">Quick chat for instant responses</p>
+                        <a href="https://wa.me/260976778519" target="_blank" class="btn btn-success btn-lg w-100 hover-scale">
+                            <i class="bi bi-whatsapp me-2"></i>+260 976 778 519
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-5">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all" data-aos="fade-up" data-aos-delay="400">
+                    <div class="card-body p-5 text-center">
+                        <div class="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4 contact-icon-animate" style="width: 80px; height: 80px;">
+                            <i class="bi bi-clock text-primary fs-2"></i>
+                        </div>
+                        <h3 class="fw-bold mb-4">Hours</h3>
+                        <p class="text-muted mb-3" style="font-size: 1.1rem;">Mon-Fri: 8:00 AM - 5:00 PM</p>
+                        <p class="text-muted mb-4" style="font-size: 1.1rem;">Sat: 9:00 AM - 1:00 PM</p>
+                        <span class="badge bg-light text-dark px-3 py-2">Zambia Time (GMT+2)</span>
                     </div>
                 </div>
             </div>
@@ -135,50 +188,128 @@
     </div>
 </section>
 
-<!-- FAQ Section -->
-<section class="faq-section py-5 bg-light">
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Contact Action Section -->
+<section class="py-8 bg-light">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <span class="badge bg-primary-subtle text-primary mb-3">FAQ</span>
-                <h2 class="display-5 fw-bold text-dark mb-5">Frequently Asked Questions</h2>
-                
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center">
+                <div class="card border-0 shadow-lg rounded-5 overflow-hidden hover-lift-strong" data-aos="zoom-in">
+                    <div class="card-body p-6">
+                        <h2 class="display-5 fw-bold mb-5">Ready to Start Your Solar Journey?</h2>
+                        <p class="lead text-muted mb-6" style="font-size: 1.25rem;">
+                            For now, please reach out directly. We're working on a contact form to make it even easier!
+                        </p>
+                        
+                        <div class="row g-5 justify-content-center mb-6">
+                            <div class="col-lg-6">
+                                <div class="d-grid">
+                                    <a href="mailto:solchartzm@gmail.com?subject=Helios%20Solar%20Inquiry&body=Hello%20Helios%20Solar,%0D%0A%0D%0AI'm%20interested%20in%20your%20solar%20solutions.%0D%0A%0D%0AMy%20name%20is:%0D%0AMy%20phone%20number%20is:%0D%0A%0D%0APlease%20contact%20me%20about:%0D%0A" 
+                                       class="btn btn-primary btn-lg py-4 fw-semibold hover-scale">
+                                        <i class="bi bi-envelope-paper me-3"></i>Send Email Inquiry
+                                    </a>
+                                    <p class="text-muted mt-3">Pre-filled template for quick inquiry</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="d-grid">
+                                    <a href="https://wa.me/260976778519?text=Hello%20Helios%20Solar,%20I'm%20interested%20in%20your%20solar%20solutions!" 
+                                       target="_blank"
+                                       class="btn btn-success btn-lg py-4 fw-semibold hover-scale">
+                                        <i class="bi bi-whatsapp me-3"></i>Chat on WhatsApp
+                                    </a>
+                                    <p class="text-muted mt-3">Instant response from our team</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 pt-6 border-top">
+                            <h3 class="fw-bold mb-4">Visit Our Office</h3>
+                            <p class="text-muted mb-0" style="font-size: 1.1rem;">
+                                <i class="bi bi-geo-alt text-primary me-3 fs-4"></i>
+                                123 Solar Street, Lusaka, Zambia<br>
+                                <span class="ms-5">P.O. Box 12345</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- FAQ Section -->
+<section id="faq" class="py-8 bg-white">
+    <div class="container">
+        <div class="row justify-content-center mb-7">
+            <div class="col-lg-8 text-center">
+                <span class="badge bg-warning-subtle text-warning mb-4 px-3 py-2 fw-semibold animate-badge">COMMON QUESTIONS</span>
+                <h2 class="display-4 fw-bold mb-5">Frequently Asked Questions</h2>
+                <p class="text-muted lead" style="font-size: 1.25rem;">Quick answers to common questions about our solar solutions</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
                 <div class="accordion" id="faqAccordion">
-                    <div class="accordion-item border-0 shadow-sm mb-3">
+                    <div class="accordion-item border-0 shadow-sm mb-4 faq-item" data-aos="fade-up">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            <button class="accordion-button collapsed fw-bold fs-4 py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                <i class="bi bi-clock-history text-primary me-4"></i>
                                 How long does a solar installation take?
                             </button>
                         </h2>
                         <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body text-muted">
-                                Most residential installations take 2-5 days, while commercial projects can take 1-4 weeks depending on the scale and complexity.
+                            <div class="accordion-body text-muted fs-5 py-4">
+                                Most residential installations take 2-5 days, while commercial projects can take 1-4 weeks depending on the scale and complexity. We provide a detailed timeline during your free consultation.
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="accordion-item border-0 shadow-sm mb-3">
+
+                    <div class="accordion-item border-0 shadow-sm mb-4 faq-item" data-aos="fade-up" data-aos-delay="100">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            <button class="accordion-button collapsed fw-bold fs-4 py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                <i class="bi bi-tools text-primary me-4"></i>
                                 Do you provide maintenance services?
                             </button>
                         </h2>
                         <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body text-muted">
-                                Yes, we offer comprehensive maintenance plans including regular inspections, cleaning, and performance optimization to ensure your system operates at peak efficiency.
+                            <div class="accordion-body text-muted fs-5 py-4">
+                                Yes, we offer comprehensive maintenance plans including regular inspections, cleaning, and performance optimization to ensure your system operates at peak efficiency. All maintenance is performed by certified technicians.
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="accordion-item border-0 shadow-sm">
+
+                    <div class="accordion-item border-0 shadow-sm mb-4 faq-item" data-aos="fade-up" data-aos-delay="200">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            <button class="accordion-button collapsed fw-bold fs-4 py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                <i class="bi bi-shield-check text-primary me-4"></i>
                                 What warranty do you offer on installations?
                             </button>
                         </h2>
                         <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body text-muted">
-                                We provide a 5-year workmanship warranty on all installations, plus manufacturer warranties on equipment that typically range from 10-25 years.
+                            <div class="accordion-body text-muted fs-5 py-4">
+                                We provide a 5-year workmanship warranty on all installations, plus manufacturer warranties on equipment that vary depending on the specific products ordered.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item border-0 shadow-sm faq-item" data-aos="fade-up" data-aos-delay="300">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-bold fs-4 py-4" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                <i class="bi bi-coin text-primary me-4"></i>
+                                Do you offer financing options?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted fs-5 py-4">
+                                Yes! We partner with several financial institutions to offer flexible financing plans. Options include installment plans.
                             </div>
                         </div>
                     </div>
@@ -187,45 +318,520 @@
         </div>
     </div>
 </section>
+
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Map Section -->
+<section class="py-0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <!-- Map Container -->
+                <div class="bg-light position-relative" style="height: 450px; overflow: hidden;">
+                    <!-- Map Placeholder with interactive effect -->
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary opacity-10"></div>
+                    <div class="position-absolute top-50 start-50 translate-middle text-center map-content">
+                        <i class="bi bi-geo-alt-fill text-primary fs-1 mb-4 hover-bounce"></i>
+                        <h3 class="fw-bold mb-3">Lusaka, Zambia</h3>
+                        <p class="text-muted mb-4" style="font-size: 1.1rem;">Plot 13940 Meanwood Ibex Street, Lusaka, Zambia</p>
+                        <a href="" 
+                           target="_blank" 
+                           class="btn btn-primary btn-lg hover-scale">
+                            <i class="bi bi-arrow-up-right-square me-2"></i>Open in Google Maps
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Back to Top Button -->
+<button id="backToTop" class="btn btn-primary btn-lg rounded-circle position-fixed bottom-0 end-0 m-4 shadow-lg hover-scale" 
+        style="width: 60px; height: 60px; z-index: 1000; display: none;">
+    <i class="bi bi-arrow-up"></i>
+</button>
 
 {% endblock %}
 
 {% block extra_css %}
 <style>
-.hero-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+/* Custom Spacing Classes */
+.min-vh-85 { min-height: 85vh; }
+.py-6 { padding-top: 5rem !important; padding-bottom: 5rem !important; }
+.py-7 { padding-top: 6rem !important; padding-bottom: 6rem !important; }
+.py-8 { padding-top: 7rem !important; padding-bottom: 7rem !important; }
+.mb-6 { margin-bottom: 4rem !important; }
+.mb-7 { margin-bottom: 5rem !important; }
+.mt-6 { margin-top: 4rem !important; }
+.pt-6 { padding-top: 4rem !important; }
+
+/* Enhanced Hover effects */
+.hover-lift-strong {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.hover-lift-strong:hover {
+    transform: translateY(-15px);
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.2) !important;
 }
 
-.min-vh-50 {
-    min-height: 50vh;
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
 }
 
-.bg-primary-subtle {
-    background-color: rgba(13, 110, 253, 0.1) !important;
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
-.contact-icon {
-    transition: transform 0.2s ease-in-out;
+.hover-pulse {
+    animation: pulse 2s infinite;
 }
 
-.contact-icon:hover {
-    transform: scale(1.1);
+.hover-bounce {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.hover-bounce:hover {
+    transform: translateY(-10px);
 }
 
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.animate-float-1 {
+    animation: float 6s ease-in-out infinite;
+}
+.animate-float-2 {
+    animation: float 7s ease-in-out infinite;
+    animation-delay: 1s;
+}
+.animate-float-3 {
+    animation: float 8s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+}
+
+.animate-badge {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+/* Improved button styles */
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+    padding: 0.75rem 2rem;
+}
+.btn-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    border: none;
+    padding: 0.75rem 2rem;
+}
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border: none;
+    color: #000 !important;
+    padding: 0.75rem 2rem;
+}
+
+/* Contact icon animation */
+.contact-icon-animate {
+    transition: all 0.3s ease;
+}
+.contact-icon-animate:hover {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+}
+.contact-icon-animate:hover i {
+    color: white !important;
+}
+
+/* FAQ improvements */
+.faq-item {
+    transition: all 0.3s ease;
+}
+.faq-item:hover {
+    transform: translateX(10px);
+}
 .accordion-button:not(.collapsed) {
-    background-color: rgba(13, 110, 253, 0.05);
-    color: var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.08);
+    color: #0d6efd;
+    box-shadow: none;
+}
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+/* Map styling */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+}
+.map-content {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+}
+.map-content.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .display-2 {
+        font-size: 3rem;
+    }
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    .py-8 {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+    .mb-7 {
+        margin-bottom: 3rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .display-2 {
+        font-size: 2.5rem;
+    }
+    .display-4 {
+        font-size: 2rem;
+    }
+    .lead {
+        font-size: 1.1rem;
+    }
+    .card-body.p-5 {
+        padding: 2rem !important;
+    }
+}
+
+/* Custom card shadow enhancements */
+.card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1rem;
+}
+
+.card:hover {
+    border-color: rgba(13, 110, 253, 0.2);
+}
+
+/* Enhanced gradient backgrounds */
+.gradient-bg {
+    background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
+}
+
+/* Smooth scrolling for the whole page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom focus styles for accessibility */
+:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+/* Glass effect for cards */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.getElementById('contactForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    // For now, just show a success message
-    alert('Thank you for your message! We will get back to you within 24 hours.');
-    this.reset();
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            
+            if (href === '#' || href === '') return;
+            
+            e.preventDefault();
+            const targetElement = document.querySelector(href);
+            
+            if (targetElement) {
+                // Add smooth scroll
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+                
+                // Update URL without jumping
+                history.pushState(null, null, href);
+            }
+        });
+    });
+    
+    // Back to top button
+    const backToTopBtn = document.getElementById('backToTop');
+    
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.style.display = 'block';
+            setTimeout(() => {
+                backToTopBtn.style.opacity = '1';
+                backToTopBtn.style.transform = 'translateY(0)';
+            }, 10);
+        } else {
+            backToTopBtn.style.opacity = '0';
+            backToTopBtn.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                backToTopBtn.style.display = 'none';
+            }, 300);
+        }
+    });
+    
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Map content fade-in on scroll
+    const mapContent = document.querySelector('.map-content');
+    
+    function checkMapVisibility() {
+        const rect = mapContent.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        if (rect.top <= windowHeight * 0.8) {
+            mapContent.classList.add('visible');
+            window.removeEventListener('scroll', checkMapVisibility);
+        }
+    }
+    
+    window.addEventListener('scroll', checkMapVisibility);
+    checkMapVisibility(); // Check on load
+    
+    // FAQ accordion smooth animation
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(10px)';
+            this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.15)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Add click effect to buttons
+    document.querySelectorAll('.hover-scale').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.7);
+                transform: scale(0);
+                animation: ripple-animation 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                top: ${y}px;
+                left: ${x}px;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            // Remove ripple after animation
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Stagger animations for cards
+    const animatedCards = document.querySelectorAll('[data-aos]');
+    
+    function checkCardVisibility() {
+        animatedCards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            if (rect.top <= windowHeight * 0.85) {
+                const delay = card.getAttribute('data-aos-delay') || 0;
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                    card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                }, parseInt(delay));
+            }
+        });
+    }
+    
+    // Set initial state
+    animatedCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    });
+    
+    window.addEventListener('scroll', checkCardVisibility);
+    checkCardVisibility(); // Check on load
+    
+    // Add subtle parallax to hero elements
+    window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const heroSection = document.querySelector('.hero-section');
+        const floatingElements = document.querySelectorAll('.animate-float-1, .animate-float-2');
+        
+        if (heroSection) {
+            const rate = scrolled * -0.5;
+            floatingElements.forEach((el, index) => {
+                el.style.transform = `translateY(${rate * (index + 1) * 0.1}px) rotate(${rate * 0.05}deg)`;
+            });
+        }
+    });
+    
+    // Form submission simulation (for future use)
+    const contactButtons = document.querySelectorAll('a[href^="mailto:"], a[href*="whatsapp"]');
+    
+    contactButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Add loading state
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Opening...';
+            this.style.pointerEvents = 'none';
+            
+            // Reset after 2 seconds
+            setTimeout(() => {
+                this.innerHTML = originalHTML;
+                this.style.pointerEvents = 'auto';
+            }, 2000);
+            
+            // Track contact clicks (for analytics)
+            const contactMethod = this.href.includes('mailto') ? 'email' : 'whatsapp';
+            console.log(`Contact method clicked: ${contactMethod}`);
+        });
+    });
+    
+    // Animate badges on hover
+    const badges = document.querySelectorAll('.animate-badge, .badge');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Initialize tooltips for interactive elements
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Add scroll-based animations for sections
+    const sections = document.querySelectorAll('section');
+    
+    function animateSectionsOnScroll() {
+        sections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            if (rect.top <= windowHeight * 0.75) {
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+                section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            }
+        });
+    }
+    
+    // Set initial state for sections
+    sections.forEach(section => {
+        if (!section.classList.contains('hero-section')) {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        }
+    });
+    
+    window.addEventListener('scroll', animateSectionsOnScroll);
+    animateSectionsOnScroll(); // Check on load
+    
+    // Add keyboard navigation support
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            // Close any open accordions when Escape is pressed
+            const openAccordions = document.querySelectorAll('.accordion-button[aria-expanded="true"]');
+            openAccordions.forEach(accordion => {
+                accordion.click();
+            });
+        }
+    });
 });
 </script>
 {% endblock %}

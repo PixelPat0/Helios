@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Payment Instructions - Order #{{ order.id }} | Helios{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Order Confirmation Card -->
+            <div class="card mb-4 shadow-sm border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">✓ Order Created Successfully</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Order ID</h6>
+                            <h4 class="text-dark">#{{ order.id }}</h4>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Order Total</h6>
+                            <h4 class="text-success">K{{ order.amount_paid|floatformat:2 }}</h4>
+                        </div>
+                    </div>
+                    <hr />
+                    <p class="text-muted mb-0"><strong>Status:</strong> <span class="badge bg-warning">Awaiting Payment</span></p>
+                </div>
+            </div>
+
+            <!-- Payment Instructions Card -->
+            <div class="card mb-4 shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">📱 How to Complete Your Payment</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Your order is confirmed. Complete payment within <strong>24 hours</strong> to proceed to fulfillment.</p>
+
+                    <!-- Step 1: Prepare Payment -->
+                    <div class="step mb-4">
+                        <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <strong>1</strong>
+                        </div>
+                        <h5 class="mt-2">Open Your Mobile Money App</h5>
+                        <p class="text-muted">Airtel Money, MTN, or Zamtel Kwacha</p>
+                    </div>
+
+                    <!-- Step 2: Send Payment -->
+                    <div class="step mb-4">
+                        <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <strong>2</strong>
+                        </div>
+                        <h5 class="mt-2">Send Payment to This Account</h5>
+                        <div class="alert alert-light border border-secondary p-3">
+                            <p class="mb-1"><strong>Recipient:</strong> {{ brother_name }}</p>
+                            <p class="mb-1"><strong>Phone Number:</strong> <code class="bg-light p-2">{{ brother_number }}</code></p>
+                            <p class="mb-1"><strong>Amount:</strong> <code class="bg-light p-2">K{{ order.amount_paid|floatformat:2 }}</code></p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Include Payment Code -->
+                    <div class="step mb-4">
+                        <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <strong>3</strong>
+                        </div>
+                        <h5 class="mt-2">Use Your Payment Code as Reference</h5>
+                        <p class="text-muted">Enter this code in the payment message/description:</p>
+                        <div class="alert alert-warning p-3 text-center">
+                            <h4 class="mb-0 font-monospace"><strong>{{ payment_code }}</strong></h4>
+                            <small class="text-muted">Copy and paste exactly</small>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Confirmation -->
+                    <div class="step mb-4">
+                        <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <strong>4</strong>
+                        </div>
+                        <h5 class="mt-2">Payment Confirmation</h5>
+                        <p class="text-muted">Once we receive your payment, we'll verify it within 2-4 hours and send you an email confirmation. Your order will then move to processing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Example Payment Message -->
+            <div class="card mb-4 shadow-sm border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">💡 Example: What Your Payment Message Should Look Like</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light border border-secondary p-3 text-center">
+                        <p class="mb-0"><strong>Message/Description:</strong></p>
+                        <p class="font-monospace text-muted mb-0" style="font-size: 1.1em;">{{ payment_code }} - Helios Order</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Details Summary -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">📦 Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Customer Name:</strong> {{ order.full_name }}</p>
+                    <p><strong>Email:</strong> {{ order.email }}</p>
+                    <p><strong>Phone:</strong> {{ order.phone_number|default:"Not provided" }}</p>
+                    <p><strong>Order Date:</strong> {{ order.date_ordered|date:"M d, Y H:i" }}</p>
+                    <hr />
+                    <p class="text-muted"><small>A confirmation email has been sent to <strong>{{ order.email }}</strong> with these payment details.</small></p>
+                </div>
+            </div>
+
+            <!-- Support / Questions -->
+            <div class="card mb-4 shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">❓ Having Issues?</h5>
+                </div>
+                <div class="card-body">
+                    <p>If you have any questions or issues completing payment, please contact us:</p>
+                    <p>
+                        <strong>Email:</strong> <a href="mailto:{{ business_email }}">{{ business_email }}</a><br>
+                        <strong>WhatsApp:</strong> <a href="https://wa.me/260977000000" target="_blank">Message us</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2">
+                <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg">← Back to Shop</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'custom_order_detail' order.id %}" class="btn btn-primary btn-lg">View Order Details</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .step-number {
+        font-size: 1.1em;
+    }
+    .font-monospace {
+        font-family: 'Courier New', monospace;
+    }
+</style>
+
+{% endblock %}

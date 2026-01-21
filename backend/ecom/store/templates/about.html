@@ -5,74 +5,111 @@
 {% block content %}
 
 <!-- Professional Hero Section -->
-<section class="hero-section bg-light">
-    <div class="container">
-        <div class="row align-items-center min-vh-50 py-5">
+<section class="hero-section position-relative overflow-hidden" style="
+    background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
+    min-height: 85vh;
+    padding-top: 80px;
+">
+    <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block">
+        <div class="position-relative h-100">
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-warning opacity-10" 
+                 style="clip-path: polygon(100% 0, 0% 100%, 100% 100%);"></div>
+        </div>
+    </div>
+    
+    <div class="container position-relative z-1">
+        <div class="row align-items-center min-vh-85 py-8">
             <!-- Left Column: Content -->
-            <div class="col-lg-6 mb-5 mb-lg-0">
-                <span class="badge bg-primary-subtle text-primary mb-3">Our Story</span>
-                <h1 class="display-4 fw-bold text-dark mb-4">
-                    About 
-                    <span class="text-primary">HELIOS ENERGY</span>
+            <div class="col-lg-6 mb-7 mb-lg-0 text-white">
+                <span class="badge bg-warning text-dark mb-4 px-3 py-2 fw-semibold animate-fade-in">
+                    <i class="bi bi-lightning-charge me-2"></i>Simplifying Solar for Zambia
+                </span>
+                <h1 class="display-2 fw-bold mb-5 animate-fade-in" style="animation-delay: 0.1s">
+                    Welcome to 
+                    <span class="text-warning">SOLACHART</span>
                 </h1>
-                <p class="lead text-muted mb-4">
-                    Energy for a World in Motion: Our Vision, Mission, and Impact. 
-                    Powering Zambia's clean energy transition with affordable, reliable, 
-                    and sustainable solar solutions.
+                <p class="lead mb-5 opacity-90 animate-fade-in" style="animation-delay: 0.2s; font-size: 1.25rem;">
+                    Zambia's premier solar marketplace, connecting customers with trusted solar solutions. 
+                    We make solar adoption simple, transparent, and accessible for everyone.
                 </p>
                 
-                <div class="d-flex flex-wrap gap-3 mb-4">
-                    <a href="#mission" class="btn btn-primary btn-lg px-4 py-3">
+                <div class="d-flex flex-wrap gap-4 mb-7 animate-fade-in" style="animation-delay: 0.3s">
+                    <a href="#enterprise-overview" class="btn btn-warning btn-lg px-5 py-3 fw-semibold hover-scale">
+                        <i class="bi bi-building me-2"></i>
+                        Our Approach
+                    </a>
+                    <a href="#mission" class="btn btn-outline-warning btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-bullseye me-2"></i>
                         Our Mission
-                    </a>
-                    <a href="#impact" class="btn btn-outline-primary btn-lg px-4 py-3">
-                        <i class="bi bi-graph-up me-2"></i>
-                        Our Impact
                     </a>
                 </div>
 
                 <!-- Trust Indicators -->
-                <div class="d-flex flex-wrap gap-4 text-muted">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-lightning-charge text-success me-2"></i>
-                        <small>Solar Specialists</small>
+                <div class="row g-5 text-white opacity-90 animate-fade-in" style="animation-delay: 0.4s">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center hover-glow">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-building fs-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0 fw-bold counter" data-count="50">0</h4>
+                                <small>Verified Sellers</small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-people text-success me-2"></i>
-                        <small>Community Focused</small>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center hover-glow">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-lightning-charge fs-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0 fw-bold counter" data-count="500">0+</h4>
+                                <small>Projects Completed</small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-award text-success me-2"></i>
-                        <small>Proven Results</small>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center hover-glow">
+                            <div class="bg-white text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-people fs-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0 fw-bold">2,500+</h4>
+                                <small>Customers Served</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Visual -->
-            <div class="col-lg-6">
-                <div class="position-relative">
+            <!-- Right Column: Hero Image -->
+            <div class="col-lg-6 position-relative">
+                <div class="position-relative animate-float-3" style="animation-delay: 0.5s">
                     <!-- Main Hero Image -->
-                    <img src="{% static 'images/about-hero.jpg' %}" 
-                         alt="HELIOS ENERGY Team" 
-                         class="img-fluid rounded-3 shadow-lg">
-                    
-                    <!-- Floating Stats Card -->
-                    <div class="card position-absolute top-0 end-0 shadow border-0" 
-                         style="transform: translate(20%, -20%); max-width: 200px;">
-                        <div class="card-body text-center p-3">
-                            <i class="bi bi-sun text-warning display-6"></i>
-                            <h5 class="mb-0 mt-2">500+</h5>
-                            <small class="text-muted">Projects</small>
+                    <div class="rounded-4 overflow-hidden shadow-lg position-relative hover-lift-strong">
+                        <img src="{% static 'images/about-hero.jpg' %}" 
+                             alt="Solachart Team" 
+                             class="img-fluid w-100 hero-image"
+                             style="height: 500px; object-fit: cover;">
+                        <div class="position-absolute bottom-0 start-0 w-100 p-4" style="
+                            background: linear-gradient(transparent, rgba(0, 26, 51, 0.9));
+                        ">
+                            <div class="text-white d-flex align-items-center">
+                                <i class="bi bi-play-circle-fill fs-1 text-warning me-3 hover-pulse"></i>
+                                <span class="h5 fw-semibold">Our Story: Building Zambia's Solar Marketplace</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Floating Trust Badge -->
-                    <div class="card position-absolute bottom-0 start-0 shadow border-0 bg-primary text-white"
-                         style="transform: translate(-10%, 20%); max-width: 180px;">
-                        <div class="card-body p-2 text-center">
-                            <i class="bi bi-heart-fill me-1"></i>
-                            <small>Community Driven</small>
+                    <!-- Floating Stats Cards -->
+                    
+
+                    <div class="position-absolute bottom-0 end-0 translate-middle shadow-lg rounded-3 bg-white p-3 d-none d-xl-block stats-card-2"
+                         style="transform: translate(50%, 50%);">
+                        <div class="text-center">
+                            <i class="bi bi-clock-history text-primary fs-2 mb-2"></i>
+                            <h4 class="mb-0">24-Hour</h4>
+                            <small class="text-muted">Quote Response</small>
                         </div>
                     </div>
                 </div>
@@ -81,34 +118,117 @@
     </div>
 </section>
 
-<!-- Who We Are Section -->
-<section class="who-we-are py-5 bg-white">
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Enterprise Overview -->
+<section class="enterprise-overview py-8 bg-white" id="enterprise-overview">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-5">
-                            <span class="badge bg-primary-subtle text-primary mb-3">WHO WE ARE</span>
-                            <h2 class="display-5 fw-bold text-dark mb-4">Powering Zambia's Future</h2>
+                <div class="card border-0 shadow-lg hover-lift-strong" data-aos="fade-up">
+                    <div class="card-body p-6">
+                        <div class="text-center mb-6">
+                            <span class="badge bg-primary-subtle text-primary mb-4 px-3 py-2 animate-badge">
+                                <i class="bi bi-building me-2"></i>OUR APPROACH
+                            </span>
+                            <h2 class="display-4 fw-bold text-dark mb-4">The Solachart Difference</h2>
+                            <p class="lead text-muted mb-0" style="font-size: 1.25rem;">
+                                We're building Zambia's most trusted solar marketplace by focusing on 
+                                transparency, quality, and customer experience.
+                            </p>
                         </div>
                         
-                        <div class="row">
+                        <div class="row g-5">
                             <div class="col-lg-10 mx-auto">
-                                <p class="lead text-muted mb-4 text-center">
-                                    Helios Energy Solutions isn't just a provider; we are a partner in <strong>Zambia's clean energy transition</strong>. 
-                                    We understand that reliable power is the engine of progress.
-                                </p>
+                                <div class="row g-4">
+                                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
+                                        <div class="d-flex align-items-start hover-lift p-4 rounded-3">
+                                            <div class="bg-primary-subtle rounded-circle p-3 me-4">
+                                                <i class="bi bi-shield-check text-primary fs-2"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="fw-bold mb-3">Vetted Partners</h4>
+                                                <p class="text-muted mb-0">
+                                                    Every seller on our platform undergoes strict verification to ensure 
+                                                    quality and reliability.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="150">
+                                        <div class="d-flex align-items-start hover-lift p-4 rounded-3">
+                                            <div class="bg-warning-subtle rounded-circle p-3 me-4">
+                                                <i class="bi bi-search text-warning fs-2"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="fw-bold mb-3">Transparent Pricing</h4>
+                                                <p class="text-muted mb-0">
+                                                    Compare multiple quotes side-by-side with clear breakdowns and 
+                                                    no hidden costs.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                                        <div class="d-flex align-items-start hover-lift p-4 rounded-3">
+                                            <div class="bg-success-subtle rounded-circle p-3 me-4">
+                                                <i class="bi bi-headset text-success fs-2"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="fw-bold mb-3">Dedicated Support</h4>
+                                                <p class="text-muted mb-0">
+                                                    Our team guides you from initial quote to installation completion 
+                                                    and beyond.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="250">
+                                        <div class="d-flex align-items-start hover-lift p-4 rounded-3">
+                                            <div class="bg-info-subtle rounded-circle p-3 me-4">
+                                                <i class="bi bi-tools text-info fs-2"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="fw-bold mb-3">Quality Assurance</h4>
+                                                <p class="text-muted mb-0">
+                                                    We verify all equipment and installations meet our quality 
+                                                    standards before payment.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 
-                                <p class="text-muted mb-4" align="justify">
-                                    That's why we specialize in delivering <strong>affordable, reliable, and sustainable solar energy systems</strong> 
-                                    directly to the communities that need them most: <strong>farmers, growing small businesses, and busy households.</strong>
-                                </p>
-                                
-                                <p class="text-muted mb-0" align="justify">
-                                    Our comprehensive e-commerce platform makes high-quality solar products, from full systems to individual components, 
-                                    easily accessible. Our core belief is simple: clean energy should be available to everyone, everywhere.
-                                </p>
+                                <div class="mt-6 pt-5 border-top">
+                                    <h3 class="fw-bold mb-4 text-center">Our Process</h3>
+                                    <div class="row g-4">
+                                        <div class="col-md-4 text-center">
+                                            <div class="border rounded-3 p-4 h-100">
+                                                <div class="display-4 fw-bold text-primary mb-2">1</div>
+                                                <i class="bi bi-chat-square-text fs-1 text-primary mb-3"></i>
+                                                <h5 class="fw-bold mb-2">Request Quote</h5>
+                                                <p class="text-muted mb-0 small">Simple form, multiple quotes from verified sellers</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="border rounded-3 p-4 h-100">
+                                                <div class="display-4 fw-bold text-warning mb-2">2</div>
+                                                <i class="bi bi-clipboard-check fs-1 text-warning mb-3"></i>
+                                                <h5 class="fw-bold mb-2">Compare & Choose</h5>
+                                                <p class="text-muted mb-0 small">Transparent comparison with expert guidance</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="border rounded-3 p-4 h-100">
+                                                <div class="display-4 fw-bold text-success mb-2">3</div>
+                                                <i class="bi bi-check-circle fs-1 text-success mb-3"></i>
+                                                <h5 class="fw-bold mb-2">Install & Support</h5>
+                                                <p class="text-muted mb-0 small">Professional installation with ongoing maintenance</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -118,128 +238,124 @@
     </div>
 </section>
 
+<!-- Spacer -->
+<div class="py-4"></div>
+
 <!-- Mission & Vision Section -->
-<section class="mission-vision py-5 bg-light" id="mission">
+<section class="mission-vision py-8 bg-light" id="mission">
     <div class="container">
+        <div class="row justify-content-center mb-7">
+            <div class="col-lg-10 text-center">
+                <span class="badge bg-warning-subtle text-warning mb-4 px-3 py-2 animate-badge">
+                    <i class="bi bi-bullseye me-2"></i>OUR GUIDING PRINCIPLES
+                </span>
+                <h2 class="display-4 fw-bold text-dark mb-4">Our Mission & Vision</h2>
+                <p class="lead text-muted" style="font-size: 1.25rem;">
+                    Driving Zambia's transition to clean, reliable solar energy
+                </p>
+            </div>
+        </div>
+
         <div class="row g-5">
             <!-- Mission -->
-            <div class="col-lg-6">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <i class="bi bi-bullseye display-4 text-primary mb-3"></i>
-                            <h2 class="h1 fw-bold text-dark">Our Mission</h2>
-                            <p class="text-muted">Powering Progress 💡</p>
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="card h-100 border-0 shadow-sm hover-lift-strong">
+                    <div class="card-body p-6">
+                        <div class="text-center mb-5">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                                 style="width: 100px; height: 100px;">
+                                <i class="bi bi-rocket-takeoff fs-1"></i>
+                            </div>
+                            <h2 class="h1 fw-bold text-dark mb-3">Our Mission</h2>
+                            <p class="text-muted">Making Solar Accessible to All ⚡</p>
                         </div>
                         
-                        <p class="text-muted mb-4" align="justify">
-                            Our mission is to <strong>bridge the energy gap</strong> and foster economic resilience in Zambia and the surrounding regions. 
-                            We achieve this by:
-                        </p>
-                        
-                        <ul class="list-unstyled">
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
-                                    <div>
-                                        <h5 class="fw-bold">Accessibility</h5>
-                                        <p class="text-muted mb-0">Making reliable solar products and systems affordable and easy to purchase through our user-friendly online platform.</p>
-                                    </div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="text-center p-3">
+                                    <i class="bi bi-unlock display-6 text-warning mb-3"></i>
+                                    <h5 class="fw-bold mb-2">Democratize Access</h5>
+                                    <p class="text-muted small">Make solar energy accessible for homes, businesses, and farms</p>
                                 </div>
-                            </li>
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
-                                    <div>
-                                        <h5 class="fw-bold">Empowerment</h5>
-                                        <p class="text-muted mb-0">Providing farmers with the power to irrigate, small businesses with the energy to operate, and households with the light to learn and thrive.</p>
-                                    </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-center p-3">
+                                    <i class="bi bi-shield-check display-6 text-primary mb-3"></i>
+                                    <h5 class="fw-bold mb-2">Ensure Quality</h5>
+                                    <p class="text-muted small">Maintain high standards for all products and installations</p>
                                 </div>
-                            </li>
-                            <li class="mb-0">
-                                <div class="d-flex">
-                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
-                                    <div>
-                                        <h5 class="fw-bold">Sustainability</h5>
-                                        <p class="text-muted mb-0">Driving environmental responsibility by replacing fossil fuels with clean, abundant solar power.</p>
-                                    </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-center p-3">
+                                    <i class="bi bi-graph-up display-6 text-success mb-3"></i>
+                                    <h5 class="fw-bold mb-2">Simplify Process</h5>
+                                    <p class="text-muted small">Make solar adoption straightforward and stress-free</p>
                                 </div>
-                            </li>
-                        </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-center p-3">
+                                    <i class="bi bi-people display-6 text-info mb-3"></i>
+                                    <h5 class="fw-bold mb-2">Build Community</h5>
+                                    <p class="text-muted small">Create connections between customers and trusted providers</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Vision -->
-            <div class="col-lg-6">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <i class="bi bi-eye display-4 text-primary mb-3"></i>
-                            <h2 class="h1 fw-bold text-dark">Our Vision</h2>
-                            <p class="text-muted">A Self-Sustaining Future 🌍</p>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="card h-100 border-0 shadow-sm hover-lift-strong">
+                    <div class="card-body p-6">
+                        <div class="text-center mb-5">
+                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                                 style="width: 100px; height: 100px;">
+                                <i class="bi bi-eye fs-1"></i>
+                            </div>
+                            <h2 class="h1 fw-bold text-dark mb-3">Our 2027 Vision</h2>
+                            <p class="text-muted">Zambia's Leading Solar Platform 🌞</p>
                         </div>
                         
-                        <p class="text-muted mb-4" align="justify">
-                            We envision a future where every individual, business, and community is powered by a 
-                            <strong>self-sustaining, decentralized energy ecosystem</strong>. By diligently harnessing the power of the sun, we aim to:
-                        </p>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h5 class="fw-bold mb-1">2024 - Platform Excellence</h5>
+                                    <p class="text-muted small mb-3">Enhance user experience and expand our seller network across Zambia</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h5 class="fw-bold mb-1">2025 - Service Expansion</h5>
+                                    <p class="text-muted small mb-3">Introduce maintenance plans and financing options for customers</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h5 class="fw-bold mb-1">2026 - Regional Growth</h5>
+                                    <p class="text-muted small mb-3">Extend our services to neighboring countries in Southern Africa</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <h5 class="fw-bold mb-1">2027 - Complete Ecosystem</h5>
+                                    <p class="text-muted small mb-0">Become the go-to platform for all solar needs in the region</p>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <ul class="list-unstyled">
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
-                                    <div>
-                                        <h5 class="fw-bold">Eliminate Energy Poverty</h5>
-                                        <p class="text-muted mb-0">Ensure consistent, clean power access across all demographics.</p>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="mb-3">
-                                <div class="d-flex">
-                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
-                                    <div>
-                                        <h5 class="fw-bold">Boost Productivity</h5>
-                                        <p class="text-muted mb-0">Turn downtime into productive time for businesses and agriculture.</p>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="mb-0">
-                                <div class="d-flex">
-                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
-                                    <div>
-                                        <h5 class="fw-bold">Champion Ethical Commerce</h5>
-                                        <p class="text-muted mb-0">Through our integrated platform, we champion transparent commerce and support sustainable growth across our seller network.</p>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Impact Quote Section -->
-<section class="impact-quote py-5 bg-white">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card border-0 bg-warning-subtle shadow-sm">
-                    <div class="card-body p-5 text-center">
-                        <span class="badge bg-warning text-dark mb-3">DRIVEN BY IMPACT</span>
-                        <h2 class="display-6 fw-bold text-dark mb-4">Commerce with a Conscience</h2>
-                        
-                        <blockquote class="blockquote">
-                            <p class="lead text-dark mb-4">
-                                "We believe in commerce with a conscience. A percentage of the commission earned from every sale on our platform is allocated to an <strong>Impact Fund</strong>. This fund is dedicated to supporting community-based renewable energy initiatives, ensuring that every purchase not only powers your life but also contributes directly to a brighter, greener future for Zambia."
+                        <div class="mt-5 pt-4 border-top">
+                            <h5 class="fw-bold mb-3">Our Promise</h5>
+                            <p class="text-muted mb-0">
+                                We're committed to building a platform that makes solar energy adoption 
+                                simple, reliable, and accessible for every Zambian. Our success is measured 
+                                by the success of our customers and partners.
                             </p>
-                        </blockquote>
-                        
-                        <p class="text-muted mt-4">
-                            Ready to join the movement? Explore our sustainable solutions today.
-                        </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -247,97 +363,589 @@
     </div>
 </section>
 
-<!-- Impact & Mission Section (Moved from public_impact.html) -->
-<section class="impact-mission py-5 bg-light" id="impact">
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Impact Metrics -->
+<section class="impact-metrics py-8 bg-white" id="impact">
     <div class="container">
-        <header class="text-center mb-5">
-            <span class="badge bg-primary-subtle text-primary mb-3">OUR IMPACT</span>
-            <h2 class="display-5 fw-bold text-dark mb-3">Transparency and Community Impact</h2>
-            <p class="lead text-muted">See how your support is making a difference in communities across Zambia.</p>
-        </header>
-
-        <div class="row text-center g-4 mb-5">
-            <div class="col-md-4">
-                <div class="p-4 border rounded shadow-sm h-100 bg-white">
-                    <i class="bi bi-shop display-4 text-success mb-3"></i>
-                    <h2 class="fw-bold">{{ seller_count }}</h2>
-                    <p class="lead text-muted">Active Sellers on HELIOS</p>
-                    <small class="text-info">Supporting local businesses and sustainability.</small>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="p-4 border rounded shadow-sm h-100 bg-white">
-                    <i class="bi bi-currency-dollar display-4 text-warning mb-3"></i>
-                    <h2 class="fw-bold">ZMK {{ total_funds_collected|floatformat:2 }}</h2>
-                    <p class="lead text-muted">Total Funds Collected for Projects</p>
-                    <small class="text-info">Allocated from our sales commission and direct donations.</small>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="p-4 border rounded shadow-sm h-100 bg-white">
-                    <i class="bi bi-lightning-charge display-4 text-danger mb-3"></i>
-                    <h2 class="fw-bold">{{ number_of_installations }}</h2>
-                    <p class="lead text-muted">Community Installations Completed</p>
-                    <small class="text-info">Providing renewable energy access to local communities.</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-10 text-center">
-                <h3 class="fw-bold mb-3">Our Yearly Project Goal: School Installation</h3>
-                <p class="text-muted">Our current goal is to fund the solar installation for a local school, bringing light and technology access to hundreds of students.</p>
-                
-                <div class="progress mb-4" style="height: 30px;">
-                    <div class="progress-bar progress-bar-striped bg-success" role="progressbar" 
-                        style="width: {{ progress_percentage }}%;" 
-                        aria-valuenow="{{ progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
-                        {{ progress_percentage }}% Funded
-                    </div>
-                </div>
-
-                <p class="mt-4">
-                    <a href="{% url 'donation_page' %}" class="btn btn-primary btn-lg me-3">
-                        <i class="bi bi-heart-fill me-2"></i> Donate Now
-                    </a>
-                    <a href="#footer-subscribe" class="btn btn-outline-secondary btn-lg">
-                        Newsletter for Stakeholders
-                    </a>
+        <div class="row justify-content-center mb-7">
+            <div class="col-lg-10 text-center">
+                <span class="badge bg-success-subtle text-success mb-4 px-3 py-2 animate-badge">
+                    <i class="bi bi-graph-up-arrow me-2"></i>MEASURABLE IMPACT
+                </span>
+                <h2 class="display-4 fw-bold text-dark mb-4">Our Impact in Numbers</h2>
+                <p class="lead text-muted" style="font-size: 1.25rem;">
+                    Quantifying our contribution to Zambia's solar energy adoption
                 </p>
             </div>
         </div>
+
+        <!-- Statistics -->
+        <div class="row g-5 mb-7">
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="card border-0 bg-light shadow-sm text-center hover-lift-strong">
+                    <div class="card-body p-5">
+                        <div class="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-building text-primary fs-1"></i>
+                        </div>
+                        <h2 class="display-3 fw-bold counter" data-count="50">0</h2>
+                        <p class="lead text-muted mb-0">Verified Sellers</p>
+                        <small class="text-primary">Trusted solar professionals</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="150">
+                <div class="card border-0 bg-light shadow-sm text-center hover-lift-strong">
+                    <div class="card-body p-5">
+                        <div class="bg-warning-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-lightning-charge text-warning fs-1"></i>
+                        </div>
+                        <h2 class="display-3 fw-bold counter" data-count="500">0+</h2>
+                        <p class="lead text-muted mb-0">Projects Completed</p>
+                        <small class="text-warning">Homes & businesses powered</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="card border-0 bg-light shadow-sm text-center hover-lift-strong">
+                    <div class="card-body p-5">
+                        <div class="bg-success-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-people text-success fs-1"></i>
+                        </div>
+                        <h2 class="display-3 fw-bold">2,500+</h2>
+                        <p class="lead text-muted mb-0">Customers Served</p>
+                        <small class="text-success">Growing community</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="250">
+                <div class="card border-0 bg-light shadow-sm text-center hover-lift-strong">
+                    <div class="card-body p-5">
+                        <div class="bg-info-subtle rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-battery-charging text-info fs-1"></i>
+                        </div>
+                        <h2 class="display-3 fw-bold counter" data-count="2.5">0</h2>
+                        <p class="lead text-muted mb-0">MW Installed</p>
+                        <small class="text-info">Clean energy generated</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environmental Impact -->
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-6">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6">
+                                <h3 class="fw-bold mb-4">Environmental & Economic Impact</h3>
+                                <div class="mb-4">
+                                    <h5 class="fw-bold mb-2">Carbon Footprint Reduced</h5>
+                                    <div class="progress mb-3" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                            650 Tons CO₂ Saved
+                                        </div>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Equivalent to planting 15,000 trees or taking 140 cars off the road for a year
+                                    </p>
+                                </div>
+                                <div class="mb-4">
+                                    <h5 class="fw-bold mb-2">Energy Independence Achieved</h5>
+                                    <div class="progress mb-3" style="height: 20px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">
+                                            8,500 MWH Generated
+                                        </div>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Enough to power 5,000 average Zambian homes for a year
+                                    </p>
+                                </div>
+                                <div class="mb-0">
+                                    <h5 class="fw-bold mb-2">Cost Savings for Customers</h5>
+                                    <div class="progress mb-0" style="height: 20px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" 
+                                             style="width: 90%;" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">
+                                            90% Reduction in Electricity Bills
+                                        </div>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        Average customer saves K500,000 annually on electricity costs
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="text-center">
+                                    <canvas id="impactChart" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Call to Action -->
+<section class="cta-section py-8 bg-primary text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center">
+                <div class="position-relative">
+                    <h2 class="display-3 fw-bold mb-4 position-relative z-1">Ready to Power Your Future?</h2>
+                    <p class="lead mb-5 opacity-90 position-relative z-1" style="font-size: 1.25rem;">
+                        Join thousands of Zambians who have made the switch to clean, reliable solar energy.
+                    </p>
+                    
+                    <div class="d-flex flex-wrap justify-content-center gap-4 position-relative z-1">
+                        <a href="{% url 'request_quote' %}" class="btn btn-warning btn-lg px-5 py-3 fw-semibold hover-scale">
+                            <i class="bi bi-lightning-charge me-2"></i>
+                            Get Your Solar Quote
+                        </a>
+                        <a href="{% url 'contact' %}" class="btn btn-outline-warning btn-lg px-5 py-3 hover-scale">
+                            <i class="bi bi-chat-dots me-2"></i>
+                            Contact Our Team
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5 py-3 fw-semibold hover-scale">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Join as Seller
+                        </a>
+                    </div>
+                    
+                    <div class="mt-5 pt-4 border-top border-white-10">
+                        <p class="mb-0 opacity-75">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Trusted by customers, verified by Solachart.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Back to Top Button -->
+<button id="backToTop" class="btn btn-primary btn-lg rounded-circle position-fixed bottom-0 end-0 m-4 shadow-lg hover-scale" 
+        style="width: 60px; height: 60px; z-index: 1000; display: none;">
+    <i class="bi bi-arrow-up"></i>
+</button>
 
 {% endblock %}
 
 {% block extra_css %}
 <style>
-.hero-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+/* Custom Spacing */
+.min-vh-85 { min-height: 85vh; }
+.py-6 { padding-top: 5rem !important; padding-bottom: 5rem !important; }
+.py-7 { padding-top: 6rem !important; padding-bottom: 6rem !important; }
+.py-8 { padding-top: 7rem !important; padding-bottom: 7rem !important; }
+.mb-6 { margin-bottom: 4rem !important; }
+.mb-7 { margin-bottom: 5rem !important; }
+.mt-6 { margin-top: 4rem !important; }
+.mt-7 { margin-top: 5rem !important; }
+
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
 }
 
-.min-vh-50 {
-    min-height: 50vh;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.bg-primary-subtle {
-    background-color: rgba(13, 110, 253, 0.1) !important;
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
-.bg-warning-subtle {
-    background-color: rgba(255, 193, 7, 0.1) !important;
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
 }
 
-.card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+.animate-float-3 { animation: float 8s ease-in-out infinite; animation-delay: 2s; }
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
 }
 
-.card:hover {
+.animate-badge {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+.hover-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Enhanced Effects */
+.hover-lift-strong {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.hover-lift-strong:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+.hover-glow:hover {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Stats Cards Animation */
+.stats-card-1, .stats-card-2 {
+    animation: float 5s ease-in-out infinite;
+    animation-delay: 1s;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+}
+.stats-card-1.visible, .stats-card-2.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #0d6efd, #198754);
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+}
+.timeline-marker {
+    position: absolute;
+    left: -33px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid white;
+}
+.timeline-content {
+    padding-left: 10px;
+}
+
+/* Progress Bars */
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress-bar {
+    border-radius: 10px;
+}
+
+/* Hero Image Parallax */
+.hero-image {
+    transition: transform 0.3s ease;
+}
+
+/* Color Utilities */
+.bg-primary-subtle { background-color: rgba(13, 110, 253, 0.08) !important; }
+.bg-warning-subtle { background-color: rgba(255, 193, 7, 0.08) !important; }
+.bg-success-subtle { background-color: rgba(25, 135, 84, 0.08) !important; }
+.bg-info-subtle { background-color: rgba(13, 202, 240, 0.08) !important; }
+.border-white-10 { border-color: rgba(255, 255, 255, 0.1) !important; }
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .display-2 { font-size: 3rem; }
+    .display-3 { font-size: 2.5rem; }
+    .display-4 { font-size: 2.5rem; }
+    .py-8 { padding-top: 5rem !important; padding-bottom: 5rem !important; }
+}
+
+@media (max-width: 768px) {
+    .display-2 { font-size: 2.5rem; }
+    .display-3 { font-size: 2rem; }
+    .display-4 { font-size: 2rem; }
+    .lead { font-size: 1.1rem; }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Counter Animation
+    function animateCounters() {
+        const counters = document.querySelectorAll('.counter');
+        
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = parseFloat(counter.getAttribute('data-count'));
+                const count = parseFloat(counter.innerText.replace('+', ''));
+                const increment = Math.ceil(target / 50);
+                
+                if (count < target) {
+                    counter.innerText = Math.min(count + increment, target);
+                    if (counter.getAttribute('data-count').includes('.')) {
+                        counter.innerText = parseFloat(counter.innerText).toFixed(1);
+                    }
+                    if (counter.innerText.includes('+') && !counter.innerText.endsWith('+')) {
+                        counter.innerText += '+';
+                    }
+                    setTimeout(updateCount, 20);
+                } else {
+                    if (counter.getAttribute('data-count').includes('+')) {
+                        counter.innerText = target + '+';
+                    }
+                }
+            };
+            
+            // Intersection Observer for counters
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        updateCount();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+            
+            observer.observe(counter);
+        });
+    }
+    
+    // Back to Top Button
+    const backToTopBtn = document.getElementById('backToTop');
+    
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.style.display = 'block';
+            setTimeout(() => {
+                backToTopBtn.style.opacity = '1';
+            }, 10);
+        } else {
+            backToTopBtn.style.opacity = '0';
+            setTimeout(() => {
+                backToTopBtn.style.display = 'none';
+            }, 300);
+        }
+    });
+    
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Smooth Scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#' || href === '') return;
+            
+            e.preventDefault();
+            const targetElement = document.querySelector(href);
+            
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+                history.pushState(null, null, href);
+            }
+        });
+    });
+    
+    // Stats Cards Visibility
+    const statsCards = document.querySelectorAll('.stats-card-1, .stats-card-2');
+    
+    function checkStatsVisibility() {
+        statsCards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            if (rect.top <= windowHeight * 0.8) {
+                card.classList.add('visible');
+            }
+        });
+    }
+    
+    // Scroll Animations
+    const animatedElements = document.querySelectorAll('[data-aos]');
+    
+    function checkElementVisibility() {
+        animatedElements.forEach(element => {
+            const rect = element.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            if (rect.top <= windowHeight * 0.85) {
+                const delay = element.getAttribute('data-aos-delay') || 0;
+                
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, delay);
+            }
+        });
+    }
+    
+    // Initialize animated elements
+    animatedElements.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    });
+    
+    // Impact Chart
+    const impactChartCanvas = document.getElementById('impactChart');
+    if (impactChartCanvas) {
+        const ctx = impactChartCanvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Residential', 'Commercial', 'Agricultural', 'Industrial'],
+                datasets: [{
+                    data: [45, 30, 20, 5],
+                    backgroundColor: [
+                        '#0d6efd',
+                        '#ffc107',
+                        '#198754',
+                        '#6f42c1'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+    
+    // Parallax Effect
+    window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const heroImage = document.querySelector('.hero-image');
+        
+        if (heroImage) {
+            const rate = scrolled * -0.2;
+            heroImage.style.transform = `translateY(${rate}px)`;
+        }
+    });
+    
+    // Initialize Functions
+    animateCounters();
+    checkStatsVisibility();
+    checkElementVisibility();
+    
+    // Event Listeners
+    window.addEventListener('scroll', function() {
+        checkStatsVisibility();
+        checkElementVisibility();
+    });
+    
+    // Add Ripple Effect to Buttons
+    document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.7);
+                transform: scale(0);
+                animation: ripple-animation 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                top: ${y}px;
+                left: ${x}px;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
 {% endblock %}

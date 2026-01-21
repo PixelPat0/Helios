@@ -1,8 +1,22 @@
 # store/admin.py
 from django.contrib import admin
-from .models import Category, Customer, Product, Profile, QuoteRequest, SellerQuote
+from .models import Category, Customer, Product, Profile, QuoteRequest, SellerQuote, ContactMessage
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
+
+
+
+#Contact stuff
+@admin.action(description="Mark selected messages as read")
+def mark_as_read(modeladmin, request, queryset):
+    queryset.update(is_read=True)
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'email', 'subject', 'subscribe_newsletter', 'is_read', 'created_at')
+    list_filter = ('is_read', 'subscribe_newsletter', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    actions = [mark_as_read]
 
 # ---------------------------
 # Register store models safely

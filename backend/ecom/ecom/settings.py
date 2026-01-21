@@ -131,4 +131,9 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@helios.example')
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
 TEST_SELLER_EMAIL = os.getenv('TEST_SELLER_EMAIL', 'test.seller@example.com')
 
+# MVP Payment System Settings
+BROTHER_PHONE_NUMBER = os.getenv('BROTHER_PHONE_NUMBER', '+260977XXXXXX')
+BROTHER_NAME = os.getenv('BROTHER_NAME', 'Helios Zambia (Brother Account)')
+BUSINESS_CONTACT_EMAIL = os.getenv('BUSINESS_CONTACT_EMAIL', 'helios.zambia@example.com')
+
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

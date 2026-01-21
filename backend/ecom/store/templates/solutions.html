@@ -10,68 +10,73 @@
     min-height: 85vh;
     padding-top: 80px;
 ">
+    <!-- Floating Background Elements -->
     <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block">
         <div class="position-relative h-100">
             <div class="position-absolute top-0 start-0 w-100 h-100 bg-warning opacity-10" style="clip-path: polygon(100% 0, 0% 100%, 100% 100%);"></div>
         </div>
     </div>
     
+    <!-- Animated Background Shapes -->
+    
+    <div class="position-absolute bottom-30 end-30 w-20 h-20 rounded-circle bg-warning opacity-5 animate-float-2"></div>
+    
     <div class="container position-relative z-1">
-        <div class="row align-items-center min-vh-85 py-5">
+        <div class="row align-items-center min-vh-85 py-8">
             <!-- Left Column: Content -->
-            <div class="col-lg-6 mb-5 mb-lg-0 text-white">
-                <span class="badge bg-warning text-dark mb-3 px-3 py-2 fw-semibold">Mapping your solar journey</span>
-                <h1 class="display-3 fw-bold mb-4">
+            <div class="col-lg-6 mb-7 mb-lg-0 text-white">
+                <span class="badge bg-warning text-dark mb-4 px-3 py-2 fw-semibold animate-fade-in">Mapping your solar journey</span>
+                <h1 class="display-2 fw-bold mb-5 animate-fade-in" style="animation-delay: 0.1s">
                     Power Your Future With 
-                    <span class="text-warning">Clean Energy</span>
+                    <span class="text-warning">Solchart</span>
                 </h1>
-                <p class="lead mb-4 opacity-90">
+                <p class="lead mb-5 opacity-90 animate-fade-in" style="animation-delay: 0.2s; font-size: 1.25rem;">
                     Complete solar solutions for residential, commercial, and agricultural needs. 
                     Cutting-edge technology, expert installation, and unmatched reliability.
                 </p>
                 
-                <div class="d-flex flex-wrap gap-3 mb-5">
-                    <a href="#residential" class="btn btn-warning btn-lg px-5 py-3 fw-semibold">
+                <div class="d-flex flex-wrap gap-4 mb-7 animate-fade-in" style="animation-delay: 0.3s">
+                    <a href="#residential" class="btn btn-warning btn-lg px-5 py-3 fw-semibold hover-scale">
                         <i class="bi bi-house-door me-2"></i>
                         Residential Solutions
                     </a>
-                    <a href="{% url 'category_summary' %}" class="btn btn-outline-warning btn-lg px-5 py-3">
+                    <a href="{% url 'category_summary' %}" class="btn btn-outline-warning btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-shop me-2"></i>
                         Shop Solar Products
                     </a>
                 </div>
 
                 <!-- Trust Indicators -->
-                <div class="row g-4 text-white opacity-90">
+                <div class="row g-5 text-white opacity-90 animate-fade-in" style="animation-delay: 0.4s">
                     <div class="col-auto">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center hover-glow">
                             <div class="bg-white text-primary rounded-circle p-2 me-3">
                                 <i class="bi bi-award fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">500+</h5>
+                                <h4 class="mb-0 fw-bold counter" data-count="50">0</h4>
                                 <small>Installations</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-auto">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center hover-glow">
                             <div class="bg-white text-primary rounded-circle p-2 me-3">
                                 <i class="bi bi-shield-check fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">5+ Years</h5>
-                                <small>Experience</small>
+                                <h4 class="mb-0 fw-bold counter" data-count="5">0</h4>
+                                <small>Years Experience</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-auto">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center hover-glow">
                             <div class="bg-white text-primary rounded-circle p-2 me-3">
                                 <i class="bi bi-people fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">24/7</h5>
+                                <h4 class="mb-0 fw-bold">24/7</h4>
                                 <small>Support</small>
                             </div>
                         </div>
@@ -81,58 +86,61 @@
 
             <!-- Right Column: Hero Image -->
             <div class="col-lg-6 position-relative">
-                <div class="position-relative">
+                <div class="position-relative animate-float-3" style="animation-delay: 0.5s">
                     <!-- Main Hero Image -->
-                    <div class="rounded-4 overflow-hidden shadow-lg position-relative">
+                    <div class="rounded-4 overflow-hidden shadow-lg position-relative hover-lift-strong">
                         <img src="{% static 'images/solar-hero.jpg' %}" 
                              alt="Solar Installation" 
-                             class="img-fluid w-100"
+                             class="img-fluid w-100 hero-image"
                              style="height: 500px; object-fit: cover;">
                         <div class="position-absolute bottom-0 start-0 w-100 p-4" style="
                             background: linear-gradient(transparent, rgba(0, 26, 51, 0.9));
                         ">
-                            <div class="text-white">
-                                <i class="bi bi-play-circle-fill fs-1 text-warning me-3"></i>
+                            <div class="text-white d-flex align-items-center">
+                                <i class="bi bi-play-circle-fill fs-1 text-warning me-3 hover-pulse"></i>
                                 <span class="h5 fw-semibold">See Our Work in Action</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Floating Stats Cards -->
-                    <div class="position-absolute top-0 start-0 translate-middle shadow-lg rounded-3 bg-white p-3 d-none d-xl-block"
-                         style="transform: translate(-50%, -50%);">
-                        <div class="text-center">
-                            <i class="bi bi-lightning-charge-fill text-warning fs-2 mb-2"></i>
-                            <h4 class="mb-0">80%</h4>
-                            <small class="text-muted">Energy Savings</small>
-                        </div>
-                    </div>
+                    <div class="position-absolute top-0 start-0 translate-middle shadow-lg rounded-3 bg-white p-2 d-none d-xl-block stats-card-1"
+     style="transform: translate(-50%, -50%);">
+    <div class="text-center">
+        <i class="bi bi-lightning-charge-fill text-warning fs-4 mb-1"></i>
+        <h6 class="mb-0 counter fs-6" data-count="80">0%</h6>
+        <small class="text-muted">Energy Savings</small>
+    </div>
+</div>
 
-                    <div class="position-absolute bottom-0 end-0 translate-middle shadow-lg rounded-3 bg-white p-3 d-none d-xl-block"
-                         style="transform: translate(50%, 50%);">
-                        <div class="text-center">
-                            <i class="bi bi-graph-up-arrow text-success fs-2 mb-2"></i>
-                            <h4 class="mb-0">25 Years</h4>
-                            <small class="text-muted">Warranty</small>
-                        </div>
-                    </div>
+<div class="position-absolute bottom-0 end-0 translate-middle shadow-lg rounded-3 bg-white p-2 d-none d-xl-block stats-card-2"
+     style="transform: translate(50%, 50);">
+    <div class="text-center">
+        <i class="bi bi-graph-up-arrow text-success fs-4 mb-1"></i>
+        <h6 class="mb-0 counter fs-6" data-count="5">0</h6>
+        <small class="text-muted">Years Warranty</small>
+    </div>
+</div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- Spacer -->
+<div class="py-4"></div>
+
 <!-- Residential Solutions Section -->
-<section class="py-5 bg-white" id="residential">
+<section class="py-8 bg-white" id="residential">
     <div class="container">
-        <div class="row align-items-center g-5">
+        <div class="row align-items-center g-6">
             <!-- Image Column -->
             <div class="col-lg-6">
-                <div class="position-relative">
+                <div class="position-relative hover-lift-strong" data-aos="fade-right">
                     <img src="{% static 'images/homesolar.jpg' %}" 
                          alt="Residential Solar Installation" 
                          class="img-fluid rounded-4 shadow-lg">
-                    <div class="position-absolute bottom-0 end-0 bg-warning text-dark p-3 rounded-start shadow"
+                    <div class="position-absolute bottom-0 end-0 bg-warning text-dark p-4 rounded-start shadow hover-scale"
                          style="transform: translateY(50%);">
                         <h4 class="mb-0"><i class="bi bi-house-heart me-2"></i>Home Solutions</h4>
                     </div>
@@ -141,61 +149,61 @@
 
             <!-- Content Column -->
             <div class="col-lg-6">
-                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2">RESIDENTIAL SOLUTIONS</span>
-                <h2 class="display-5 fw-bold text-dark mb-4">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-4 px-3 py-2 animate-badge">RESIDENTIAL SOLUTIONS</span>
+                <h2 class="display-4 fw-bold text-dark mb-5" data-aos="fade-up">
                     Power Your Home with <span class="text-primary">Solar Energy</span>
                 </h2>
-                <p class="lead text-muted mb-4">
+                <p class="lead text-muted mb-5" style="font-size: 1.25rem;" data-aos="fade-up" data-aos-delay="100">
                     Reduce electricity bills and gain energy independence with our 
                     comprehensive residential solar solutions. Perfect for homes, 
                     apartments, and residential complexes.
                 </p>
                 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-start">
-                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="d-flex align-items-start hover-lift p-3 rounded-3">
+                            <i class="bi bi-check-circle-fill text-success fs-4 mt-1 me-3"></i>
                             <div>
-                                <h6 class="fw-bold">Rooftop Installations</h6>
-                                <small class="text-muted">Professional installation on any roof type</small>
+                                <h5 class="fw-bold mb-2">Rooftop Installations</h5>
+                                <p class="text-muted mb-0">Professional installation on any roof type</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-start">
-                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="250">
+                        <div class="d-flex align-items-start hover-lift p-3 rounded-3">
+                            <i class="bi bi-check-circle-fill text-success fs-4 mt-1 me-3"></i>
                             <div>
-                                <h6 class="fw-bold">Battery Backup</h6>
-                                <small class="text-muted">24/7 power with energy storage</small>
+                                <h5 class="fw-bold mb-2">Battery Backup</h5>
+                                <p class="text-muted mb-0">24/7 power with energy storage</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-start">
-                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="d-flex align-items-start hover-lift p-3 rounded-3">
+                            <i class="bi bi-check-circle-fill text-success fs-4 mt-1 me-3"></i>
                             <div>
-                                <h6 class="fw-bold">Smart Monitoring</h6>
-                                <small class="text-muted">Real-time energy tracking</small>
+                                <h5 class="fw-bold mb-2">Smart Monitoring</h5>
+                                <p class="text-muted mb-0">Real-time energy tracking</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-start">
-                            <i class="bi bi-check-circle-fill text-success fs-5 mt-1 me-3"></i>
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="350">
+                        <div class="d-flex align-items-start hover-lift p-3 rounded-3">
+                            <i class="bi bi-check-circle-fill text-success fs-4 mt-1 me-3"></i>
                             <div>
-                                <h6 class="fw-bold">Maintenance Plans</h6>
-                                <small class="text-muted">Regular service & optimization</small>
+                                <h5 class="fw-bold mb-2">Maintenance Plans</h5>
+                                <p class="text-muted mb-0">Regular service & optimization</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="d-flex gap-3">
-                    <a href="{% url 'request_quote' %}" class="btn btn-primary btn-lg px-4 py-3">
+                <div class="d-flex flex-wrap gap-3" data-aos="fade-up" data-aos-delay="400">
+                    <a href="{% url 'request_quote' %}" class="btn btn-primary btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-calendar-check me-2"></i>
                         Get Free Assessment
                     </a>
-                    <a href="{% url 'category' 'Solar-Panels' %}" class="btn btn-outline-primary btn-lg px-4 py-3">
+                    <a href="{% url 'category' 'Solar-Panels' %}" class="btn btn-outline-primary btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-cart me-2"></i>
                         Shop Products
                     </a>
@@ -205,40 +213,43 @@
     </div>
 </section>
 
+<!-- Spacer -->
+<div class="py-4"></div>
+
 <!-- Commercial Solutions Section -->
-<section class="py-5 bg-light" id="commercial">
+<section class="py-8 bg-light" id="commercial">
     <div class="container">
-        <div class="row align-items-center g-5">
+        <div class="row align-items-center g-6">
             <!-- Content Column -->
             <div class="col-lg-6 order-2 order-lg-1">
-                <span class="badge bg-warning bg-opacity-20 text-dark mb-3 px-3 py-2">COMMERCIAL SOLUTIONS</span>
-                <h2 class="display-5 fw-bold text-dark mb-4">
+                <span class="badge bg-warning bg-opacity-20 text-dark mb-4 px-3 py-2 animate-badge">COMMERCIAL SOLUTIONS</span>
+                <h2 class="display-4 fw-bold text-dark mb-5" data-aos="fade-up">
                     Solar Solutions for <span class="text-warning">Business Growth</span>
                 </h2>
-                <p class="lead text-muted mb-4">
+                <p class="lead text-muted mb-5" style="font-size: 1.25rem;" data-aos="fade-up" data-aos-delay="100">
                     Lower operational costs and demonstrate environmental leadership 
                     with our commercial solar installations for businesses, offices, 
                     and industrial facilities.
                 </p>
                 
-                <div class="mb-4">
-                    <h5 class="fw-bold mb-3">Commercial Applications:</h5>
-                    <div class="d-flex flex-wrap gap-2 mb-3">
-                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Office Buildings</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Shopping Malls</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Hotels & Resorts</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Factories</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Schools & Universities</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3">Hospitals</span>
+                <div class="mb-5" data-aos="fade-up" data-aos-delay="200">
+                    <h5 class="fw-bold mb-4">Commercial Applications:</h5>
+                    <div class="d-flex flex-wrap gap-3 mb-4">
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 hover-scale">Office Buildings</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 hover-scale">Shopping Malls</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 hover-scale">Hotels & Resorts</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 hover-scale">Factories</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 hover-scale">Schools & Universities</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 hover-scale">Hospitals</span>
                     </div>
                 </div>
 
-                <div class="d-flex gap-3">
-                    <a href="{% url 'request_quote' %}" class="btn btn-warning btn-lg px-4 py-3">
+                <div class="d-flex flex-wrap gap-3" data-aos="fade-up" data-aos-delay="300">
+                    <a href="{% url 'request_quote' %}" class="btn btn-warning btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-briefcase me-2"></i>
                         Business Inquiry
                     </a>
-                    <a href="{% url 'category' 'Inverters' %}" class="btn btn-outline-warning btn-lg px-4 py-3">
+                    <a href="{% url 'category' 'Inverters' %}" class="btn btn-outline-warning btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-gear me-2"></i>
                         View Equipment
                     </a>
@@ -247,11 +258,11 @@
 
             <!-- Image Column -->
             <div class="col-lg-6 order-1 order-lg-2">
-                <div class="position-relative">
+                <div class="position-relative hover-lift-strong" data-aos="fade-left">
                     <img src="{% static 'images/commercialsolar.jpg' %}" 
                          alt="Commercial Solar Installation" 
                          class="img-fluid rounded-4 shadow-lg">
-                    <div class="position-absolute top-0 start-0 bg-primary text-white p-3 rounded-end shadow"
+                    <div class="position-absolute top-0 start-0 bg-primary text-white p-4 rounded-end shadow hover-scale"
                          style="transform: translateY(-50%);">
                         <h4 class="mb-0"><i class="bi bi-building me-2"></i>Commercial Grade</h4>
                     </div>
@@ -261,17 +272,20 @@
     </div>
 </section>
 
+<!-- Spacer -->
+<div class="py-4"></div>
+
 <!-- Agricultural Solutions Section -->
-<section class="py-5 bg-white" id="agricultural">
+<section class="py-8 bg-white" id="agricultural">
     <div class="container">
-        <div class="row align-items-center g-5">
+        <div class="row align-items-center g-6">
             <!-- Image Column -->
             <div class="col-lg-6">
-                <div class="position-relative">
+                <div class="position-relative hover-lift-strong" data-aos="fade-right">
                     <img src="{% static 'images/agrisolar1.jpg' %}" 
                          alt="Agricultural Solar Solutions" 
                          class="img-fluid rounded-4 shadow-lg">
-                    <div class="position-absolute bottom-0 end-0 bg-success text-white p-3 rounded-start shadow"
+                    <div class="position-absolute bottom-0 end-0 bg-success text-white p-4 rounded-start shadow hover-scale"
                          style="transform: translateY(50%);">
                         <h4 class="mb-0"><i class="bi bi-tree me-2"></i>Farm Solutions</h4>
                     </div>
@@ -280,61 +294,61 @@
 
             <!-- Content Column -->
             <div class="col-lg-6">
-                <span class="badge bg-success bg-opacity-10 text-success mb-3 px-3 py-2">AGRICULTURAL SOLUTIONS</span>
-                <h2 class="display-5 fw-bold text-dark mb-4">
+                <span class="badge bg-success bg-opacity-10 text-success mb-4 px-3 py-2 animate-badge">AGRICULTURAL SOLUTIONS</span>
+                <h2 class="display-4 fw-bold text-dark mb-5" data-aos="fade-up">
                     Solar Power for <span class="text-success">Farming Excellence</span>
                 </h2>
-                <p class="lead text-muted mb-4">
+                <p class="lead text-muted mb-5" style="font-size: 1.25rem;" data-aos="fade-up" data-aos-delay="100">
                     Power irrigation systems, farm operations, and remote facilities 
                     with reliable solar energy. Reduce operational costs and increase 
                     agricultural productivity.
                 </p>
                 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <i class="bi bi-droplet text-primary fs-2 mb-3"></i>
-                                <h6 class="fw-bold">Solar Water Pumping</h6>
-                                <small class="text-muted">Efficient irrigation without grid power</small>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="card border-0 shadow-sm h-100 hover-lift-strong">
+                            <div class="card-body p-4 text-center">
+                                <i class="bi bi-droplet text-primary display-5 mb-3"></i>
+                                <h5 class="fw-bold mb-2">Solar Water Pumping</h5>
+                                <p class="text-muted mb-0">Efficient irrigation without grid power</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <i class="bi bi-lightbulb text-warning fs-2 mb-3"></i>
-                                <h6 class="fw-bold">Farm Lighting</h6>
-                                <small class="text-muted">Security & operational lighting</small>
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="250">
+                        <div class="card border-0 shadow-sm h-100 hover-lift-strong">
+                            <div class="card-body p-4 text-center">
+                                <i class="bi bi-lightbulb text-warning display-5 mb-3"></i>
+                                <h5 class="fw-bold mb-2">Farm Lighting</h5>
+                                <p class="text-muted mb-0">Security & operational lighting</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <i class="bi bi-fan text-success fs-2 mb-3"></i>
-                                <h6 class="fw-bold">Cold Storage</h6>
-                                <small class="text-muted">Solar-powered refrigeration</small>
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="card border-0 shadow-sm h-100 hover-lift-strong">
+                            <div class="card-body p-4 text-center">
+                                <i class="bi bi-fan text-success display-5 mb-3"></i>
+                                <h5 class="fw-bold mb-2">Cold Storage</h5>
+                                <p class="text-muted mb-0">Solar-powered refrigeration</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <i class="bi bi-building text-info fs-2 mb-3"></i>
-                                <h6 class="fw-bold">Remote Power</h6>
-                                <small class="text-muted">Off-grid farm operations</small>
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="350">
+                        <div class="card border-0 shadow-sm h-100 hover-lift-strong">
+                            <div class="card-body p-4 text-center">
+                                <i class="bi bi-building text-info display-5 mb-3"></i>
+                                <h5 class="fw-bold mb-2">Remote Power</h5>
+                                <p class="text-muted mb-0">Off-grid farm operations</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="d-flex gap-3">
-                    <a href="{% url 'request_quote' %}" class="btn btn-success btn-lg px-4 py-3">
+                <div class="d-flex flex-wrap gap-3" data-aos="fade-up" data-aos-delay="400">
+                    <a href="{% url 'request_quote' %}" class="btn btn-success btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-tree me-2"></i>
                         Farm Assessment
                     </a>
-                    <a href="{% url 'category' 'Batteries' %}" class="btn btn-outline-success btn-lg px-4 py-3">
+                    <a href="{% url 'category' 'Batteries' %}" class="btn btn-outline-success btn-lg px-5 py-3 hover-scale">
                         <i class="bi bi-battery-charging me-2"></i>
                         View Storage
                     </a>
@@ -344,63 +358,66 @@
     </div>
 </section>
 
+<!-- Spacer -->
+<div class="py-4"></div>
+
 <!-- Products Showcase Section -->
-<section class="py-5 bg-primary bg-opacity-5">
+<section class="py-8 bg-primary bg-opacity-5">
     <div class="container">
-        <div class="row mb-5">
+        <div class="row mb-7">
             <div class="col-lg-8 mx-auto text-center">
-                <span class="badge bg-primary mb-3 px-3 py-2">OUR PRODUCTS</span>
-                <h2 class="display-5 fw-bold text-dark mb-3">Premium Solar Equipment</h2>
-                <p class="lead text-muted">
+                <span class="badge bg-primary mb-4 px-3 py-2 animate-badge">OUR PRODUCTS</span>
+                <h2 class="display-4 fw-bold text-dark mb-4" data-aos="fade-up">Premium Solar Equipment</h2>
+                <p class="lead text-muted mb-0" data-aos="fade-up" data-aos-delay="100">
                     Browse our selection of high-quality solar products from leading manufacturers.
                 </p>
             </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100 text-center">
-                    <div class="card-body p-4">
-                        <i class="bi bi-sun text-warning display-4 mb-3"></i>
-                        <h5 class="fw-bold">Solar Panels</h5>
-                        <p class="text-muted small">High-efficiency panels for maximum output</p>
-                        <a href="{% url 'category' 'Solar-Panels' %}" class="btn btn-outline-primary btn-sm">
+        <div class="row g-4 justify-content-center">
+            <div class="col-xl-3 col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-sun text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3">Solar Panels</h4>
+                        <p class="text-muted mb-4">High-efficiency panels for maximum output</p>
+                        <a href="{% url 'category' 'Solar-Panels' %}" class="btn btn-outline-primary btn-lg w-100 hover-scale">
                             Browse Products
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100 text-center">
-                    <div class="card-body p-4">
-                        <i class="bi bi-lightning-charge text-warning display-4 mb-3"></i>
-                        <h5 class="fw-bold">Inverters</h5>
-                        <p class="text-muted small">Reliable power conversion systems</p>
-                        <a href="{% url 'category' 'Inverters' %}" class="btn btn-outline-primary btn-sm">
+            <div class="col-xl-3 col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="250">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-lightning-charge text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3">Inverters</h4>
+                        <p class="text-muted mb-4">Reliable power conversion systems</p>
+                        <a href="{% url 'category' 'Inverters' %}" class="btn btn-outline-primary btn-lg w-100 hover-scale">
                             Browse Products
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100 text-center">
-                    <div class="card-body p-4">
-                        <i class="bi bi-battery-charging text-warning display-4 mb-3"></i>
-                        <h5 class="fw-bold">Batteries</h5>
-                        <p class="text-muted small">Energy storage solutions</p>
-                        <a href="{% url 'category' 'Batteries' %}" class="btn btn-outline-primary btn-sm">
+            <div class="col-xl-3 col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-battery-charging text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3">Batteries</h4>
+                        <p class="text-muted mb-4">Energy storage solutions</p>
+                        <a href="{% url 'category' 'Batteries' %}" class="btn btn-outline-primary btn-lg w-100 hover-scale">
                             Browse Products
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm h-100 text-center">
-                    <div class="card-body p-4">
-                        <i class="bi bi-lamp text-warning display-4 mb-3"></i>
-                        <h5 class="fw-bold">Lighting</h5>
-                        <p class="text-muted small">Solar-powered lighting solutions</p>
-                        <a href="{% url 'category' 'Lighting' %}" class="btn btn-outline-primary btn-sm">
+            <div class="col-xl-3 col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="350">
+                <div class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-lamp text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3">Lighting</h4>
+                        <p class="text-muted mb-4">Solar-powered lighting solutions</p>
+                        <a href="{% url 'category' 'Lighting' %}" class="btn btn-outline-primary btn-lg w-100 hover-scale">
                             Browse Products
                         </a>
                     </div>
@@ -408,8 +425,8 @@
             </div>
         </div>
 
-        <div class="text-center mt-5">
-            <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg px-5 py-3">
+        <div class="text-center mt-7" data-aos="fade-up" data-aos-delay="400">
+            <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg px-5 py-3 hover-scale">
                 <i class="bi bi-shop me-2"></i>
                 Visit Our Store
             </a>
@@ -417,18 +434,21 @@
     </div>
 </section>
 
+<!-- Spacer -->
+<div class="py-4"></div>
+
 <!-- CTA Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-8 bg-primary text-white">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h2 class="display-6 fw-bold mb-3">Ready to Start Your Solar Journey?</h2>
-                <p class="lead mb-0 opacity-90">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-8" data-aos="fade-right">
+                <h2 class="display-4 fw-bold mb-3">Ready to Start Your Solar Journey?</h2>
+                <p class="lead mb-0 opacity-90" style="font-size: 1.25rem;">
                     Get a free consultation and customized quote for your solar project.
                 </p>
             </div>
-            <div class="col-lg-4 text-lg-end">
-                <a href="{% url 'request_quote' %}" class="btn btn-warning btn-lg px-5 py-3">
+            <div class="col-lg-4 text-lg-end" data-aos="fade-left">
+                <a href="{% url 'request_quote' %}" class="btn btn-warning btn-lg px-5 py-3 hover-scale">
                     <i class="bi bi-chat-dots me-2"></i>
                     Request Quote
                 </a>
@@ -437,17 +457,167 @@
     </div>
 </section>
 
+<!-- Back to Top Button -->
+<button id="backToTop" class="btn btn-primary btn-lg rounded-circle position-fixed bottom-0 end-0 m-4 shadow-lg hover-scale" 
+        style="width: 60px; height: 60px; z-index: 1000; display: none;">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
 {% endblock %}
 
 {% block extra_css %}
 <style>
-.hero-section {
+/* Custom Spacing Classes */
+.min-vh-85 { min-height: 85vh; }
+.py-6 { padding-top: 5rem !important; padding-bottom: 5rem !important; }
+.py-7 { padding-top: 6rem !important; padding-bottom: 6rem !important; }
+.py-8 { padding-top: 7rem !important; padding-bottom: 7rem !important; }
+.mb-6 { margin-bottom: 4rem !important; }
+.mb-7 { margin-bottom: 5rem !important; }
+.mt-7 { margin-top: 5rem !important; }
+
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+@keyframes ripple {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(4); opacity: 0; }
+}
+
+.animate-float-1 {
+    animation: float 6s ease-in-out infinite;
+}
+.animate-float-2 {
+    animation: float 7s ease-in-out infinite;
+    animation-delay: 1s;
+}
+.animate-float-3 {
+    animation: float 8s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+}
+
+.animate-badge {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+.hover-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Enhanced Hover effects */
+.hover-lift-strong {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.hover-lift-strong:hover {
+    transform: translateY(-15px);
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.2) !important;
+}
+
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-glow {
+    transition: all 0.3s ease;
+}
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+/* Enhanced button styles */
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+    padding: 0.75rem 2rem;
+}
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border: none;
+    color: #000 !important;
+    padding: 0.75rem 2rem;
+}
+.btn-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    border: none;
+    padding: 0.75rem 2rem;
+}
+
+/* Product card hover effects */
+.product-card {
     position: relative;
     overflow: hidden;
 }
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s;
+}
+.product-card:hover::before {
+    left: 100%;
+}
 
-.min-vh-85 {
-    min-height: 85vh;
+/* Stats cards animation */
+.stats-card-1, .stats-card-2 {
+    animation: float 5s ease-in-out infinite;
+    animation-delay: 1s;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+}
+.stats-card-1.visible, .stats-card-2.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hero image parallax */
+.hero-image {
+    transition: transform 0.3s ease;
 }
 
 /* Smooth scrolling */
@@ -455,98 +625,289 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Card hover effects */
-.card-hover:hover {
-    transform: translateY(-10px);
-    transition: transform 0.3s ease;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Section spacing */
+/* Section spacing for anchor links */
 section {
     scroll-margin-top: 80px;
 }
 
-/* Gradient backgrounds */
-.bg-primary-gradient {
-    background: linear-gradient(135deg, var(--bs-primary) 0%, #0059b3 100%);
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .display-2 {
+        font-size: 3rem;
+    }
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    .py-8 {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
 }
 
-.bg-warning-gradient {
-    background: linear-gradient(135deg, var(--bs-warning) 0%, #ffd700 100%);
-}
-
-/* Image overlays */
-.img-overlay {
-    position: relative;
-}
-
-.img-overlay::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(0,0,0,0.3), transparent);
-    border-radius: inherit;
+@media (max-width: 768px) {
+    .display-2 {
+        font-size: 2.5rem;
+    }
+    .display-4 {
+        font-size: 2rem;
+    }
+    .lead {
+        font-size: 1.1rem;
+    }
+    .card-body.p-5 {
+        padding: 2rem !important;
+    }
 }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+document.addEventListener('DOMContentLoaded', function() {
+    // Counter animation for stats
+    function animateCounters() {
+        const counters = document.querySelectorAll('.counter');
+        
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = parseInt(counter.getAttribute('data-count'));
+                const count = parseInt(counter.innerText);
+                const increment = Math.ceil(target / 100);
+                
+                if (count < target) {
+                    counter.innerText = count + increment;
+                    setTimeout(updateCount, 20);
+                } else {
+                    counter.innerText = target + (counter.innerText.includes('%') ? '%' : '');
+                }
+            };
+            
+            // Check if counter is in viewport
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        updateCount();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+            
+            observer.observe(counter);
+        });
+    }
+    
+    // Back to top button
+    const backToTopBtn = document.getElementById('backToTop');
+    
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.style.display = 'block';
+            setTimeout(() => {
+                backToTopBtn.style.opacity = '1';
+            }, 10);
+        } else {
+            backToTopBtn.style.opacity = '0';
+            setTimeout(() => {
+                backToTopBtn.style.display = 'none';
+            }, 300);
+        }
+    });
+    
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            
+            if (href === '#' || href === '') return;
+            
+            e.preventDefault();
+            const targetElement = document.querySelector(href);
+            
+            if (targetElement) {
+                // Add active class to current section
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Smooth scroll
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+                
+                // Update URL
+                history.pushState(null, null, href);
+            }
+        });
+    });
+    
+    // Check stats cards visibility
+    const statsCards = document.querySelectorAll('.stats-card-1, .stats-card-2');
+    
+    function checkStatsVisibility() {
+        statsCards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            if (rect.top <= windowHeight * 0.8) {
+                card.classList.add('visible');
+            }
+        });
+    }
+    
+    // Scroll animations for elements with data-aos
+    const animatedElements = document.querySelectorAll('[data-aos]');
+    
+    function checkElementVisibility() {
+        animatedElements.forEach(element => {
+            const rect = element.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            if (rect.top <= windowHeight * 0.85) {
+                const delay = element.getAttribute('data-aos-delay') || 0;
+                
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, delay);
+            }
+        });
+    }
+    
+    // Set initial state for animated elements
+    animatedElements.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    });
+    
+    // Ripple effect for buttons
+    document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.7);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                top: ${y}px;
+                left: ${x}px;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            // Remove ripple after animation
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Parallax effect for hero image
+    window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const heroImage = document.querySelector('.hero-image');
+        const floatElements = document.querySelectorAll('.animate-float-1, .animate-float-2');
+        
+        if (heroImage) {
+            const rate = scrolled * -0.3;
+            heroImage.style.transform = `translateY(${rate}px)`;
+        }
+        
+        if (floatElements) {
+            floatElements.forEach((el, index) => {
+                el.style.transform = `translateY(${scrolled * -0.1 * (index + 1)}px)`;
             });
         }
     });
-});
-
-// Add active class to navigation items
-const sections = document.querySelectorAll('section[id]');
-window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        if (scrollY >= (sectionTop - 150)) {
-            current = section.getAttribute('id');
+    
+    // Active section detection for navigation
+    const sections = document.querySelectorAll('section[id]');
+    
+    function updateActiveSection() {
+        let current = '';
+        const scrollPosition = window.pageYOffset + 150;
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        // Update navigation
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    }
+    
+    // Initialize functions
+    animateCounters();
+    checkStatsVisibility();
+    checkElementVisibility();
+    updateActiveSection();
+    
+    // Event listeners
+    window.addEventListener('scroll', function() {
+        checkStatsVisibility();
+        checkElementVisibility();
+        updateActiveSection();
+    });
+    
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Preload images for smoother experience
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        if (img.complete) {
+            img.classList.add('loaded');
+        } else {
+            img.addEventListener('load', function() {
+                this.classList.add('loaded');
+            });
         }
     });
-
-    // Update navigation active state
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
-            link.classList.add('active');
-        }
-    });
-});
-
-// Animation on scroll
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('animated');
-        }
-    });
-}, observerOptions);
-
-document.querySelectorAll('.card, .img-fluid').forEach(el => {
-    observer.observe(el);
 });
 </script>
 {% endblock %}

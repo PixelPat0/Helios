@@ -3,47 +3,501 @@
 {% load humanize %} 
 
 {% block content %}
-<div class="container my-5">
-    <h1 class="mb-4">Your Notifications</h1>
+<div class="container my-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="h4 fw-bold mb-0">
+            <i class="bi bi-bell text-primary me-2"></i>
+            Notifications
+        </h2>
+        {% if notifications %}
+        <div class="dropdown">
+            <button class="btn btn-light btn-sm px-2 py-1 dropdown-toggle border" type="button" id="notificationActions" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" style="min-width: 160px;">
+                <li><a class="dropdown-item py-2" href="#" id="markAllRead"><i class="bi bi-check2-all me-2"></i>Mark all read</a></li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li><a class="dropdown-item text-danger py-2" href="#" id="clearAll"><i class="bi bi-trash me-2"></i>Clear all</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
 
     {% if notifications %}
-        <div class="list-group">
-            {% for notification in notifications %}
-                
-                {% comment %} --- LOGIC TO DETERMINE LINK URL --- {% endcomment %}
-                
-                {% if notification.quote_request %}
-                    {# If it is a Quote Request, go to the custom details page #}
-                    {% url 'quote_request_details' notification.quote_request.id as link_url %}
-                
-                {% elif notification.order_id %}
-                    {# FIX: If the INTEGER FIELD 'order_id' exists, use it directly to build the link #}
-                    {% url 'custom_order_detail' notification.order_id as link_url %}
-                
-                {% else %}
-                    {# Fallback #}
-                    {% url 'home' as link_url %}
-                {% endif %}
-                
-                {% comment %} ----------------------------------- {% endcomment %}
-
-                <a href="{{ link_url }}" class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-warning{% endif %}">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ notification.message }}</h5>
-                        <small>{{ notification.created_at|timesince }} ago</small>
+        <div class="card border-light shadow-sm">
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for notification in notifications %}
+                        
+                        {% if notification.quote_request %}
+                            <!-- Quote Request Notification -->
+                            {% url 'quote_request_details' notification.quote_request.id as link_url %}
+                            <a href="{{ link_url }}" class="list-group-item list-group-item-action border-0 py-2 px-3 {% if not notification.is_read %}border-start border-3 border-primary{% else %}border-start border-1 border-light{% endif %}" 
+                               data-notification-id="{{ notification.id }}">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-2 pt-1">
+                                        <i class="bi bi-chat-quote text-primary" style="font-size: 0.9rem;"></i>
+                                    </div>
+                                    <div class="flex-grow-1 me-2">
+                                        <div class="d-flex justify-content-between align-items-start mb-0">
+                                            <span class="fw-normal {% if not notification.is_read %}text-dark{% else %}text-muted{% endif %}" style="font-size: 0.875rem;">
+                                                {{ notification.message }}
+                                            </span>
+                                            <div class="d-flex align-items-center ms-2">
+                                                {% if not notification.is_read %}
+                                                <span class="badge bg-danger me-1" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">NEW</span>
+                                                {% endif %}
+                                                <span class="badge bg-primary" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">Quote</span>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-clock me-1"></i>
+                                            <span style="font-size: 0.75rem;">{{ notification.created_at|timesince }} ago</span>
+                                        </small>
+                                    </div>
+                                    <div class="dropdown ms-auto">
+                                        <button class="btn btn-link text-muted p-0 border-0" type="button" 
+                                                data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.7rem;">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: 140px;">
+                                            {% if not notification.is_read %}
+                                            <li><a class="dropdown-item mark-read py-1" href="#" data-id="{{ notification.id }}">
+                                                <i class="bi bi-check2 me-2"></i>Mark read
+                                            </a></li>
+                                            {% endif %}
+                                            <li><a class="dropdown-item text-danger delete-notification py-1" href="#" data-id="{{ notification.id }}">
+                                                <i class="bi bi-trash me-2"></i>Delete
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </a>
+                        
+                        {% elif notification.order_id %}
+                            <!-- Order Notification -->
+                            {% url 'custom_order_detail' notification.order_id as link_url %}
+                            <a href="{{ link_url }}" class="list-group-item list-group-item-action border-0 py-2 px-3 {% if not notification.is_read %}border-start border-3 border-success{% else %}border-start border-1 border-light{% endif %}" 
+                               data-notification-id="{{ notification.id }}">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-2 pt-1">
+                                        <i class="bi bi-cart text-success" style="font-size: 0.9rem;"></i>
+                                    </div>
+                                    <div class="flex-grow-1 me-2">
+                                        <div class="d-flex justify-content-between align-items-start mb-0">
+                                            <span class="fw-normal {% if not notification.is_read %}text-dark{% else %}text-muted{% endif %}" style="font-size: 0.875rem;">
+                                                {{ notification.message }}
+                                            </span>
+                                            <div class="d-flex align-items-center ms-2">
+                                                {% if not notification.is_read %}
+                                                <span class="badge bg-danger me-1" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">NEW</span>
+                                                {% endif %}
+                                                <span class="badge bg-success" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">Order</span>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-clock me-1"></i>
+                                            <span style="font-size: 0.75rem;">{{ notification.created_at|timesince }} ago</span>
+                                        </small>
+                                    </div>
+                                    <div class="dropdown ms-auto">
+                                        <button class="btn btn-link text-muted p-0 border-0" type="button" 
+                                                data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.7rem;">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: 140px;">
+                                            {% if not notification.is_read %}
+                                            <li><a class="dropdown-item mark-read py-1" href="#" data-id="{{ notification.id }}">
+                                                <i class="bi bi-check2 me-2"></i>Mark read
+                                            </a></li>
+                                            {% endif %}
+                                            <li><a class="dropdown-item text-danger delete-notification py-1" href="#" data-id="{{ notification.id }}">
+                                                <i class="bi bi-trash me-2"></i>Delete
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </a>
+                        
+                        {% else %}
+                            <!-- General Notification -->
+                            {% url 'home' as link_url %}
+                            <a href="{{ link_url }}" class="list-group-item list-group-item-action border-0 py-2 px-3 {% if not notification.is_read %}border-start border-3 border-warning{% else %}border-start border-1 border-light{% endif %}" 
+                               data-notification-id="{{ notification.id }}">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-2 pt-1">
+                                        <i class="bi bi-bell text-warning" style="font-size: 0.9rem;"></i>
+                                    </div>
+                                    <div class="flex-grow-1 me-2">
+                                        <div class="d-flex justify-content-between align-items-start mb-0">
+                                            <span class="fw-normal {% if not notification.is_read %}text-dark{% else %}text-muted{% endif %}" style="font-size: 0.875rem;">
+                                                {{ notification.message }}
+                                            </span>
+                                            <div class="d-flex align-items-center ms-2">
+                                                {% if not notification.is_read %}
+                                                <span class="badge bg-danger me-1" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">NEW</span>
+                                                {% endif %}
+                                                <span class="badge bg-secondary" style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">General</span>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-clock me-1"></i>
+                                            <span style="font-size: 0.75rem;">{{ notification.created_at|timesince }} ago</span>
+                                        </small>
+                                    </div>
+                                    <div class="dropdown ms-auto">
+                                        <button class="btn btn-link text-muted p-0 border-0" type="button" 
+                                                data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.7rem;">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: 140px;">
+                                            {% if not notification.is_read %}
+                                            <li><a class="dropdown-item mark-read py-1" href="#" data-id="{{ notification.id }}">
+                                                <i class="bi bi-check2 me-2"></i>Mark read
+                                            </a></li>
+                                            {% endif %}
+                                            <li><a class="dropdown-item text-danger delete-notification py-1" href="#" data-id="{{ notification.id }}">
+                                                <i class="bi bi-trash me-2"></i>Delete
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endif %}
+                        
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Simple Footer -->
+            <div class="card-footer bg-transparent border-0 py-2 px-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted" style="font-size: 0.75rem;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        {{ notifications|length }} notification{{ notifications|pluralize }}
+                    </small>
+                    <div>
+                        <span class="badge bg-light text-dark border" id="unreadCountBadge" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;">
+                            <i class="bi bi-circle-fill text-primary me-1" style="font-size: 0.4rem;"></i>
+                            <span id="unreadCount">{{ notifications|length }}</span> unread
+                        </span>
                     </div>
-                    {% if not notification.is_read %}
-                        <small class="text-danger fw-bold">NEW</small>
-                    {% endif %}
-                </a>
-                
-            {% endfor %}
+                </div>
+            </div>
         </div>
+        
     {% else %}
-        <div class="alert alert-info" role="alert">
-            <i class="bi bi-info-circle me-2"></i> You have no notifications!
+        <!-- Compact Empty State -->
+        <div class="text-center py-4">
+            <div class="mb-2">
+                <i class="bi bi-inbox text-muted opacity-50" style="font-size: 2.5rem;"></i>
+            </div>
+            <h4 class="h6 fw-semibold text-muted mb-2">No notifications</h4>
+            <p class="text-muted small mb-3">All caught up! Check back later for updates.</p>
+            <a href="{% url 'home' %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-house me-1"></i>
+                Back to Home
+            </a>
         </div>
     {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Ultra compact styling */
+.list-group-item {
+    min-height: 44px;
+    transition: all 0.15s ease;
+    border-bottom: 1px solid #f5f5f5 !important;
+}
+
+.list-group-item:hover {
+    background-color: #fafafa;
+}
+
+/* Subtle border-left indicator for unread */
+.border-start.border-3 {
+    padding-left: 12px !important;
+}
+
+.border-start.border-1 {
+    padding-left: 14px !important;
+}
+
+/* Tiny badges */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+/* Clean dropdown */
+.dropdown-menu {
+    font-size: 0.8rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+}
+
+/* Hover effect for dropdown dots */
+.btn-link:hover {
+    color: #495057 !important;
+    background-color: #f8f9fa;
+    border-radius: 3px;
+}
+
+/* Animation for new notifications */
+@keyframes highlightFade {
+    0% { background-color: rgba(13, 110, 253, 0.05); }
+    100% { background-color: transparent; }
+}
+
+.border-start.border-3 {
+    animation: highlightFade 2s ease-out;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .list-group-item {
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .dropdown-menu {
+        font-size: 0.75rem;
+        min-width: 120px !important;
+    }
+}
+
+/* Even more compact on very small screens */
+@media (max-width: 576px) {
+    .list-group-item {
+        padding: 0.375rem 0.5rem !important;
+    }
+    
+    .badge {
+        font-size: 0.5rem !important;
+        padding: 0.1rem 0.25rem !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .list-group-item {
+        background-color: #2b2d31;
+        border-bottom-color: #3a3d44 !important;
+    }
+    
+    .list-group-item:hover {
+        background-color: #35373d;
+    }
+    
+    .text-dark {
+        color: #e9ecef !important;
+    }
+    
+    .text-muted {
+        color: #adb5bd !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Mark individual notification as read
+    $('.mark-read').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var notificationId = $(this).data('id');
+        var $notificationItem = $(this).closest('.list-group-item');
+        
+        $.ajax({
+            url: '{% url "mark_notification_read" %}',
+            method: 'POST',
+            data: {
+                'notification_id': notificationId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update UI
+                    $notificationItem.removeClass('border-3 border-primary border-success border-warning')
+                                     .addClass('border-1 border-light');
+                    $notificationItem.find('.badge.bg-danger').remove();
+                    $notificationItem.find('span.fw-normal').removeClass('text-dark').addClass('text-muted');
+                    
+                    // Update unread count
+                    updateUnreadCount();
+                }
+            }
+        });
+    });
+    
+    // Mark all as read
+    $('#markAllRead').click(function(e) {
+        e.preventDefault();
+        
+        if (!confirm('Mark all notifications as read?')) return;
+        
+        $.ajax({
+            url: '{% url "mark_all_notifications_read" %}',
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update all notifications
+                    $('.list-group-item').removeClass('border-3 border-primary border-success border-warning')
+                                         .addClass('border-1 border-light');
+                    $('.list-group-item .badge.bg-danger').remove();
+                    $('.list-group-item span.fw-normal').removeClass('text-dark').addClass('text-muted');
+                    
+                    // Update unread count
+                    updateUnreadCount();
+                    
+                    // Quick feedback
+                    showQuickMessage('All marked as read');
+                }
+            }
+        });
+    });
+    
+    // Delete individual notification
+    $('.delete-notification').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var notificationId = $(this).data('id');
+        var $notificationItem = $(this).closest('.list-group-item');
+        
+        if (!confirm('Delete this notification?')) return;
+        
+        $.ajax({
+            url: '{% url "delete_notification" %}',
+            method: 'POST',
+            data: {
+                'notification_id': notificationId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Fade out and remove
+                    $notificationItem.fadeOut(200, function() {
+                        $(this).remove();
+                        updateUnreadCount();
+                        showQuickMessage('Deleted');
+                        
+                        // If empty, reload
+                        if ($('.list-group-item').length === 0) {
+                            setTimeout(() => location.reload(), 300);
+                        }
+                    });
+                }
+            }
+        });
+    });
+    
+    // Clear all notifications
+    $('#clearAll').click(function(e) {
+        e.preventDefault();
+        
+        if (!confirm('Clear all notifications? This cannot be undone.')) return;
+        
+        $.ajax({
+            url: '{% url "clear_all_notifications" %}',
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Fade out all
+                    $('.list-group-item').fadeOut(200, function() {
+                        location.reload();
+                    });
+                }
+            }
+        });
+    });
+    
+    // Auto-mark as read on click
+    $('.list-group-item').click(function(e) {
+        var $target = $(e.target);
+        
+        // Don't trigger if clicking dropdown elements
+        if ($target.closest('.dropdown, .dropdown-item, .delete-notification, .mark-read').length) {
+            return;
+        }
+        
+        var $item = $(this);
+        var $badge = $item.find('.badge.bg-danger');
+        
+        if ($badge.length) {
+            var notificationId = $item.data('notification-id');
+            
+            $.ajax({
+                url: '{% url "mark_notification_read" %}',
+                method: 'POST',
+                data: {
+                    'notification_id': notificationId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $badge.remove();
+                        $item.removeClass('border-3 border-primary border-success border-warning')
+                             .addClass('border-1 border-light');
+                        $item.find('span.fw-normal').removeClass('text-dark').addClass('text-muted');
+                        updateUnreadCount();
+                    }
+                }
+            });
+        }
+    });
+    
+    // Helper function to update unread count
+    function updateUnreadCount() {
+        var unreadCount = $('.badge.bg-danger').length;
+        $('#unreadCount').text(unreadCount);
+        
+        if (unreadCount === 0) {
+            $('#unreadCountBadge').fadeOut(200);
+        } else {
+            $('#unreadCountBadge').fadeIn(200);
+        }
+    }
+    
+    // Quick message function (no Bootstrap toast)
+    function showQuickMessage(message) {
+        // Remove existing message
+        $('#quickMessage').remove();
+        
+        // Create message element
+        var $msg = $('<div id="quickMessage" style="position: fixed; bottom: 20px; right: 20px; background: #28a745; color: white; padding: 8px 16px; border-radius: 4px; font-size: 0.85rem; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></div>');
+        $msg.text(message);
+        
+        // Add to page
+        $('body').append($msg);
+        
+        // Remove after 2 seconds
+        setTimeout(function() {
+            $msg.fadeOut(200, function() {
+                $(this).remove();
+            });
+        }, 2000);
+    }
+    
+    // Initialize unread count
+    updateUnreadCount();
+});
+</script>
 {% endblock %}

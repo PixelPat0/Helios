@@ -1,8 +1,50 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django import forms
-from .models import Profile, Product, QuoteRequest
+from .models import Profile, Product, QuoteRequest, ContactMessage
 from payment.models import NewsletterSubscriber
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = ContactMessage
+        fields = ['name', 'email', 'subject', 'message', 'subscribe_newsletter']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Your full name',
+                'required': True
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'you@example.com',
+                'required': True
+            }),
+            'subject': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Subject',
+                'required': True
+            }),
+            'message': forms.Textarea(attrs={
+                'class': 'form-control', 
+                'rows': 6, 
+                'placeholder': 'Write your message...',
+                'required': True
+            }),
+            'subscribe_newsletter': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+        labels = {
+            'name': 'Full Name',
+            'email': 'Email Address',
+            'subject': 'Subject',
+            'message': 'Message',
+            'subscribe_newsletter': 'Subscribe to newsletter'
+        }
+        help_texts = {
+            'subscribe_newsletter': 'Receive solar tips and updates'
+        }
+
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -172,7 +214,7 @@ class QuoteRequestForm(forms.ModelForm):
             'project_type', 'system_type',
             'daily_energy_usage_kwh', 'current_voltage',
             'appliances_to_run', 'roof_type',
-            'budget_range', 'timeline', 'additional_notes'
+            'budget_range', 'timeline', 'additional_notes', 'payment_method'
         ]
         widgets = {
             'contact_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),

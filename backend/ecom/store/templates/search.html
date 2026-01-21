@@ -2,112 +2,554 @@
 
 {% block content %}
 
-
-    <!-- Header -->
-    <header class="py-5 text-white" style="background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-dark) 100%);">
-    <div class="container px-4 px-lg-5 my-5">
-        <div class="text-center">
-            <h1 class="display-5 fw-bold text-warning">🔍 Search Results</h1>
-            <p class="lead fw-normal text-light mb-0">Found what you're looking for?</p>
-            </div>
+<!-- Search Hero Section -->
+<section class="search-hero py-8 position-relative" style="
+    background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
+    min-height: 60vh;
+    padding-top: 120px;
+">
+    <!-- Floating Background Elements -->
+    <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block">
+        <div class="position-relative h-100">
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-warning opacity-10" 
+                 style="clip-path: polygon(100% 0, 0% 100%, 100% 100%);"></div>
+        </div>
     </div>
-</header>
-</br></br>
-    <!-- Search Form Section -->
-    <div class="container">
+    
+    <!-- Animated Background Shapes -->
+    <div class="position-absolute bottom-30 end-30 w-20 h-20 rounded-circle bg-warning opacity-5 animate-float-2"></div>
+    
+    <div class="container position-relative z-2">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        Search Products
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{% url 'search' %}">
+            <div class="col-lg-8 text-center">
+                <span class="badge bg-warning text-dark mb-4 px-3 py-2 fw-semibold animate-fade-in">
+                    <i class="bi bi-search me-2"></i>Find Your Solar Solutions
+                </span>
+                <h1 class="display-3 fw-bold text-white mb-4 animate-fade-in" style="animation-delay: 0.1s">
+                    Search Our <span class="text-warning">Solar Products</span>
+                </h1>
+                <p class="lead mb-5 opacity-90 animate-fade-in" style="animation-delay: 0.2s; font-size: 1.25rem;">
+                    Discover high-quality solar products and equipment for all your energy needs
+                </p>
+
+                <!-- Search Form -->
+                <div class="animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="bg-white bg-opacity-10 rounded-4 p-4 p-lg-5 border border-warning border-opacity-25">
+                        <form method="POST" action="{% url 'search' %}" class="search-form">
                             {% csrf_token %}
-                            <div class="mb-3">
-                                <input type="text" class="form-control" placeholder="Search for products" aria-label="Search" name="searched">
+                            <div class="input-group input-group-lg shadow-lg">
+                                <span class="input-group-text bg-warning border-warning text-dark">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" 
+                                       class="form-control border-warning border-opacity-25 bg-white bg-opacity-10 text-white" 
+                                       placeholder="Search for solar panels, inverters, batteries..." 
+                                       aria-label="Search products"
+                                       name="searched"
+                                       value="{{ search_query|default:'' }}"
+                                       required
+                                       autofocus>
+                                <button type="submit" class="btn btn-warning px-5 fw-semibold">
+                                    Search
+                                </button>
                             </div>
-                            <button type="submit" class="btn btn-primary">Search</button>
                         </form>
                     </div>
-                </div>
 
-                <br/><br/><br/><br/><br/>
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-                {% if searched %}
-                    {% for product in searched %}
-                        {% if product.is_sale %}
-
-
-                            <div class="col mb-5">
-                                <div class="card h-100">
-                                    <!-- Sale badge-->
-                                    <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
-
-
-
-                                    <!-- Product image-->
-                                    <img class="card-img-top" src="{{product.image.url}}" alt="..." />
-                                    <!-- Product details-->
-                                    <div class="card-body p-4">
-                                        <div class="text-center">
-                                            <!-- Product name-->
-                                            <h5 class="fw-bolder">{{ product.name }}</h5>
-
-                                            <!-- Sale Notification on product -->
-                                            <div class="d-flex justify-content-center small text-warning mb-2">
-                                            <div class="bi-star-fill"></div>
-                                            &nbsp;&nbsp;Sale!!&nbsp;&nbsp;
-                                            <div class="bi-star-fill"></div>
-                                            </div>
-                                            <!-- Product price-->
-                                            <strike>
-                                            ZMK{{ product.price }}
-                                            </strike>
-                                            &nbsp;
-                                            ZMK{{ product.sale_price }}
-                                            <!-- Product description-->
-                                        </div>
-                                    </div>
-                                    <!-- Product actions-->
-                                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                        <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View products</a></div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            {% else %}
-                        <div class="col mb-5">
-                            <div class="card h-100">
-                                <!-- Product image-->
-                                <img class="card-img-top" src="{{product.image.url}}" alt="..." />
-                                <!-- Product details-->
-                                <div class="card-body p-4">
-                                    <div class="text-center">
-                                        <!-- Product name-->
-                                        <h5 class="fw-bolder">{{ product.name }}</h5>
-                                        <!-- Product price-->
-                                        ${{ product.price }}
-                                        <!-- Product description-->
-                                    </div>
-                                </div>
-                                <!-- Product actions-->
-                                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                    <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View Product</a></div>
-                                </div>
-                            </div>
+                    <!-- Search Stats -->
+                    {% if searched %}
+                    <div class="mt-4 animate-fade-in" style="animation-delay: 0.4s">
+                        <div class="d-inline-block bg-dark bg-opacity-50 rounded-3 p-3">
+                            <p class="mb-0 text-white">
+                                <i class="bi bi-check-circle-fill text-warning me-2"></i>
+                                Found <span class="text-warning fw-bold">{{ searched|length }}</span> 
+                                product{{ searched|pluralize }} for "{{ search_query }}"
+                            </p>
                         </div>
-                            {% endif %}
-                        {% endfor %}
-                    
-
-                
-                {% endif %}
-            </div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-    <br><br>
+</section>
 
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Search Results Section -->
+<section class="py-8 {% if searched %}bg-white{% else %}bg-light{% endif %}">
+    <div class="container">
+        {% if searched %}
+        <!-- Results Header & Filters -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-dark mb-3">Search Results</h2>
+                <p class="text-muted mb-4">
+                    Found <span class="fw-bold text-primary">{{ result_count }}</span> product{{ result_count|pluralize }} matching "{{ search_query }}"
+                </p>
+
+                <!-- Filter Form -->
+                <form method="GET" action="{% url 'search' %}" class="row g-3">
+                    <input type="hidden" name="q" value="{{ search_query }}">
+                    
+                    <!-- Category Filter -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Category</label>
+                        <select class="form-select" name="category" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if selected_category.id == cat.id %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Price Range Filter -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Price Range (ZMK)</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" class="form-control" name="min_price" placeholder="Min" 
+                                       value="{{ min_price|default:'' }}" min="0" step="100">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" class="form-control" name="max_price" placeholder="Max" 
+                                       value="{{ max_price|default:'' }}" min="0" step="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sale Filter & Apply Button -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <div class="form-check mt-2 flex-grow-1">
+                                <input class="form-check-input" type="checkbox" name="sale" value="true" 
+                                       id="saleFilter" {% if selected_sale %}checked{% endif %}>
+                                <label class="form-check-label" for="saleFilter">
+                                    <i class="bi bi-star-fill text-warning me-1"></i>On Sale Only
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">
+                                <i class="bi bi-funnel me-2"></i>Apply Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Clear Filters Link -->
+                    {% if selected_category or selected_sale or min_price or max_price %}
+                    <div class="col-12">
+                        <a href="{% url 'search' %}?q={{ search_query }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Clear Filters
+                        </a>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="row g-4 g-lg-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 justify-content-center">
+            {% for product in searched %}
+            <div class="col mb-5">
+                <div class="card h-100 border-0 shadow-sm hover-lift-strong">
+                    {% if product.is_sale %}
+                    <!-- Sale badge-->
+                    <div class="badge bg-danger text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
+                    {% endif %}
+
+                    <!-- Product image - SIMPLIFIED VERSION -->
+                    <div class="card-img-top position-relative" style="height: 220px; overflow: hidden;">
+                        {% if product.image %}
+                        <img class="img-fluid w-100 h-100" 
+                             src="{{ product.image.url }}" 
+                             alt="{{ product.name }}"
+                             style="object-fit: cover;">
+                        {% else %}
+                        <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Product details-->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <!-- Product name-->
+                            <h5 class="fw-bolder mb-3">{{ product.name }}</h5>
+
+                            <!-- Sale Notification on product -->
+                            {% if product.is_sale %}
+                            <div class="d-flex justify-content-center small text-warning mb-2">
+                                <div class="bi-star-fill"></div>
+                                &nbsp;&nbsp;Sale!!&nbsp;&nbsp;
+                                <div class="bi-star-fill"></div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Product price-->
+                            <div class="mb-3">
+                                {% if product.is_sale %}
+                                <strike class="text-muted">
+                                    ZMK{{ product.price }}
+                                </strike>
+                                &nbsp;
+                                <span class="text-primary h4 fw-bold">ZMK{{ product.sale_price }}</span>
+                                {% else %}
+                                <span class="text-primary h4 fw-bold">ZMK{{ product.price }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Category -->
+                            {% if product.category %}
+                            <div class="mb-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1">
+                                    {{ product.category.name }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Product actions-->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-primary mt-auto" href="{% url 'product' product.id %}">
+                                <i class="bi bi-eye me-2"></i>View Details
+                            </a>
+                            {% if product.is_available %}
+                            <a href="{% url 'product' product.id %}" class="btn btn-primary mt-2">
+                                <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                            </a>
+                            {% else %}
+                            <button class="btn btn-outline-secondary mt-2" disabled>
+                                <i class="bi bi-clock me-2"></i>Out of Stock
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Spacer -->
+        <div class="py-4"></div>
+
+        <!-- Pagination -->
+        {% if searched.paginator.num_pages > 1 %}
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="Search results pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if searched.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ searched.previous_page_number }}&q={{ search_query }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in searched.paginator.page_range %}
+                            {% if searched.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link bg-primary border-primary">{{ num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}&q={{ search_query }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if searched.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ searched.next_page_number }}&q={{ search_query }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+
+        {% elif request.method == 'POST' and search_query %}
+        <!-- No Results Found -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center py-8">
+                <div class="mb-5">
+                    <i class="bi bi-search display-1 text-muted opacity-25"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-dark mb-3">No Products Found</h2>
+                <p class="lead text-muted mb-5" style="font-size: 1.25rem;">
+                    We couldn't find any products matching "<strong class="text-primary">{{ search_query }}</strong>".
+                </p>
+                
+                <div class="row g-3 justify-content-center mb-6">
+                    <div class="col-auto">
+                        <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg px-4 py-3">
+                            <i class="bi bi-shop me-2"></i> Browse All Products
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{% url 'solutions' %}" class="btn btn-outline-primary btn-lg px-4 py-3">
+                            <i class="bi bi-lightning me-2"></i> View Solutions
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Search Suggestions -->
+                <div class="bg-light rounded-4 p-5">
+                    <h4 class="fw-bold text-dark mb-4">Try These Popular Searches</h4>
+                    <div class="d-flex flex-wrap gap-3 justify-content-center">
+                        <a href="{% url 'search' %}?q=solar+panels" class="badge bg-primary bg-opacity-10 text-primary py-2 px-4 hover-scale">
+                            Solar Panels
+                        </a>
+                        <a href="{% url 'search' %}?q=inverters" class="badge bg-primary bg-opacity-10 text-primary py-2 px-4 hover-scale">
+                            Inverters
+                        </a>
+                        <a href="{% url 'search' %}?q=batteries" class="badge bg-primary bg-opacity-10 text-primary py-2 px-4 hover-scale">
+                            Batteries
+                        </a>
+                        <a href="{% url 'search' %}?q=lighting" class="badge bg-primary bg-opacity-10 text-primary py-2 px-4 hover-scale">
+                            Lighting
+                        </a>
+                        <a href="{% url 'search' %}?q=charge+controllers" class="badge bg-primary bg-opacity-10 text-primary py-2 px-4 hover-scale">
+                            Charge Controllers
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Spacer -->
+<div class="py-4"></div>
+
+<!-- Featured Categories (Only show if no search or few results) -->
+{% if not searched or searched|length <= 3 %}
+<section class="py-8 bg-primary bg-opacity-5">
+    <div class="container">
+        <div class="row mb-7">
+            <div class="col-lg-8 mx-auto text-center">
+                <span class="badge bg-primary mb-4 px-3 py-2">BROWSE CATEGORIES</span>
+                <h2 class="display-5 fw-bold text-dark mb-4">Popular Product Categories</h2>
+                <p class="lead text-muted mb-0">
+                    Explore our range of high-quality solar products
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a href="{% url 'category' 'Solar-Panels' %}" class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card text-decoration-none">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-sun text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3 text-dark">Solar Panels</h4>
+                        <p class="text-muted mb-4">High-efficiency panels for maximum output</p>
+                        <span class="btn btn-outline-primary w-100">
+                            Browse Products
+                        </span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a href="{% url 'category' 'Inverters' %}" class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card text-decoration-none">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-lightning-charge text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3 text-dark">Inverters</h4>
+                        <p class="text-muted mb-4">Reliable power conversion systems</p>
+                        <span class="btn btn-outline-primary w-100">
+                            Browse Products
+                        </span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a href="{% url 'category' 'Batteries' %}" class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card text-decoration-none">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-battery-charging text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3 text-dark">Batteries</h4>
+                        <p class="text-muted mb-4">Energy storage solutions</p>
+                        <span class="btn btn-outline-primary w-100">
+                            Browse Products
+                        </span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <a href="{% url 'category' 'Lighting' %}" class="card border-0 shadow-sm h-100 hover-lift-strong transition-all product-card text-decoration-none">
+                    <div class="card-body p-5 text-center">
+                        <i class="bi bi-lamp text-warning display-4 mb-4"></i>
+                        <h4 class="fw-bold mb-3 text-dark">Lighting</h4>
+                        <p class="text-muted mb-4">Solar-powered lighting solutions</p>
+                        <span class="btn btn-outline-primary w-100">
+                            Browse Products
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Spacer -->
+<div class="py-4"></div>
+{% endif %}
+
+<!-- Newsletter Section -->
+<section class="py-8 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-8">
+                <h2 class="display-5 fw-bold mb-3">Stay Updated with Solar Innovations</h2>
+                <p class="lead mb-0 opacity-90" style="font-size: 1.25rem;">
+                    Subscribe to our newsletter for the latest solar technology updates, tips, and exclusive offers.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <form id="newsletter-form" class="input-group input-group-lg">
+                    <input type="email" class="form-control" placeholder="Enter your email" aria-label="Email" required>
+                    <button class="btn btn-warning" type="submit">
+                        Subscribe
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Search Page Specific Styles */
+.search-hero {
+    background-attachment: fixed;
+}
+
+.search-form .input-group-text {
+    border-right: none;
+}
+
+.search-form .form-control {
+    border-left: none;
+    border-right: none;
+}
+
+.search-form .form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    border-color: #ffc107;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Product Card Styles */
+.hover-lift-strong {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift-strong:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+/* Page Spacing */
+section {
+    scroll-margin-top: 80px;
+}
+
+.py-8 {
+    padding-top: 7rem !important;
+    padding-bottom: 7rem !important;
+}
+
+.mb-7 {
+    margin-bottom: 5rem !important;
+}
+
+/* Dropdown Customization */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item:hover {
+    background-color: var(--bs-primary);
+    color: white !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .display-3 {
+        font-size: 2.5rem;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+    
+    .py-8 {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+    
+    .search-hero {
+        min-height: 50vh;
+        padding-top: 140px;
+    }
+}
+
+@media (max-width: 768px) {
+    .display-3 {
+        font-size: 2rem;
+    }
+    
+    .display-5 {
+        font-size: 1.75rem;
+    }
+    
+    .lead {
+        font-size: 1.1rem;
+    }
+    
+    .search-form .input-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-form .input-group > * {
+        width: 100%;
+        border-radius: 0.375rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-3 {
+        font-size: 1.75rem;
+    }
+    
+    .search-hero {
+        padding-top: 120px;
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+</style>
 {% endblock %}

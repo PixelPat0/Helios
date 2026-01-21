@@ -4,6 +4,24 @@ import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.conf import settings
+from django.utils import timezone
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField(max_length=254)
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    subscribe_newsletter = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Contact Message"
+        verbose_name_plural = "Contact Messages"
+
+    def __str__(self):
+        return f"{self.name} — {self.subject} ({self.created_at:%Y-%m-%d %H:%M})"
 
 def user_directory_path(instance, filename):
     return f'profile_pics/user_{instance.user.id}/{filename}'
@@ -154,6 +172,9 @@ class QuoteRequest(models.Model):
     budget_range = models.CharField(max_length=100, blank=True, help_text="e.g., K20,000 - K50,000")
     timeline = models.CharField(max_length=20, choices=TIMELINE_CHOICES, default='1_month')
     additional_notes = models.TextField(blank=True, null=True)
+    payment_method = models.CharField(max_length=20, 
+        choices=[('Cash', 'Cash'), ('Lay-By', 'Lay-By'), ('Payment Plan', 'Payment Plan')],
+        default='Cash')
 
     status = models.CharField(
         max_length=20, 

@@ -2,128 +2,234 @@
 {% load humanize %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Select Payment Method</h3>
+        <div class="col-md-10 col-lg-7">
+            
+            <!-- Main Payment Card -->
+            <div class="card shadow-lg border-0 rounded-3">
+                
+                <!-- Card Header -->
+                <div class="card-header bg-primary text-white py-3 text-center">
+                    <h3 class="mb-0 fw-bold"><i class="bi bi-wallet2 me-2"></i>Complete Payment</h3>
                 </div>
-                <div class="card-body">
-                    <!-- Order Summary -->
-                    <div class="mb-4">
-                        <h4>Order Summary</h4>
-                        <p class="text-muted mb-2">Total Amount: ZMK {{ total|floatformat:2|intcomma }}</p>
+
+                <!-- Card Body -->
+                <div class="card-body p-4">
+                    
+                    <!-- Total Amount Display -->
+                    <div class="alert alert-light border text-center mb-4">
+                        <p class="text-muted mb-1 text-uppercase small fw-bold">Total Amount Due</p>
+                        <h2 class="text-primary fw-bold mb-0">ZMK {{ total|floatformat:2|intcomma }}</h2>
                     </div>
 
-                    <!-- Payment Methods -->
-                    <div class="row g-3">
-                        <!-- MTN Mobile Money -->
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <i class="bi bi-phone"></i> MTN Mobile Money
-                                    </h5>
-                                    <form method="POST" action="{% url 'process_order' %}" class="payment-form" id="mtnForm" style="display: none;">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="payment_method" value="mtn">
-                                        <div class="mb-3">
-                                            <label class="form-label">Phone Number</label>
-                                            <input type="tel" name="phone_number" class="form-control" required>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary w-100">Pay with MTN Money</button>
-                                    </form>
-                                    <button class="btn btn-outline-primary w-100 select-payment" data-form="mtnForm">
-                                        Select MTN Money
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Instructions -->
+                    <p class="text-center text-muted mb-4 small">
+                        Select a payment method below to view instructions. <br>
+                        Once you have sent the money, enter the <strong>Transaction ID</strong> to confirm.
+                    </p>
 
-                        <!-- Airtel Money -->
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <i class="bi bi-phone-fill"></i> Airtel Money
-                                    </h5>
-                                    <form method="POST" action="{% url 'process_order' %}" class="payment-form" id="airtelForm" style="display: none;">
+                    <!-- Payment Methods Accordion -->
+                    <div class="accordion" id="paymentAccordion">
+                        
+                        <!-- Airtel Money Payment Option -->
+                        <div class="accordion-item border mb-3 rounded overflow-hidden">
+                            <h2 class="accordion-header" id="headingAirtel">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAirtel" aria-expanded="false" aria-controls="collapseAirtel">
+                                    <span class="text-danger me-2"><i class="bi bi-phone-fill"></i></span> Airtel Money
+                                </button>
+                            </h2>
+                            <div id="collapseAirtel" class="accordion-collapse collapse" aria-labelledby="headingAirtel" data-bs-parent="#paymentAccordion">
+                                <div class="accordion-body bg-light">
+                                    <!-- Airtel Instructions -->
+                                    <div class="alert alert-danger border-danger bg-opacity-10">
+                                        <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle me-1"></i> Instructions:</h6>
+                                        <ol class="mb-0 small ps-3">
+                                            <li>Dial <strong>*115#</strong> or use the Airtel App.</li>
+                                            <li>Send <strong>ZMK {{ total|floatformat:2 }}</strong> to:</li>
+                                            <li class="my-1"><strong>0976 778519</strong> (Name: Patrick Kafumukache)</li>
+                                            <li>Copy the <strong>Transaction ID</strong> from the SMS confirmation.</li>
+                                        </ol>
+                                    </div>
+
+                                    <!-- Airtel Payment Form -->
+                                    <form method="POST" action="{% url 'process_order' %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="payment_method" value="airtel">
                                         <div class="mb-3">
-                                            <label class="form-label">Phone Number</label>
-                                            <input type="tel" name="phone_number" class="form-control" required>
+                                            <label class="form-label small fw-bold">Enter Transaction ID / Reference</label>
+                                            <input type="text" name="payment_reference" class="form-control" placeholder="e.g. CI2109..." required>
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-100">Pay with Airtel Money</button>
+                                        <button type="submit" class="btn btn-danger w-100 fw-bold">
+                                            Confirm Airtel Payment <i class="bi bi-arrow-right ms-2"></i>
+                                        </button>
                                     </form>
-                                    <button class="btn btn-outline-primary w-100 select-payment" data-form="airtelForm">
-                                        Select Airtel Money
-                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bank Card -->
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <i class="bi bi-credit-card"></i> Bank Card
-                                    </h5>
-                                    <form method="POST" action="{% url 'process_order' %}" class="payment-form" id="cardForm" style="display: none;">
+                        <!-- Zamtel Money Payment Option -->
+                        <div class="accordion-item border mb-3 rounded overflow-hidden">
+                            <h2 class="accordion-header" id="headingZamtel">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseZamtel" aria-expanded="false" aria-controls="collapseZamtel">
+                                    <span class="text-info me-2"><i class="bi bi-phone"></i></span> Zamtel Money
+                                </button>
+                            </h2>
+                            <div id="collapseZamtel" class="accordion-collapse collapse" aria-labelledby="headingZamtel" data-bs-parent="#paymentAccordion">
+                                <div class="accordion-body bg-light">
+                                    <!-- Zamtel Instructions -->
+                                    <div class="alert alert-info border-info bg-opacity-10">
+                                        <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle me-1"></i> Instructions:</h6>
+                                        <ol class="mb-0 small ps-3">
+                                            <li>Dial <strong>*115#</strong> or use the Zamtel Money App.</li>
+                                            <li>Select <strong>"Send Money"</strong> option.</li>
+                                            <li>Send <strong>ZMK {{ total|floatformat:2 }}</strong> to:</li>
+                                            <li class="my-1"><strong>0952 410153</strong> (Name: Patrick Kafumukache)</li>
+                                            <li>Save the <strong>Transaction ID</strong> from the confirmation message.</li>
+                                        </ol>
+                                    </div>
+
+                                    <!-- Zamtel Payment Form -->
+                                    <form method="POST" action="{% url 'process_order' %}">
                                         {% csrf_token %}
-                                        <input type="hidden" name="payment_method" value="card">
+                                        <input type="hidden" name="payment_method" value="zamtel">
                                         <div class="mb-3">
-                                            <label class="form-label">Card Number</label>
-                                            <input type="text" name="card_number" class="form-control" required>
+                                            <label class="form-label small fw-bold">Enter Transaction ID / Reference</label>
+                                            <input type="text" name="payment_reference" class="form-control" placeholder="e.g. ZM2024..." required>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label">Expiry Date</label>
-                                                <input type="text" name="card_expiry" class="form-control" placeholder="MM/YY" required>
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label">CVV</label>
-                                                <input type="text" name="card_cvv" class="form-control" required>
-                                            </div>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary w-100">Pay with Card</button>
+                                        <button type="submit" class="btn btn-info text-white w-100 fw-bold">
+                                            Confirm Zamtel Payment <i class="bi bi-arrow-right ms-2"></i>
+                                        </button>
                                     </form>
-                                    <button class="btn btn-outline-primary w-100 select-payment" data-form="cardForm">
-                                        Select Card Payment
-                                    </button>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Bank Deposit / Transfer Option -->
+                        <div class="accordion-item border rounded overflow-hidden">
+                            <h2 class="accordion-header" id="headingBank">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBank" aria-expanded="false" aria-controls="collapseBank">
+                                    <span class="text-primary me-2"><i class="bi bi-bank2"></i></span> Bank Deposit / Transfer
+                                </button>
+                            </h2>
+                            <div id="collapseBank" class="accordion-collapse collapse" aria-labelledby="headingBank" data-bs-parent="#paymentAccordion">
+                                <div class="accordion-body bg-light">
+                                    <!-- Bank Details -->
+                                    <div class="card card-body border-0 shadow-sm mb-3">
+                                        <h6 class="fw-bold text-primary mb-2">Banking Details</h6>
+                                        <ul class="list-unstyled small mb-0">
+                                            <li class="mb-1"><strong>Bank:</strong> FNB Zambia</li>
+                                            <li class="mb-1"><strong>Account Name:</strong> Solchart Ltd</li>
+                                            <li class="mb-1"><strong>Account Number:</strong> 62000000000</li>
+                                            <li class="mb-1"><strong>Branch Code:</strong> 260000</li>
+                                            <li><strong>Reference:</strong> Use your Name or Phone Number</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Bank Payment Form -->
+                                    <form method="POST" action="{% url 'process_order' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="payment_method" value="bank">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold">Enter Depositor Name / Reference</label>
+                                            <input type="text" name="payment_reference" class="form-control" placeholder="e.g. John Doe Payment" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100 fw-bold">
+                                            Confirm Bank Transfer <i class="bi bi-arrow-right ms-2"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- End Accordion -->
+                    
+                    <!-- Alternative Payment Methods Note -->
+                    <div class="alert alert-warning border-warning mt-4 mb-0">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-chat-right-text text-warning fs-5 me-3 mt-1"></i>
+                            <div>
+                                <h6 class="alert-heading fw-bold mb-2">Other Payment Methods?</h6>
+                                <p class="mb-2 small">
+                                    If you wish to pay using other methods (Cash on Delivery, PayPal, Credit Card, etc.), 
+                                    please contact us via WhatsApp or call:
+                                </p>
+                                <div class="d-flex align-items-center justify-content-center mt-3">
+                                    <a href="https://wa.me/260976778519" class="btn btn-success btn-sm me-3" target="_blank">
+                                        <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                                    </a>
+                                    <a href="tel:+260976778519" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-telephone me-1"></i> Call +260 976 778519
+                                    </a>
+                                </div>
+                                <p class="mt-3 mb-0 small text-muted">
+                                    We're here to help you complete your purchase with your preferred payment method.
+                                </p>
+                            </div>
+                        </div>
                     </div>
+                    
+                </div> <!-- End Card Body -->
+                
+                <!-- Card Footer - Back Button -->
+                <div class="card-footer bg-white text-center py-3 border-0">
+                    <a href="{% url 'checkout' %}" class="text-decoration-none text-muted small hover-primary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Shipping Details
+                    </a>
                 </div>
-            </div>
+
+            </div> <!-- End Main Card -->
+            
         </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Hide all payment forms initially
-    const paymentForms = document.querySelectorAll('.payment-form');
-    paymentForms.forEach(form => form.style.display = 'none');
+<!-- Custom CSS -->
+<style>
+    /* Accordion Styling */
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9fa; /* Light gray instead of default blue tint */
+        color: #212529;
+        box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+    }
+    .accordion-button:focus {
+        box-shadow: none; /* Removes the heavy blue outline on click */
+        border-color: rgba(0,0,0,.125);
+    }
+    
+    /* Hover effect for back link */
+    .hover-primary:hover {
+        color: var(--bs-primary) !important;
+    }
+    
+    /* Zamtel button text color adjustment */
+    .btn-info.text-white {
+        background-color: #1c94c4;
+        border-color: #1c94c4;
+    }
+    .btn-info.text-white:hover {
+        background-color: #187da8;
+        border-color: #187da8;
+    }
+    
+    /* Payment method icons */
+    .accordion-button span.text-info {
+        color: #1c94c4 !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .card-body.p-4 {
+            padding: 1.5rem !important;
+        }
+        .alert-warning .d-flex {
+            flex-direction: column;
+        }
+        .alert-warning .d-flex .btn {
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+    }
+</style>
 
-    // Add click handlers to all select payment buttons
-    const selectButtons = document.querySelectorAll('.select-payment');
-    selectButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Hide all forms and show all select buttons
-            paymentForms.forEach(form => form.style.display = 'none');
-            selectButtons.forEach(btn => btn.style.display = 'block');
-            
-            // Show selected form and hide its button
-            const formId = this.dataset.form;
-            const form = document.getElementById(formId);
-            form.style.display = 'block';
-            this.style.display = 'none';
-        });
-    });
-});
-</script>
 {% endblock %}

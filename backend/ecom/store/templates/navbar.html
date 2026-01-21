@@ -1,26 +1,40 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm fixed-top">
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #2c3e50;">
     <div class="container px-3 px-lg-4">
-        <!-- Brand Logo - Cleaner Design -->
-        <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="{% url 'home' %}">
-            <i class="bi bi-lightning-charge fs-4 me-2 text-warning"></i> 
-            <span class="d-none d-sm-inline">Solchart</span>
-            <span class="d-sm-none">HELIOS</span>
+        <!-- Brand Logo with Your Image -->
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <!-- Check if logo exists - simplified approach -->
+            {% if 'logo' %}  <!-- You'll need to adjust this condition based on your actual logo variable -->
+            <img src="{% static 'images/solchartlogo11.png' %}" 
+                 alt="Solchart Logo" 
+                 class="nav-logo me-2">
+            {% else %}
+            <!-- Fallback if logo not uploaded yet -->
+            <div class="logo-placeholder me-2">
+                <i class="bi bi-lightning-charge-fill fs-3"></i>
+            </div>
+            {% endif %}
+            <div class="brand-text d-flex flex-column">
+                <span class="fw-bold brand-name">SOLCHART</span>
+                <small class="brand-tagline">SOLAR SOLUTIONS</small>
+            </div>
         </a>
 
         <!-- Mobile Toggle -->
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <!-- Main Navigation -->
         <div class="collapse navbar-collapse" id="navbarMain">
             <!-- Left Navigation -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- Home (Now Solutions Page) -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="font-size: 1.05rem;">
+                <!-- Home/Solutions -->
                 <li class="nav-item">
                     <a class="nav-link px-3 position-relative" href="{% url 'home' %}">
                         <i class="bi bi-house d-lg-none me-2"></i>
-                        Solutions
+                        <span>Solutions</span>
                         <span class="nav-link-underline"></span>
                     </a>
                 </li>
@@ -29,11 +43,11 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle px-3 position-relative" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="bi bi-shop d-lg-none me-2"></i>
-                        Store
+                        <span>Store</span>
                         <span class="nav-link-underline"></span>
                     </a>
-                    <ul class="dropdown-menu shadow border-0" style="min-width: 220px;">
-                        <li><h6 class="dropdown-header text-primary fw-semibold">Solar Products</h6></li>
+                    <ul class="dropdown-menu shadow border-0" style="min-width: 240px; font-size: 1rem;">
+                        <li><h6 class="dropdown-header text-primary fw-semibold py-2">Solar Products</h6></li>
                         <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'store' %}">
                             <i class="bi bi-house-door me-3 text-muted"></i>
                             <div>
@@ -80,12 +94,11 @@
                     </ul>
                 </li>
 
-
                 <!-- About -->
                 <li class="nav-item">
                     <a class="nav-link px-3 position-relative" href="{% url 'about' %}">
                         <i class="bi bi-info-circle d-lg-none me-2"></i>
-                        About
+                        <span>About</span>
                         <span class="nav-link-underline"></span>
                     </a>
                 </li>
@@ -94,22 +107,22 @@
                 <li class="nav-item">
                     <a class="nav-link px-3 position-relative" href="{% url 'contact' %}">
                         <i class="bi bi-telephone d-lg-none me-2"></i>
-                        Contact
+                        <span>Contact</span>
                         <span class="nav-link-underline"></span>
                     </a>
                 </li>
 
                 <!-- Request Quote -->
                 <li class="nav-item d-none d-lg-block">
-                    <a class="nav-link px-3 fw-semibold text-warning bg-warning bg-opacity-10 rounded-pill" 
+                    <a class="nav-link px-3 fw-semibold text-dark bg-warning bg-opacity-15 rounded-pill hover-grow" 
                        href="{% url 'request_quote' %}" 
-                       style="padding: 0.4rem 1.2rem !important;">
+                       style="padding: 0.5rem 1.5rem !important;">
                         <i class="bi bi-lightning-charge me-1"></i>
                         Get Quote
                     </a>
                 </li>
 
-                <!-- Dashboard (Visible to active sellers - Mobile Only) -->
+                <!-- Dashboard (Mobile Only for Sellers) -->
                 {% if user.is_authenticated and user.seller_profile.is_active %}
                 <li class="nav-item d-lg-none">
                     <a class="nav-link px-3 text-success fw-semibold" href="{% url 'seller_dashboard' %}">
@@ -121,10 +134,10 @@
             </ul>
 
             <!-- Right Navigation -->
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center" style="font-size: 1.05rem;">
                 <!-- Search -->
                 <li class="nav-item me-2">
-                    <a class="nav-link px-2 rounded-circle bg-light" href="{% url 'search' %}" title="Search Products">
+                    <a class="nav-link px-2 rounded-circle nav-icon-btn" href="{% url 'search' %}" title="Search Products">
                         <i class="bi bi-search"></i>
                     </a>
                 </li>
@@ -132,7 +145,7 @@
                 <!-- Notifications -->
                 {% if user.is_authenticated %}
                 <li class="nav-item dropdown me-2">
-                    <a class="nav-link px-2 position-relative rounded-circle bg-light" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link px-2 position-relative rounded-circle nav-icon-btn" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="bi bi-bell"></i>
                         {% if unread_notification_count and unread_notification_count > 0 %}
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">
@@ -140,8 +153,8 @@
                             </span>
                         {% endif %}
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 300px;">
-                        <li><h6 class="dropdown-header text-primary fw-semibold">Notifications</h6></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 300px; font-size: 0.95rem;">
+                        <li><h6 class="dropdown-header text-primary fw-semibold py-2">Notifications</h6></li>
                         {% if unread_notifications %}
                             {% for notification in unread_notifications %}
                             <li>
@@ -176,10 +189,10 @@
 
                 <!-- Cart -->
                 <li class="nav-item me-3">
-                    <a class="nav-link px-2 position-relative rounded-circle bg-light" href="{% url 'cart_summary' %}">
+                    <a class="nav-link px-2 position-relative rounded-circle nav-icon-btn" href="{% url 'cart_summary' %}">
                         <i class="bi bi-cart3"></i>
                         <span id="cart_quantity" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" 
-                              style="font-size: 0.65rem; padding: 0.25rem 0.5rem; min-width: 1.5rem;">
+                              style="font-size: 0.65rem; padding: 0.25rem 0.5rem; min-width: 1.5rem; font-weight: 600;">
                             {{ cart_quantity|default:0 }}
                         </span>
                     </a>
@@ -192,9 +205,9 @@
                         <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 me-2">
                             <i class="bi bi-person"></i>
                         </div>
-                        <span class="d-none d-lg-inline">{{ user.first_name|default:user.username|truncatechars:12 }}</span>
+                        <span class="d-none d-lg-inline fw-medium">{{ user.first_name|default:user.username|truncatechars:12 }}</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 250px;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 260px; font-size: 0.95rem;">
                         <!-- User Info -->
                         <li class="px-3 py-2">
                             <div class="fw-medium text-primary">{{ user.get_full_name|default:user.username }}</div>
@@ -204,7 +217,7 @@
                         
                         <!-- Seller Links -->
                         {% if user.seller_profile.is_active %}
-                        <li><h6 class="dropdown-header text-primary fw-semibold">Seller Tools</h6></li>
+                        <li><h6 class="dropdown-header text-primary fw-semibold py-1">Seller Tools</h6></li>
                         <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'seller_dashboard' %}">
                             <i class="bi bi-speedometer2 me-3 text-success"></i>
                             Dashboard
@@ -222,7 +235,7 @@
                         
                         <!-- Admin Links -->
                         {% if user.is_superuser %}
-                        <li><h6 class="dropdown-header text-primary fw-semibold">Admin Tools</h6></li>
+                        <li><h6 class="dropdown-header text-primary fw-semibold py-1">Admin Tools</h6></li>
                         <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'not_shipped_dash' %}">
                             <i class="bi bi-clock me-3 text-warning"></i>
                             Pending Orders
@@ -269,9 +282,9 @@
                         <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 me-2">
                             <i class="bi bi-person"></i>
                         </div>
-                        <span class="d-none d-lg-inline">Account</span>
+                        <span class="d-none d-lg-inline fw-medium">Account</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="font-size: 0.95rem;">
                         <li><a class="dropdown-item py-2 d-flex align-items-center" href="{% url 'login' %}">
                             <i class="bi bi-box-arrow-in-right me-3"></i>
                             Login
@@ -283,7 +296,7 @@
                         <li><hr class="dropdown-divider my-1"></li>
                         <li><a class="dropdown-item py-2 d-flex align-items-center text-success" href="{% url 'seller_signup' %}">
                             <i class="bi bi-bag-plus me-3"></i>
-                            Sell on Helios
+                            Sell on Solchart
                         </a></li>
                     </ul>
                 </li>

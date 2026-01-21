@@ -1,5 +1,6 @@
 # payment/models.py
 from decimal import Decimal
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
@@ -178,9 +179,18 @@ class Order(models.Model):
     amount_paid = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     date_ordered = models.DateTimeField(auto_now_add=True)
 
+    # MVP Payment Tracking: Unique reference code for manual payment confirmation
+    payment_code = models.CharField(
+        max_length=20, 
+        unique=True, 
+        null=True, 
+        blank=True,
+        help_text="Unique payment code (e.g., HLS-1001-A7K2) for customer to include with payment"
+    )
+
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default='pending')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, null=True, blank=True)
-    payment_reference = models.CharField(max_length=100, null=True, blank=True)
+    payment_reference = models.CharField(max_length=100, null=True, blank=True, help_text="Transaction ID or Reference")
     date_paid = models.DateTimeField(null=True, blank=True)
     date_processed = models.DateTimeField(null=True, blank=True)
     date_shipped = models.DateTimeField(null=True, blank=True)
@@ -193,6 +203,27 @@ class Order(models.Model):
             models.Index(fields=['-date_ordered']),
             models.Index(fields=['-date_shipped']),
         ]
+
+    def generate_payment_code(self):
+        """Generate unique payment code if not already set. Format: HLS-{ID}-{3-char-random}"""
+        if not self.payment_code:
+            random_suffix = str(uuid.uuid4()).replace('-', '')[:3].upper()
+            self.payment_code = f"HLS-{self.id}-{random_suffix}"
+        return self.payment_code
+
+    def save(self, *args, **kwargs):
+        """Auto-generate payment code on first save."""
+        if not self.pk:
+            # First save — let Django assign the ID
+            super().save(*args, **kwargs)
+            # Now generate code with the ID
+            self.generate_payment_code()
+            super().save(*args, **kwargs)
+        else:
+            # Subsequent saves
+            if not self.payment_code:
+                self.generate_payment_code()
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Order - {self.id}'
@@ -241,9 +272,9 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
     # Commission config!!
-    COMMISSION_RATE = Decimal('0.15')
+    COMMISSION_RATE = Decimal('0.08')
     commission_rate = models.DecimalField(max_digits=5, decimal_places=4, default=COMMISSION_RATE,
-                                          help_text="Decimal (0.15 = 15%)")
+                                          help_text="Decimal (0.08 = 8%)")
     commission_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
     # Seller now references the new Seller model

@@ -64,6 +64,14 @@
                         </div>
                     </div>
 
+                    <div class="col-md-6 mb-4">
+                        <h5 class="border-bottom pb-2 mb-3 text-primary">Preferred Payment Method</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4 text-muted">Payment Method</dt>
+                            <dd class="col-sm-8">{{ quote.payment_method|default:"Not specified" }}</dd>
+                        </dl>
+                    </div>
+
                     <hr class="my-4">
 
                     <h5 class="text-primary mb-3">Technical Requirements</h5>

@@ -1,13 +1,13 @@
 # store/views.py
 """
-Cleaned store views for Helios.
-Replace your existing store/views.py with this (backup first).
+Store views for Helios e-commerce platform.
+Handles product browsing, search, authentication, user profiles, notifications, and quote requests.
 """
 
 from decimal import Decimal
 import json
 from django.conf import settings
-from django.http import JsonResponse # <-- ADDED: Needed for AJAX endpoint
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -16,29 +16,121 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.db.models import Q, Sum
+from django.views.decorators.http import require_POST
 
 from cart.cart import Cart
-from .models import Product, Category, Profile, QuoteRequest
-from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm, QuoteRequestForm
-
-# Import newsletter form + models and notification model from payment app
-from payment.forms import NewsletterSubscriberForm, ShippingForm
-from payment.models import NewsletterSubscriber, Notification, Seller, ImpactFundTransaction
-from payment.models import ShippingAddress # This import is crucial and now required
-
-# Tokens for activation
+from .models import Product, Category, Profile, QuoteRequest, ContactMessage
+from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm, QuoteRequestForm, ContactForm
 from .tokens import account_activation_token
+
+from payment.forms import NewsletterSubscriberForm, ShippingForm
+from payment.models import (
+    NewsletterSubscriber, 
+    Notification, 
+    Seller, 
+    ImpactFundTransaction,
+    ShippingAddress
+)
 
 
 User = get_user_model()
 
 
+try:
+    from payment.models import NewsletterSubscriber
+except Exception:
+    NewsletterSubscriber = None
+
+
+# -------------------------
+# Helper Functions
+# -------------------------
+def get_impact_context(project_goal=None):
+    """
+    Get impact statistics for dashboard views.
+    Returns context dict with seller count, funds collected, installations, and progress.
+    """
+    if project_goal is None:
+        project_goal = Decimal('100000.00')
+    
+    try:
+        seller_count = Seller.objects.filter(is_active=True).count()
+    except Exception:
+        seller_count = 0
+
+    try:
+        funds_result = ImpactFundTransaction.objects.filter(is_active=True).aggregate(total=Sum('amount'))
+        total_funds = funds_result['total'] or Decimal('0.00')
+    except Exception:
+        total_funds = Decimal('0.00')
+
+    number_of_installations = 20  # Manual for MVP
+
+    try:
+        progress_raw = (Decimal(total_funds) / project_goal) * Decimal('100.00') if project_goal > 0 else Decimal('0')
+        progress_percentage = int(min(progress_raw, Decimal('100.00')).quantize(Decimal('1')))
+    except Exception:
+        progress_percentage = 0
+
+    return {
+        'seller_count': seller_count,
+        'total_funds_collected': total_funds,
+        'number_of_installations': number_of_installations,
+        'progress_percentage': progress_percentage,
+        'newsletter_form': NewsletterSubscriberForm(),
+    }
+
+
+# -------------------------
+# Notifications - AJAX Endpoints
+# -------------------------
+@require_POST
+def mark_notification_read(request):
+    notification_id = request.POST.get('notification_id')
+    try:
+        notification = Notification.objects.get(id=notification_id, user=request.user)
+        notification.is_read = True
+        notification.save()
+        return JsonResponse({'success': True})
+    except Notification.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Notification not found'})
+
+
+@require_POST
+def mark_all_notifications_read(request):
+    notifications = Notification.objects.filter(user=request.user, is_read=False)
+    notifications.update(is_read=True)
+    return JsonResponse({'success': True, 'count': notifications.count()})
+
+
+@require_POST
+def delete_notification(request):
+    notification_id = request.POST.get('notification_id')
+    try:
+        notification = Notification.objects.get(id=notification_id, user=request.user)
+        notification.delete()
+        return JsonResponse({'success': True})
+    except Notification.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Notification not found'})
+
+
+@require_POST
+def clear_all_notifications(request):
+    notifications = Notification.objects.filter(user=request.user)
+    count = notifications.count()
+    notifications.delete()
+    return JsonResponse({'success': True, 'count': count})
+
+
+# -------------------------
+# Contact Page
+# -------------------------
 def contact(request):
     """
     Contact page with form and business information
     """
-    # You can add contact form handling here later
     return render(request, 'contact.html')
 
 # -------------------------
@@ -93,15 +185,6 @@ def notification_redirect_view(request, notif_id):
     return notification_open(request, notif_id)
 
 
-@login_required
-def mark_all_notifications_read(request):
-    """Mark all unread notifications for the current user as read (POST only)."""
-    # NOTE: This view is now consolidated from payment/views.py
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': 'POST required'}, status=400)
-    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-    return JsonResponse({'ok': True})
-
 def newsletter_subscribe(request):
     """
     Accept newsletter subscription POST and redirect back to referrer.
@@ -138,48 +221,11 @@ def donation_page_view(request):
 
 def public_impact_view(request):
     """
-    Public impact dashboard:
-      - count of active sellers
-      - total funds collected (ImpactFundTransaction.sum)
-      - number of installations (manual for now)
-      - newsletter form
+    Public impact dashboard showing seller count, funds collected, installations, and progress.
     """
-    try:
-        seller_count = Seller.objects.filter(is_active=True).count()
-    except Exception:
-        seller_count = 0
-
-    # Sum transactions (expenses can be negative)
-    try:
-        # Filter by is_active=True
-        funds_collected_result = ImpactFundTransaction.objects.filter(is_active=True).aggregate(total=Sum('amount'))
-        total_funds_collected = funds_collected_result['total'] or Decimal('0.00')
-    except Exception:
-        total_funds_collected = Decimal('0.00')
-
-    # number_of_installations kept manual for MVP
-    number_of_installations = 20
-
-    # A sample project goal (update this to your real target)
-    PROJECT_GOAL = Decimal('100000.00')
-
-    # calculate progress percentage safely
-    try:
-        progress_raw = (Decimal(total_funds_collected) / PROJECT_GOAL) * Decimal('100.00') if PROJECT_GOAL > 0 else Decimal('0')
-        progress_percentage = int(min(progress_raw, Decimal('100.00')).quantize(Decimal('1')))  # integer percent
-    except Exception:
-        progress_percentage = 0
-
-    newsletter_form = NewsletterSubscriberForm()
-
-    context = {
-        'seller_count': seller_count,
-        'total_funds_collected': total_funds_collected,
-        'number_of_installations': number_of_installations,
-        'progress_percentage': progress_percentage,
-        'newsletter_form': newsletter_form,
-    }
+    context = get_impact_context()
     return render(request, 'public_impact.html', context)
+
 
 
 # -------------------------
@@ -195,13 +241,20 @@ def seller_profile_public(request, pk):
         messages.error(request, 'Seller not found or profile is inactive.')
         return redirect('home')
 
-    products = Product.objects.filter(seller=seller, is_available=True, is_sale=False).order_by('-id')
+    # Separate products by sale status for featured display
+    regular_products = Product.objects.filter(seller=seller, is_available=True, is_sale=False).order_by('-id')
     sale_products = Product.objects.filter(seller=seller, is_available=True, is_sale=True).order_by('-id')
+    
+    # All products combined for the catalog
+    all_products = Product.objects.filter(seller=seller, is_available=True).order_by('-id')
 
     return render(request, 'seller_profile_public.html', {
         'seller': seller,
-        'products': products,
+        'products': regular_products,
         'sale_products': sale_products,
+        'all_products': all_products,
+        'total_products': all_products.count(),
+        'total_sale_products': sale_products.count(),
     })
 
 
@@ -229,13 +282,77 @@ def activate(request, uidb64, token):
 # Search / Profile / Misc
 # -------------------------
 def search(request):
+    """
+    Search products with optional filtering by category, price range, and sale status.
+    Supports both POST (initial search) and GET (filtering).
+    """
+    searched = []
+    search_query = ''
+    categories = Category.objects.all()
+    selected_category = None
+    selected_sale = False
+    min_price = None
+    max_price = None
+
+    # Handle POST request (initial search)
     if request.method == 'POST':
-        searched = request.POST.get('searched', '').strip()
-        results = Product.objects.filter(Q(name__icontains=searched) | Q(description__icontains=searched))
-        if not results.exists():
-            messages.success(request, 'No products found')
-        return render(request, "search.html", {'searched': results})
-    return render(request, "search.html", {})
+        search_query = request.POST.get('searched', '').strip()
+        if search_query:
+            searched = Product.objects.filter(
+                Q(name__icontains=search_query) | Q(description__icontains=search_query),
+                is_available=True
+            ).order_by('-id')
+
+    # Handle GET request (search + filters)
+    elif request.method == 'GET':
+        search_query = request.GET.get('q', '')
+        if search_query:
+            searched = Product.objects.filter(
+                Q(name__icontains=search_query) | Q(description__icontains=search_query),
+                is_available=True
+            ).order_by('-id')
+
+            # Apply category filter
+            category_id = request.GET.get('category')
+            if category_id:
+                try:
+                    selected_category = Category.objects.get(id=category_id)
+                    searched = searched.filter(category=selected_category)
+                except Category.DoesNotExist:
+                    pass
+
+            # Apply sale filter
+            if request.GET.get('sale') == 'true':
+                selected_sale = True
+                searched = searched.filter(is_sale=True)
+
+            # Apply price range filter
+            try:
+                min_price_param = request.GET.get('min_price')
+                max_price_param = request.GET.get('max_price')
+                
+                if min_price_param:
+                    min_price = float(min_price_param)
+                    searched = searched.filter(price__gte=min_price)
+                
+                if max_price_param:
+                    max_price = float(max_price_param)
+                    searched = searched.filter(price__lte=max_price)
+            except (ValueError, TypeError):
+                pass
+
+    context = {
+        'searched': searched,
+        'search_query': search_query,
+        'categories': categories,
+        'selected_category': selected_category,
+        'selected_sale': selected_sale,
+        'min_price': min_price,
+        'max_price': max_price,
+        'result_count': searched.count() if searched else 0,
+    }
+    
+    return render(request, "search.html", context)
 
 
 @login_required
@@ -362,43 +479,11 @@ def solutions_view(request):
 
 def about(request):
     """
-    About page with impact data merged from public_impact
+    About page with impact data.
     """
-    try:
-        seller_count = Seller.objects.filter(is_active=True).count()
-    except Exception:
-        seller_count = 0
-
-    # Sum transactions (expenses can be negative)
-    try:
-        funds_collected_result = ImpactFundTransaction.objects.filter(is_active=True).aggregate(total=Sum('amount'))
-        total_funds_collected = funds_collected_result['total'] or Decimal('0.00')
-    except Exception:
-        total_funds_collected = Decimal('0.00')
-
-    # number_of_installations kept manual for MVP
-    number_of_installations = 20
-
-    # A sample project goal (update this to your real target)
-    PROJECT_GOAL = Decimal('100000.00')
-
-    # calculate progress percentage safely
-    try:
-        progress_raw = (Decimal(total_funds_collected) / PROJECT_GOAL) * Decimal('100.00') if PROJECT_GOAL > 0 else Decimal('0')
-        progress_percentage = int(min(progress_raw, Decimal('100.00')).quantize(Decimal('1')))  # integer percent
-    except Exception:
-        progress_percentage = 0
-
-    newsletter_form = NewsletterSubscriberForm()
-
-    context = {
-        'seller_count': seller_count,
-        'total_funds_collected': total_funds_collected,
-        'number_of_installations': number_of_installations,
-        'progress_percentage': progress_percentage,
-        'newsletter_form': newsletter_form,
-    }
+    context = get_impact_context()
     return render(request, 'about.html', context)
+
 
 
 def login_user(request):

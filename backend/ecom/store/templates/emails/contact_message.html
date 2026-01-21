@@ -1,0 +1,14 @@
+<!-- templates/emails/contact_message.html -->
+<!doctype html>
+<html>
+  <body>
+    <h2>New Contact Message</h2>
+    <p><strong>Name:</strong> {{ msg.name }}</p>
+    <p><strong>Email:</strong> {{ msg.email }}</p>
+    <p><strong>Subject:</strong> {{ msg.subject }}</p>
+    <p><strong>Subscribe?</strong> {{ msg.subscribe_newsletter|yesno:"Yes,No" }}</p>
+    <hr>
+    <p>{{ msg.message|linebreaksbr }}</p>
+    <p>Received: {{ msg.created_at }}</p>
+  </body>
+</html>

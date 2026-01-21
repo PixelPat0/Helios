@@ -19,10 +19,11 @@ from django.db import transaction
 from django.db.models import Q, Sum, F, ExpressionWrapper, DecimalField
 
 from cart.cart import Cart
-from store.models import Product, Profile
+from store.models import Product, Profile, QuoteRequest
 from store.forms import ProductForm
 from .email_utils import send_order_notifications
 from .decorators import seller_required
+from .utils import PaymentProcessor, PaymentConfirmation, log_payment_attempt
 from .forms import (
     ShippingForm,
     PaymentForm,
@@ -32,6 +33,7 @@ from .forms import (
 )
 from .models import ShippingAddress, Order, OrderItem, Seller, Notification
 
+
 # Optional Impact transaction model (may exist in your models)
 try:
     from .models import ImpactFundTransaction
@@ -39,6 +41,7 @@ except Exception:
     ImpactFundTransaction = None
 
 User = get_user_model()
+
 
 
 @login_required
@@ -464,25 +467,42 @@ def shipped_dash(request):
 # -------------------------
 # Order processing (checkout)
 # -------------------------
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import transaction
+from decimal import Decimal
+from cart.cart import Cart
+from .models import Order, OrderItem
+# Import your ImpactFund model if it's in a different app, e.g.:
+# from impact.models import ImpactFundTransaction 
+# Assuming send_order_notifications is imported:
+# from .utils import send_order_notifications
+
 def process_order(request):
     """
-    Full checkout/order creation logic.
-    Creates Order, OrderItems, ImpactFundTransaction (best-effort), notifications and clears cart.
+    Minimal MVP checkout for manual/mobile-money payments:
+    - Creates Order with status='pending'
+    - Saves payment_reference (transaction id) supplied by user
+    - Creates OrderItems (commission_rate = 8%)
+    - Sends notifications (best-effort)
+    - Clears cart
     """
     request.disable_newsletter = True
+
     if request.method != "POST":
-        message.success(request, "Access Denied")
+        messages.warning(request, "Access Denied")
         return redirect('home')
 
     cart = Cart(request)
     cart_products = cart.get_prods()
     quantities = cart.get_quants()
     total = cart.cart_total()
-    my_shipping = request.session.get('my_shipping') or {}
 
+    my_shipping = request.session.get('my_shipping') or {}
     full_name = my_shipping.get('shipping_full_name', '')
     email = my_shipping.get('shipping_email', '')
-    phone_number = my_shipping.get('phone_number', '') 
+    phone_number = my_shipping.get('phone_number', '')  # optional if you store it
+
     shipping_address = (
         f"{my_shipping.get('shipping_address1','')}\n"
         f"{my_shipping.get('shipping_address2','')}\n"
@@ -491,99 +511,117 @@ def process_order(request):
         f"{my_shipping.get('shipping_postal_code','')}\n"
         f"{my_shipping.get('shipping_country','')}"
     )
+
+    # Ensure amount is Decimal
     amount_paid = Decimal(total) if not isinstance(total, Decimal) else total
-    payment_method = request.POST.get('payment_method', None)
 
-    ITEM_COMMISSION_RATE = Decimal('0.15')
-    IMPACT_FUND_RATE = Decimal('0.10')
+    # Capture payment fields from POST (these are for manual verification)
+    payment_method = request.POST.get('payment_method', '')  # e.g. 'airtel', 'mtn'
+    payment_reference = (request.POST.get('payment_reference') or '').strip() or None
 
-    total_impact_allocation = Decimal('0.00')
+    # Commission rate (8% for MVP)
+    ITEM_COMMISSION_RATE = Decimal('0.08')
+
+    order_items = []
 
     with transaction.atomic():
-        # Create order (auth or guest)
-        if request.user.is_authenticated:
-            order = Order(user=request.user, full_name=full_name, email=email, 
-                          shipping_address=shipping_address, amount_paid=amount_paid, phone_number=phone_number,
-                            
-                          status='paid', payment_method=payment_method)
-        else:
-            order = Order(full_name=full_name, email=email,
-                          shipping_address=shipping_address, amount_paid=amount_paid, phone_number=phone_number,
-                          
-                          status='paid', payment_method=payment_method)
-        order.save()
+        user = request.user if request.user.is_authenticated else None
 
-        order_items = []
-        user_for_impact = request.user if request.user.is_authenticated else None
+        # =====================================================================
+        # PAYMENT PROCESSING
+        # =====================================================================
+        # MVP: PaymentProcessor simply records the payment and returns success
+        # Future API: Replace PaymentProcessor to call actual payment gateway
+        # See PAYMENT_INTEGRATION_GUIDE.md for details on future API integration
+        
+        payment_result = PaymentProcessor.process_payment(
+            order, 
+            payment_method, 
+            payment_reference
+        )
+        
+        if not payment_result['success']:
+            message.error(request, payment_result['message'])
+            return redirect('checkout')
+        
+        # Log the payment attempt for auditing
+        log_payment_attempt(order, payment_method, amount_paid)
+        # =====================================================================
 
+        # Create order in pending state; we'll verify payment manually later
+        order = Order.objects.create(
+            user=user,
+            full_name=full_name,
+            email=email,
+            shipping_address=shipping_address,
+            amount_paid=amount_paid,
+            phone_number=phone_number if hasattr(Order, 'phone_number') else None,
+            status='pending',
+            payment_method=payment_method,
+            payment_reference=payment_reference
+        )
+
+        # create order items
         for product in cart_products:
             product_id = product.id
+
             price = product.sale_price if getattr(product, 'is_sale', False) and getattr(product, 'sale_price', None) else product.price
             if not isinstance(price, Decimal):
                 price = Decimal(price)
 
+            # find quantity from quantities dict (keys are product ids as strings)
+            quantity = 0
             for key, value in quantities.items():
                 try:
-                    q_key = int(key)
+                    if int(key) == product_id:
+                        quantity = int(value)
+                        break
                 except (ValueError, TypeError):
                     continue
-                if q_key != product_id:
-                    continue
 
-                quantity = int(value)
-                # ensure OrderItem.seller is set from the product (if present)
-                seller_for_item = getattr(product, 'seller', None)
-                oi = OrderItem(
-                    order=order,
-                    product=product,
-                    seller=seller_for_item,
-                    user=user_for_impact,
-                    quantity=quantity,
-                    price=price,
-                    commission_rate=ITEM_COMMISSION_RATE
-                )
-                oi.save()
-                order_items.append(oi)
+            if quantity <= 0:
+                continue
 
-                item_subtotal = (price * Decimal(quantity)).quantize(Decimal('0.01'))
-                platform_commission = (item_subtotal * ITEM_COMMISSION_RATE).quantize(Decimal('0.01'))
-                impact_allocation = (platform_commission * IMPACT_FUND_RATE).quantize(Decimal('0.01'))
-                total_impact_allocation += impact_allocation
+            seller_for_item = getattr(product, 'seller', None)
 
-        # Create ImpactFundTransaction if model exists
-        if total_impact_allocation > Decimal('0.00') and ImpactFundTransaction is not None:
-            try:
-                ImpactFundTransaction.objects.create(
-                    transaction_type='COMMISSION',
-                    amount=total_impact_allocation,
-                    user=user_for_impact,
-                    description=f"Impact allocation from Order #{order.pk} ({(IMPACT_FUND_RATE * 100)}% of commission)",
-                )
-            except Exception as e:
-                print("ImpactFundTransaction create failed:", e)
+            oi = OrderItem(
+                order=order,
+                product=product,
+                seller=seller_for_item,
+                user=user,
+                quantity=quantity,
+                price=price,
+                commission_rate=ITEM_COMMISSION_RATE
+            )
+            # OrderItem.save() should compute commission_amount in your model save()
+            oi.save()
+            order_items.append(oi)
 
-        # Send notifications (best-effort)
-        print("DEBUG 1: Before calling send_order_notifications. Order items count:", len(order_items))
+        # Notifications (best-effort; don't block order creation)
         try:
-            send_order_notifications(order, order_items)
-            print("DEBUG 2: send_order_notifications called successfully.")
+            if 'send_order_notifications' in globals() and callable(send_order_notifications):
+                send_order_notifications(order, order_items)
         except Exception as e:
+            # keep going; log for debugging
             print("Error sending notifications:", e)
 
-        # Clear cart
+        # Clear cart (best-effort)
         try:
             if hasattr(cart, "clear"):
                 cart.clear()
             else:
+                # fallback: remove cart keys from session
                 for key in list(request.session.keys()):
                     if key == "session_key":
                         del request.session[key]
-        except Exception:
-            pass
+        except Exception as e:
+            print("Error clearing cart:", e)
 
-    message.success(request, "Order Placed Successfully")
-    return redirect('home')
+        # Redirect to payment instructions page instead of home
+        return redirect('payment_pending', order_id=order.id)
 
+    messages.warning(request, "Order creation failed. Please try again.")
+    return redirect('checkout')
 
 # -------------------------
 # Billing/Checkout helpers + exports
@@ -839,3 +877,38 @@ def update_order_status(request, pk):
 
     # --- 4. Redirect to Order Detail View (Crucial for the new UI flow) ---
     return redirect('seller_order_detail', order_id=order.id)
+
+
+# -------------------------
+# MVP: Payment Confirmation Instructions
+# -------------------------
+def payment_pending(request, order_id):
+    """
+    Display payment instructions to customer after order is placed.
+    Shows payment code and details for manual payment submission.
+    """
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        message.error(request, "Order not found.")
+        return redirect('home')
+    
+    # Check permission (customer can see their own order)
+    if order.user and order.user != request.user:
+        message.error(request, "You don't have permission to view this order.")
+        return redirect('home')
+    
+    # Generate payment code if not already set
+    if not order.payment_code:
+        order.generate_payment_code()
+        order.save()
+    
+    context = {
+        'order': order,
+        'payment_code': order.payment_code,
+        'brother_number': settings.BROTHER_PHONE_NUMBER,
+        'brother_name': settings.BROTHER_NAME,
+        'business_email': settings.BUSINESS_CONTACT_EMAIL,
+    }
+    
+    return render(request, 'payment/payment_pending.html', context)

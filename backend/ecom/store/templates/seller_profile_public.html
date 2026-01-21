@@ -3,70 +3,848 @@
 
 {% block content %}
 
-<div class="container my-5">
+<!-- Seller Hero Section -->
+<section class="seller-hero position-relative" style="
+    background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
+    min-height: 50vh;
+    padding-top: 140px;
+    padding-bottom: 80px;
+">
+    <!-- Floating Background Elements -->
+    <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block">
+        <div class="position-relative h-100">
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-warning opacity-10" 
+                 style="clip-path: polygon(100% 0, 0% 100%, 100% 100%);"></div>
+        </div>
+    </div>
     
-    <div class="row mb-4 p-4 border rounded shadow-sm bg-light">
-        <div class="col-md-2 text-center">
-            {% if seller.logo %}
-                <img src="{{ seller.logo.url }}" class="img-fluid rounded-circle" alt="{{ seller.business_name }} Logo" style="width: 100px; height: 100px; object-fit: cover;">
-            {% else %}
-                <i class="bi bi-shop display-4 text-secondary"></i>
-            {% endif %}
-        </div>
-        <div class="col-md-10">
-            <h1 class="display-5">{{ seller.business_name }}</h1>
-            <p class="lead">{{ seller.business_description|default:"No description provided." }}</p>
-            <p class="text-muted">
-                <i class="bi bi-geo-alt-fill me-2"></i>Location: {{ seller.city|default:"N/A" }}, {{ seller.country|default:"N/A" }}
-                | 
-                <i class="bi bi-envelope-fill me-2"></i>Email: <a href="mailto:{{ seller.business_email }}">{{ seller.business_email }}</a>
-            </p>
-        </div>
-    </div>
-
-    {% if sale_products %}
-    <h2 class="mt-5 mb-3">🔥 On Sale Now</h2>
-    <hr>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for product in sale_products %}
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">
-                            <span class="text-danger fw-bold">Sale: ZMK {{ product.sale_price }}</span> 
-                            <s class="text-muted">ZMK {{ product.price }}</s>
-                        </p>
-                        <a href="{% url 'product' product.id %}" class="btn btn-sm btn-outline-primary">View Product</a>
+    <!-- Animated Background Shapes -->
+    <div class="position-absolute bottom-30 end-30 w-20 h-20 rounded-circle bg-warning opacity-5 animate-float-2"></div>
+    
+    <div class="container position-relative z-2">
+        <div class="row align-items-center g-6">
+            <!-- Logo/Image Column -->
+            <div class="col-lg-4 col-md-5">
+                <div class="text-center">
+                    <div class="position-relative d-inline-block mb-5">
+                        {% if seller.logo %}
+                            <img src="{{ seller.logo.url }}" 
+                                 class="img-fluid rounded-circle border border-4 border-warning shadow-lg" 
+                                 alt="{{ seller.business_name }} Logo" 
+                                 style="width: 200px; height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle border border-4 border-warning shadow-lg d-flex align-items-center justify-content-center bg-primary bg-opacity-10" 
+                                 style="width: 200px; height: 200px;">
+                                <i class="bi bi-shop display-1 text-warning"></i>
+                            </div>
+                        {% endif %}
+                        {% if seller.is_active %}
+                        <span class="position-absolute bottom-0 end-0 bg-success text-white rounded-circle p-2 border border-3 border-white">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </span>
+                        {% endif %}
                     </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <h2 class="mt-5 mb-3">🛍️ All Products</h2>
-    <hr>
-    {% if products or sale_products %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for product in products %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text">ZMK {{ product.price }}</p>
-                            <a href="{% url 'product' product.id %}" class="btn btn-sm btn-outline-secondary">View Product</a>
+                    
+                    <!-- Contact Seller Button - Smaller -->
+                    <div class="mb-4">
+                        <a href="{% url 'request_quote' %}" class="btn btn-warning btn-md fw-bold px-4 py-2 shadow-sm">
+                            <i class="bi bi-envelope-heart me-2"></i>Contact Seller
+                        </a>
+                    </div>
+                    
+                    <!-- Seller Stats -->
+                    <div class="mt-5">
+                        <div class="row g-3 text-white text-center">
+                            <div class="col-6">
+                                <div class="bg-dark bg-opacity-25 rounded-3 p-3">
+                                    <h3 class="mb-0 fw-bold counter" data-count="{{ total_products|default:'0' }}">0</h3>
+                                    <small class="opacity-75">Products</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-dark bg-opacity-25 rounded-3 p-3">
+                                    <h3 class="mb-0 fw-bold counter" data-count="{{ total_sale_products|default:'0' }}">0</h3>
+                                    <small class="opacity-75">On Sale</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            {% endfor %}
             </div>
-    {% else %}
-        <p class="alert alert-info">This seller currently has no products listed.</p>
-    {% endif %}
 
-</div>
+            <!-- Info Column -->
+            <div class="col-lg-8 col-md-7 text-white">
+                <div class="ps-lg-4">
+                    <!-- Verified Badge with Trust Indicators -->
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50 px-4 py-2 rounded-pill me-3">
+                            <i class="bi bi-shield-check me-2"></i>Verified Seller
+                        </span>
+                        <div class="d-flex">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 me-2 rounded-pill">
+                                <i class="bi bi-check-circle me-1"></i>Trusted
+                            </span>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-1 rounded-pill">
+                                <i class="bi bi-star me-1"></i>Premium
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <h1 class="display-3 fw-bold mb-4">{{ seller.business_name }}</h1>
+                    
+                    <p class="lead mb-5 opacity-90" style="font-size: 1.3rem; line-height: 1.6;">
+                        {{ seller.business_description|default:"Premium solar solutions provider committed to sustainable energy." }}
+                    </p>
+                    
+                    <!-- Seller Info Cards -->
+                    <div class="row g-4 mb-5">
+                        {% if seller.city or seller.country %}
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-4 rounded-4 bg-dark bg-opacity-25 hover-lift">
+                                <div class="bg-warning bg-opacity-25 text-warning rounded-circle p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-geo-alt fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 opacity-75">Location</h6>
+                                    <p class="mb-0 fw-semibold h5">
+                                        {% if seller.city %}{{ seller.city }}{% endif %}
+                                        {% if seller.country and seller.city %}, {% endif %}
+                                        {% if seller.country %}{{ seller.country }}{% endif %}
+                                        {% if not seller.city and not seller.country %}Not specified{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-4 rounded-4 bg-dark bg-opacity-25 hover-lift">
+                                <div class="bg-warning bg-opacity-25 text-warning rounded-circle p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-calendar-check fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 opacity-75">Member Since</h6>
+                                    <p class="mb-0 fw-semibold h5">
+                                        {{ seller.created_at|date:"F Y"|default:"Recently" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trust Indicators -->
+                    <div class="bg-dark bg-opacity-20 rounded-4 p-4 mb-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-shield-check me-2"></i>Why Trust This Seller</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success fs-5 me-3"></i>
+                                    <span class="opacity-90">Verified Business</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-clock-history text-warning fs-5 me-3"></i>
+                                    <span class="opacity-90">{{ seller.created_at|timesince }} on platform</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-box-seam text-info fs-5 me-3"></i>
+                                    <span class="opacity-90">{{ total_products|default:0 }} Products</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-chat-dots text-primary fs-5 me-3"></i>
+                                    <span class="opacity-90">Responsive Seller</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-{% endblock content %}
+<!-- Spacer -->
+<div class="py-5"></div>
+
+<!-- On Sale Products Section -->
+{% if sale_products %}
+<section class="py-8 bg-white">
+    <div class="container">
+        <div class="row mb-7">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 mb-4 px-4 py-2 rounded-pill">
+                            <i class="bi bi-fire me-2"></i>HOT DEALS
+                        </span>
+                        <h2 class="display-5 fw-bold text-dark mb-2">On Sale Now</h2>
+                        <p class="text-muted mb-0 lead">
+                            Special offers from {{ seller.business_name }}
+                        </p>
+                    </div>
+                    {% if sale_products|length > 4 %}
+                    <div class="d-none d-md-block">
+                        <a href="#all-products" class="btn btn-outline-primary btn-lg">
+                            View All Products <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+            {% for product in sale_products %}
+            <div class="col mb-5">
+                <div class="card h-100 border-0 shadow-sm hover-lift-strong product-card">
+                    <!-- Sale Badge -->
+                    <div class="position-absolute top-0 start-0 m-3 z-2">
+                        <span class="badge bg-danger text-white px-3 py-2 fw-bold rounded-pill">
+                            <i class="bi bi-tag me-1"></i> SALE
+                        </span>
+                    </div>
+                    
+                    <!-- Product Image -->
+                    <div class="card-img-top position-relative" style="height: 240px; overflow: hidden;">
+                        {% if product.image and product.image.url %}
+                        <img class="img-fluid w-100 h-100" 
+                             src="{{ product.image.url }}" 
+                             alt="{{ product.name }}"
+                             style="object-fit: cover; transition: transform 0.3s ease;">
+                        {% else %}
+                        <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-0 hover-opacity-10 transition-300"></div>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <!-- Product Name -->
+                            <h5 class="fw-bolder mb-3">{{ product.name }}</h5>
+                            
+                            <!-- Price -->
+                            <div class="mb-3">
+                                <strike class="text-muted">
+                                    ZMK{{ product.price }}
+                                </strike>
+                                <br>
+                                <span class="text-primary h4 fw-bold">ZMK{{ product.sale_price }}</span>
+                            </div>
+                            
+                            <!-- Category -->
+                            {% if product.category %}
+                            <div class="mb-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill">
+                                    {{ product.category.name }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Stock Status -->
+                            <div class="mb-3">
+                                {% if product.is_available %}
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i>In Stock
+                                </span>
+                                {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-1 rounded-pill">
+                                    <i class="bi bi-clock me-1"></i>Out of Stock
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Actions -->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-primary mt-auto rounded-pill px-4" href="{% url 'product' product.id %}">
+                                <i class="bi bi-eye me-2"></i>View Details
+                            </a>
+                            {% if product.is_available %}
+                            <a href="{% url 'product' product.id %}" class="btn btn-primary mt-2 rounded-pill px-4">
+                                <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Spacer -->
+<div class="py-5"></div>
+{% endif %}
+
+<!-- All Products Section -->
+<section class="py-8 {% if sale_products %}bg-light{% else %}bg-white{% endif %}" id="all-products">
+    <div class="container">
+        <div class="row mb-7">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 mb-4 px-4 py-2 rounded-pill">
+                            <i class="bi bi-grid me-2"></i>PRODUCT CATALOG
+                        </span>
+                        <h2 class="display-5 fw-bold text-dark mb-2">All Products</h2>
+                        <p class="text-muted mb-0 lead">
+                            Browse the complete collection from {{ seller.business_name }}
+                        </p>
+                    </div>
+                    <div class="d-none d-md-block">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary btn-lg dropdown-toggle rounded-pill" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                                <i class="bi bi-funnel me-2"></i>Sort By
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="?sort=price_low">Price: Low to High</a></li>
+                                <li><a class="dropdown-item" href="?sort=price_high">Price: High to Low</a></li>
+                                <li><a class="dropdown-item" href="?sort=name">Name A-Z</a></li>
+                                <li><a class="dropdown-item" href="?sort=newest">Newest First</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if products %}
+        <div class="row g-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+            {% for product in all_products %}
+            <div class="col mb-5">
+                <div class="card h-100 border-0 shadow-sm hover-lift-strong product-card">
+                    {% if product.is_sale %}
+                    <!-- Sale Badge -->
+                    <div class="position-absolute top-0 start-0 m-3 z-2">
+                        <span class="badge bg-danger text-white px-3 py-2 fw-bold rounded-pill">
+                            <i class="bi bi-tag me-1"></i> SALE
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Product Image -->
+                    <div class="card-img-top position-relative" style="height: 240px; overflow: hidden;">
+                        {% if product.image and product.image.url %}
+                        <img class="img-fluid w-100 h-100" 
+                             src="{{ product.image.url }}" 
+                             alt="{{ product.name }}"
+                             style="object-fit: cover; transition: transform 0.3s ease;">
+                        {% else %}
+                        <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-0 hover-opacity-10 transition-300"></div>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <!-- Product Name -->
+                            <h5 class="fw-bolder mb-3">{{ product.name }}</h5>
+                            
+                            <!-- Price -->
+                            <div class="mb-3">
+                                {% if product.is_sale %}
+                                <strike class="text-muted">
+                                    ZMK{{ product.price }}
+                                </strike>
+                                <br>
+                                <span class="text-primary h4 fw-bold">ZMK{{ product.sale_price }}</span>
+                                {% else %}
+                                <span class="text-primary h4 fw-bold">ZMK{{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Category -->
+                            {% if product.category %}
+                            <div class="mb-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill">
+                                    {{ product.category.name }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Stock Status -->
+                            <div class="mb-3">
+                                {% if product.is_available %}
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i>In Stock
+                                </span>
+                                {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-1 rounded-pill">
+                                    <i class="bi bi-clock me-1"></i>Out of Stock
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Short Description -->
+                            {% if product.description %}
+                            <p class="text-muted small mb-0" style="height: 60px; overflow: hidden;">
+                                {{ product.description|truncatechars:80 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Product Actions -->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-primary mt-auto rounded-pill px-4" href="{% url 'product' product.id %}">
+                                <i class="bi bi-eye me-2"></i>View Details
+                            </a>
+                            {% if product.is_available %}
+                            <a href="{% url 'product' product.id %}" class="btn btn-primary mt-2 rounded-pill px-4">
+                                <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="row justify-content-center py-8">
+            <div class="col-lg-6 text-center">
+                <div class="mb-5">
+                    <i class="bi bi-box display-1 text-muted opacity-25"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-3">No Products Available</h3>
+                <p class="lead text-muted mb-5">
+                    This seller hasn't added any products yet. Check back soon!
+                </p>
+                <a href="{% url 'category_summary' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+                    <i class="bi bi-shop me-2"></i>Browse Other Sellers
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Spacer -->
+<div class="py-5"></div>
+
+<!-- About Seller Section -->
+{% if seller.business_description %}
+<section class="py-8 bg-white border-top border-bottom">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-5">
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 mb-4 px-4 py-2 rounded-pill">
+                            <i class="bi bi-info-circle me-2"></i>ABOUT THE SELLER
+                        </span>
+                        <h3 class="fw-bold text-dark mb-4">More About {{ seller.business_name }}</h3>
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <div class="pe-md-4">
+                                    <p class="lead text-muted mb-4">
+                                        {{ seller.business_description }}
+                                    </p>
+                                    
+                                    <!-- Additional Info -->
+                                    <div class="row g-3">
+                                        <!-- REMOVED: Business address section -->
+                                        
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-start p-3 rounded-3 bg-light">
+                                                <i class="bi bi-shield-check text-primary mt-1 me-3 fs-4"></i>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Seller Status</h6>
+                                                    <p class="text-muted mb-0">
+                                                        {% if seller.is_active %}
+                                                        <span class="text-success">Verified & Active</span>
+                                                        {% else %}
+                                                        <span class="text-warning">Currently Inactive</span>
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light rounded-4 p-4 text-center h-100">
+                                    <div class="mb-4">
+                                        <i class="bi bi-shop-window display-4 text-primary opacity-25"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Trusted Solar Partner</h5>
+                                    <p class="text-muted small mb-0">
+                                        Providing quality solar solutions since {{ seller.created_at|date:"Y"|default:"2023" }}
+                                    </p>
+                                    <!-- Contact Button in About Section -->
+                                    <div class="mt-4">
+                                        <a href="{% url 'request_quote' %}" class="btn btn-primary w-100 rounded-pill">
+                                            <i class="bi bi-chat-left-text me-2"></i>Contact Seller
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Seller Profile Specific Styles */
+.seller-hero {
+    background-attachment: fixed;
+    overflow: hidden;
+}
+
+.product-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.product-card:hover img {
+    transform: scale(1.05);
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.hover-opacity-10:hover {
+    opacity: 0.1 !important;
+}
+
+.transition-300 {
+    transition: all 0.3s ease;
+}
+
+/* Counter Animation */
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.counter {
+    animation: countUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+/* Badge Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.badge {
+    transition: all 0.3s ease;
+}
+
+.badge:hover {
+    animation: pulse 1s infinite;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .display-3 {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .display-3 {
+        font-size: 2.5rem;
+    }
+    
+    .py-8 {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+    }
+    
+    .seller-hero {
+        min-height: auto;
+        padding-top: 120px;
+        padding-bottom: 4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .display-3 {
+        font-size: 2.2rem;
+    }
+    
+    .display-5 {
+        font-size: 1.8rem;
+    }
+    
+    .lead {
+        font-size: 1.1rem;
+    }
+    
+    .seller-hero .row {
+        text-align: center;
+    }
+    
+    .seller-hero .col-lg-4 {
+        margin-bottom: 2rem;
+    }
+    
+    .ps-lg-4 {
+        padding-left: 0 !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-3 {
+        font-size: 1.8rem;
+    }
+    
+    .seller-hero {
+        padding-top: 100px;
+        padding-bottom: 3rem;
+    }
+    
+    .card-body.p-5 {
+        padding: 1.5rem !important;
+    }
+    
+    .seller-hero {
+        min-height: 60vh;
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Accessibility Improvements */
+.btn:focus,
+.form-control:focus {
+    outline: 2px solid var(--bs-warning);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-warning-rgb), 0.25);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #002244 0%, #004488 50%, #0066cc 100%);
+}
+
+/* Rounded elements */
+.rounded-4 {
+    border-radius: 1rem !important;
+}
+
+.rounded-3 {
+    border-radius: 0.75rem !important;
+}
+
+/* Gradient text */
+.gradient-text {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-animate {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Counter animation for stats
+    function animateCounters() {
+        const counters = document.querySelectorAll('.counter');
+        
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-count'));
+            if (isNaN(target)) return;
+            
+            const increment = target / 100;
+            let current = 0;
+            
+            const updateCounter = () => {
+                if (current < target) {
+                    current += increment;
+                    counter.textContent = Math.ceil(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = target;
+                }
+            };
+            
+            // Check if counter is in viewport
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        updateCounter();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(counter);
+        });
+    }
+    
+    // Add smooth hover effects to cards
+    const cards = document.querySelectorAll('.product-card, .hover-lift');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        });
+    });
+    
+    // Initialize counters
+    animateCounters();
+    
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            if (href === '#' || href === '') return;
+            
+            e.preventDefault();
+            const targetElement = document.querySelector(href);
+            
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // Add image loading fallback
+    const productImages = document.querySelectorAll('.product-card img');
+    productImages.forEach(img => {
+        img.addEventListener('error', function() {
+            this.src = '{% static "images/placeholder-product.jpg" %}';
+            this.alt = 'Product image not available';
+        });
+    });
+    
+    // Add section animations when scrolling
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('section-animate');
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all sections
+    document.querySelectorAll('section').forEach(section => {
+        observer.observe(section);
+    });
+    
+    // Add ripple effect to buttons
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.7);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                top: ${y}px;
+                left: ${x}px;
+            `;
+            
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

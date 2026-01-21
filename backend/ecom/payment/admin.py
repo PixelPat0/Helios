@@ -1,6 +1,7 @@
 # payment/admin.py
 from django.contrib import admin
 from .models import Order, OrderItem, ShippingAddress, Seller, NewsletterSubscriber, ImpactFundTransaction
+from .utils import PaymentConfirmation
 
 
 @admin.register(ImpactFundTransaction)
@@ -51,22 +52,66 @@ class OrderItemInline(admin.TabularInline):
 # Register Order (single registration)
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'full_name', 'email', 'amount_paid', 'status', 'date_ordered')
+    list_display = ('id', 'payment_code', 'full_name', 'email', 'amount_paid', 'status', 'date_ordered')
     list_filter = ('status', 'date_ordered')
-    search_fields = ('full_name', 'email', 'id')
-    readonly_fields = ('date_ordered',)
+    search_fields = ('full_name', 'email', 'id', 'payment_code')
+    readonly_fields = ('date_ordered', 'payment_code')
     inlines = [OrderItemInline]
+    actions = ['confirm_payment_received', 'mark_processing', 'mark_shipped']
+    
     fieldsets = (
         ('Order Information', {
-            'fields': ('user', 'full_name', 'email', 'shipping_address', 'amount_paid', 'date_ordered')
+            'fields': ('id', 'user', 'full_name', 'email', 'shipping_address', 'amount_paid', 'date_ordered')
         }),
-        ('Status and Payment', {
-            'fields': ('status', 'payment_method', 'payment_reference')
+        ('MVP Payment Tracking', {
+            'fields': ('payment_code', 'payment_method', 'payment_reference'),
+            'description': 'Payment Code: Customer includes this code when paying to brother\'s account'
         }),
-        ('Timestamps', {
-            'fields': ('date_paid', 'date_processed', 'date_shipped', 'date_delivered')
+        ('Status and Dates', {
+            'fields': ('status', 'date_paid', 'date_processed', 'date_shipped', 'date_delivered')
         }),
     )
+
+    def confirm_payment_received(self, request, queryset):
+        """
+        Admin action to manually confirm payment received.
+        
+        MVP: Admin manually verifies payment came in and clicks this action
+        Future: This action can be removed when using API integration
+                (payment confirmation happens automatically via webhook)
+        
+        See PAYMENT_INTEGRATION_GUIDE.md for details
+        """
+        updated_count = 0
+        
+        for order in queryset:
+            result = PaymentConfirmation.confirm_payment_received(order)
+            
+            if result['success']:
+                updated_count += 1
+        
+        if updated_count > 0:
+            self.message_user(request, f"✓ {updated_count} order(s) marked as PAID. Ready for processing.")
+        else:
+            self.message_user(request, "No pending orders to confirm, or errors occurred.")
+    
+    confirm_payment_received.short_description = "✓ Confirm Payment Received (Pending → Paid) [MVP ONLY]"
+
+    def mark_processing(self, request, queryset):
+        """Admin action to mark orders as processing."""
+        updated = queryset.filter(status__in=['paid', 'pending']).update(status='processing')
+        if updated > 0:
+            self.message_user(request, f"✓ {updated} order(s) moved to PROCESSING.")
+    
+    mark_processing.short_description = "→ Mark as Processing"
+
+    def mark_shipped(self, request, queryset):
+        """Admin action to mark orders as shipped."""
+        updated = queryset.filter(status='processing').update(status='shipped')
+        if updated > 0:
+            self.message_user(request, f"✓ {updated} order(s) marked as SHIPPED.")
+    
+    mark_shipped.short_description = "📦 Mark as Shipped"
 
 
 # Register OrderItem (single registration)
