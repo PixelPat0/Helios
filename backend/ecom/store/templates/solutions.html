@@ -9,6 +9,8 @@
     background: linear-gradient(135deg, #001a33 0%, #003366 50%, #0059b3 100%);
     min-height: 85vh;
     padding-top: 80px;
+    padding-bottom: 100px;
+    border-bottom: 1px solid #0059b3;
 ">
     <!-- Floating Background Elements -->
     <div class="position-absolute top-0 end-0 w-50 h-100 d-none d-lg-block">
@@ -17,14 +19,11 @@
         </div>
     </div>
     
-    <!-- Animated Background Shapes -->
-    
-    <div class="position-absolute bottom-30 end-30 w-20 h-20 rounded-circle bg-warning opacity-5 animate-float-2"></div>
-    
     <div class="container position-relative z-1">
+        <!-- Main Hero Row: Adjusted columns for better spacing -->
         <div class="row align-items-center min-vh-85 py-8">
-            <!-- Left Column: Content -->
-            <div class="col-lg-6 mb-7 mb-lg-0 text-white">
+            <!-- Left Column: Text Content -->
+            <div class="col-lg-5 mb-7 mb-lg-0 text-white">
                 <span class="badge bg-warning text-dark mb-4 px-3 py-2 fw-semibold animate-fade-in">Mapping your solar journey</span>
                 <h1 class="display-2 fw-bold mb-5 animate-fade-in" style="animation-delay: 0.1s">
                     Power Your Future With 
@@ -35,7 +34,7 @@
                     Cutting-edge technology, expert installation, and unmatched reliability.
                 </p>
                 
-                <div class="d-flex flex-wrap gap-4 mb-7 animate-fade-in" style="animation-delay: 0.3s">
+                <div class="d-flex flex-wrap gap-4 mb-4 animate-fade-in" style="animation-delay: 0.3s">
                     <a href="#residential" class="btn btn-warning btn-lg px-5 py-3 fw-semibold hover-scale">
                         <i class="bi bi-house-door me-2"></i>
                         Residential Solutions
@@ -84,8 +83,8 @@
                 </div>
             </div>
 
-            <!-- Right Column: Hero Image -->
-            <div class="col-lg-6 position-relative">
+            <!-- Right Column: Hero Image & Floating Cards -->
+            <div class="col-lg-6 offset-lg-1 position-relative">
                 <div class="position-relative animate-float-3" style="animation-delay: 0.5s">
                     <!-- Main Hero Image -->
                     <div class="rounded-4 overflow-hidden shadow-lg position-relative hover-lift-strong">
@@ -97,28 +96,28 @@
                             background: linear-gradient(transparent, rgba(0, 26, 51, 0.9));
                         ">
                             <div class="text-white d-flex align-items-center">
-                                <i class="bi bi-play-circle-fill fs-1 text-warning me-3 hover-pulse"></i>
-                                <span class="h5 fw-semibold">See Our Work in Action</span>
+                                <i class="bi bi-play-circle-fill fs-2 text-warning me-3 hover-pulse"></i>
+                                <span class="h6 fw-semibold mb-0">See Our Work in Action</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Floating Stats Cards -->
                     <div class="position-absolute top-0 start-0 translate-middle shadow-lg rounded-3 bg-white p-2 d-none d-xl-block stats-card-1"
-     style="transform: translate(-50%, -50%);">
-    <div class="text-center">
-        <i class="bi bi-lightning-charge-fill text-warning fs-4 mb-1"></i>
-        <h6 class="mb-0 counter fs-6" data-count="80">0%</h6>
-        <small class="text-muted">Energy Savings</small>
+     style="transform: translate(-50%, -50%); width: 100px;">
+    <div class="text-center py-1">
+        <i class="bi bi-lightning-charge-fill text-warning fs-5 mb-1"></i>
+        <h6 class="mb-0 counter fw-bold" style="font-size: 0.9rem;" data-count="100">0%</h6>
+        <div class="text-muted lh-1" style="font-size: 0.7rem;">Energy Savings</div>
     </div>
 </div>
 
 <div class="position-absolute bottom-0 end-0 translate-middle shadow-lg rounded-3 bg-white p-2 d-none d-xl-block stats-card-2"
-     style="transform: translate(50%, 50);">
-    <div class="text-center">
-        <i class="bi bi-graph-up-arrow text-success fs-4 mb-1"></i>
-        <h6 class="mb-0 counter fs-6" data-count="5">0</h6>
-        <small class="text-muted">Years Warranty</small>
+     style="transform: translate(50%, 50%); width: 110px;">
+    <div class="text-center py-1">
+        <i class="bi bi-graph-up-arrow text-success fs-5 mb-1"></i>
+        <h6 class="mb-0 counter fw-bold" style="font-size: 0.9rem;" data-count="2">0</h6>
+        <div class="text-muted lh-1" style="font-size: 0.7rem;">Years Warranty</div>
     </div>
 </div>
                 </div>
@@ -140,7 +139,7 @@
                     <img src="{% static 'images/homesolar.jpg' %}" 
                          alt="Residential Solar Installation" 
                          class="img-fluid rounded-4 shadow-lg">
-                    <div class="position-absolute bottom-0 end-0 bg-warning text-dark p-4 rounded-start shadow hover-scale"
+                    <div class="position-absolute bottom-0 end-0 bg-primary text-white p-4 rounded-start shadow hover-scale"
                          style="transform: translateY(50%);">
                         <h4 class="mb-0"><i class="bi bi-house-heart me-2"></i>Home Solutions</h4>
                     </div>
@@ -362,7 +361,7 @@
 <div class="py-4"></div>
 
 <!-- Products Showcase Section -->
-<section class="py-8 bg-primary bg-opacity-5">
+<section class="py-8 bg-primary bg-opacity-5" style="color: #333;">
     <div class="container">
         <div class="row mb-7">
             <div class="col-lg-8 mx-auto text-center">
@@ -438,7 +437,7 @@
 <div class="py-4"></div>
 
 <!-- CTA Section -->
-<section class="py-8 bg-primary text-white">
+<section class="py-8 bg-primary text-white" style="color: #333;">
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-8" data-aos="fade-right">
@@ -658,6 +657,20 @@ section {
         padding: 2rem !important;
     }
 }
+
+/* Color contrast for different sections */
+section.bg-light {
+    background-color: #f9f9f9;
+    color: #333;
+}
+section.bg-secondary {
+    background-color: #6c757d;
+    color: #333;
+}
+section.bg-success {
+    background-color: #198754;
+    color: #333;
+}
 </style>
 {% endblock %}
 
@@ -816,97 +829,19 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.overflow = 'hidden';
             this.appendChild(ripple);
             
-            // Remove ripple after animation
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
+            setTimeout(() => ripple.remove(), 600);
         });
     });
-    
-    // Parallax effect for hero image
-    window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const heroImage = document.querySelector('.hero-image');
-        const floatElements = document.querySelectorAll('.animate-float-1, .animate-float-2');
-        
-        if (heroImage) {
-            const rate = scrolled * -0.3;
-            heroImage.style.transform = `translateY(${rate}px)`;
-        }
-        
-        if (floatElements) {
-            floatElements.forEach((el, index) => {
-                el.style.transform = `translateY(${scrolled * -0.1 * (index + 1)}px)`;
-            });
-        }
-    });
-    
-    // Active section detection for navigation
-    const sections = document.querySelectorAll('section[id]');
-    
-    function updateActiveSection() {
-        let current = '';
-        const scrollPosition = window.pageYOffset + 150;
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                current = section.getAttribute('id');
-            }
-        });
-        
-        // Update navigation
-        document.querySelectorAll('a[href^="#"]').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
-        });
-    }
-    
-    // Initialize functions
-    animateCounters();
-    checkStatsVisibility();
+
+    // Initialize animations
     checkElementVisibility();
-    updateActiveSection();
-    
-    // Event listeners
+    checkStatsVisibility();
+    animateCounters();
+
+    // Add scroll listener for animations
     window.addEventListener('scroll', function() {
-        checkStatsVisibility();
         checkElementVisibility();
-        updateActiveSection();
-    });
-    
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    
-    // Add CSS for ripple animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Preload images for smoother experience
-    const images = document.querySelectorAll('img');
-    images.forEach(img => {
-        if (img.complete) {
-            img.classList.add('loaded');
-        } else {
-            img.addEventListener('load', function() {
-                this.classList.add('loaded');
-            });
-        }
+        checkStatsVisibility();
     });
 });
 </script>

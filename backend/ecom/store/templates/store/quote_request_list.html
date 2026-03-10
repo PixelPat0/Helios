@@ -60,9 +60,15 @@
                                 {% endif %}
                             </td>
                             <td class="text-end pe-4">
-                                <a href="{% url 'quote_request_details' quote.id %}" class="btn btn-sm btn-outline-primary">
-                                    View Details
-                                </a>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'quote_request_details' quote.id %}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <!-- PDF Export Button: allows users to download quote request as PDF -->
+                                    <a href="{% url 'export_quote_pdf' quote.id %}" class="btn btn-sm btn-outline-success" title="Export as PDF">
+                                        <i class="bi bi-file-pdf"></i> Export
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}

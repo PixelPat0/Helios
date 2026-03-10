@@ -50,6 +50,8 @@ urlpatterns = [
     
     # Quotes
     path('request-quote/', views.request_quote, name='request_quote'),
+    path('confirm-quote/', views.confirm_quote_request, name='confirm_quote_request'),
     path('quote-details/<int:quote_request_id>/', views.quote_request_details, name='quote_request_details'),
+    path('quote-export-pdf/<int:quote_request_id>/', views.export_quote_request_pdf, name='export_quote_pdf'),
     path('my-quotes/', views.quote_request_list, name='quote_request_list'),
 ]

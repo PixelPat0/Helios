@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block title %}Payment Instructions - Order #{{ order.id }} | Helios{% endblock %}
+{% block title %}Payment Instructions - Order #{{ order.id }} | Solchart{% endblock %}
 
 {% block content %}
 <div class="container mt-5 mb-5">
@@ -31,18 +31,32 @@
             <!-- Payment Instructions Card -->
             <div class="card mb-4 shadow-sm border-info">
                 <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">📱 How to Complete Your Payment</h4>
+                    <h4 class=\"mb-0\">💳 How to Complete Your Payment</h4>
                 </div>
                 <div class="card-body">
                     <p class="lead">Your order is confirmed. Complete payment within <strong>24 hours</strong> to proceed to fulfillment.</p>
 
-                    <!-- Step 1: Prepare Payment -->
+                    <!-- Step 1: Choose Payment Method -->
                     <div class="step mb-4">
                         <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                             <strong>1</strong>
                         </div>
-                        <h5 class="mt-2">Open Your Mobile Money App</h5>
-                        <p class="text-muted">Airtel Money, MTN, or Zamtel Kwacha</p>
+                        <h5 class=\"mt-2\">Choose Your Payment Method</h5>
+                        <p class=\"text-muted\">We accept the following payment methods:</p>
+                        <ul class="list-unstyled ps-3">
+                            <li class="mb-2">
+                                <strong><i class="bi bi-phone-fill text-danger me-2"></i>Airtel Money</strong><br>
+                                <small class="text-muted">Fast and secure mobile money transfer</small>
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="bi bi-phone text-info me-2"></i>Zamtel Money</strong><br>
+                                <small class="text-muted">Quick payment via Zamtel Mobile Money</small>
+                            </li>
+                            <li>
+                                <strong><i class="bi bi-bank2 text-primary me-2"></i>Bank Transfer (By Request)</strong><br>
+                                <small class="text-muted">Contact us via WhatsApp or email for bank payment options</small>
+                            </li>
+                        </ul>
                     </div>
 
                     <!-- Step 2: Send Payment -->
@@ -50,25 +64,22 @@
                         <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                             <strong>2</strong>
                         </div>
-                        <h5 class="mt-2">Send Payment to This Account</h5>
-                        <div class="alert alert-light border border-secondary p-3">
-                            <p class="mb-1"><strong>Recipient:</strong> {{ brother_name }}</p>
-                            <p class="mb-1"><strong>Phone Number:</strong> <code class="bg-light p-2">{{ brother_number }}</code></p>
-                            <p class="mb-1"><strong>Amount:</strong> <code class="bg-light p-2">K{{ order.amount_paid|floatformat:2 }}</code></p>
+                        <h5 class=\"mt-2\">Send Payment</h5>
+                        <p class="text-muted mb-3">Send the amount using your chosen payment method:</p>
+                        <div class=\"alert alert-light border border-secondary p-3\">
+                            <p class="mb-1"><strong>Amount to Send:</strong> <code class="bg-light p-2">K{{ order.amount_paid|floatformat:2 }}</code></p>
+                            <p class="mb-0"><strong>Reference:</strong> <code class="bg-light p-2">{{ payment_code }}</code></p>
                         </div>
+                        <p class="text-muted small mt-2">Use your name or the payment code as reference so we can identify your payment quickly.</p>
                     </div>
 
-                    <!-- Step 3: Include Payment Code -->
+                    <!-- Step 3: Submit Transaction Reference -->
                     <div class="step mb-4">
                         <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                             <strong>3</strong>
                         </div>
-                        <h5 class="mt-2">Use Your Payment Code as Reference</h5>
-                        <p class="text-muted">Enter this code in the payment message/description:</p>
-                        <div class="alert alert-warning p-3 text-center">
-                            <h4 class="mb-0 font-monospace"><strong>{{ payment_code }}</strong></h4>
-                            <small class="text-muted">Copy and paste exactly</small>
-                        </div>
+                        <h5 class="mt-2">Enter Transaction Reference</h5>
+                        <p class="text-muted">Return to the checkout page and enter the transaction ID/reference you received from your payment provider in the confirmation section.</p>
                     </div>
 
                     <!-- Step 4: Confirmation -->
@@ -77,20 +88,21 @@
                             <strong>4</strong>
                         </div>
                         <h5 class="mt-2">Payment Confirmation</h5>
-                        <p class="text-muted">Once we receive your payment, we'll verify it within 2-4 hours and send you an email confirmation. Your order will then move to processing.</p>
+                        <p class="text-muted">Once we receive and verify your payment, we'll send you an email confirmation within 2-4 hours. Your order will then move to processing and fulfillment.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Example Payment Message -->
-            <div class="card mb-4 shadow-sm border-secondary">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">💡 Example: What Your Payment Message Should Look Like</h5>
+            <!-- Payment Code Reference -->
+            <div class="card mb-4 shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class=\"mb-0\">📌 Your Payment Code</h5>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-light border border-secondary p-3 text-center">
-                        <p class="mb-0"><strong>Message/Description:</strong></p>
-                        <p class="font-monospace text-muted mb-0" style="font-size: 1.1em;">{{ payment_code }} - Helios Order</p>
+                <div class=\"card-body\">
+                    <p class=\"text-muted mb-2\">Use this code as a reference when sending your payment:</p>
+                    <div class=\"alert alert-light border border-warning p-3 text-center\">
+                        <h4 class="mb-0 font-monospace"><strong>{{ payment_code }}</strong></h4>
+                        <small class="text-muted">Save this code for your records</small>
                     </div>
                 </div>
             </div>
@@ -113,13 +125,22 @@
             <!-- Support / Questions -->
             <div class="card mb-4 shadow-sm border-danger">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">❓ Having Issues?</h5>
+                    <h5 class="mb-0">❓ Need Help?</h5>
                 </div>
                 <div class="card-body">
-                    <p>If you have any questions or issues completing payment, please contact us:</p>
-                    <p>
-                        <strong>Email:</strong> <a href="mailto:{{ business_email }}">{{ business_email }}</a><br>
-                        <strong>WhatsApp:</strong> <a href="https://wa.me/260977000000" target="_blank">Message us</a>
+                    <p class="mb-3">If you have questions about payment methods or need assistance, we're here to help:</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="https://wa.me/260976778519?text=Hi%20Solchart%2C%20I%20have%20a%20question%20about%20payment%20for%20order%20%23{{ order.id }}" 
+                           class="btn btn-success btn-sm" target="_blank">
+                            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                        </a>
+                        <a href="mailto:{{ business_email }}?subject=Payment%20Assistance%20for%20Order%20%23{{ order.id }}" 
+                           class="btn btn-primary btn-sm">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </a>
+                    </div>
+                    <p class="text-muted small mt-3 mb-0">
+                        <strong>Business Email:</strong> <a href="mailto:{{ business_email }}">{{ business_email }}</a>
                     </p>
                 </div>
             </div>

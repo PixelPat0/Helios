@@ -55,6 +55,11 @@
                     <small class="text-muted d-block">
                         <i class="bi bi-calendar-event me-1"></i> {{ order.date_ordered|date:"Y-m-d H:i" }}
                     </small>
+                    {% if order.payment_reference %}
+                    <small class="text-info d-block mt-1">
+                        <i class="bi bi-key me-1"></i> <code>{{ order.payment_reference }}</code>
+                    </small>
+                    {% endif %}
                 </div>
 
                 {# 2. Status & Delivered Tick (Col 2) #}

@@ -114,30 +114,45 @@
                             </h2>
                             <div id="collapseBank" class="accordion-collapse collapse" aria-labelledby="headingBank" data-bs-parent="#paymentAccordion">
                                 <div class="accordion-body bg-light">
-                                    <!-- Bank Details -->
-                                    <div class="card card-body border-0 shadow-sm mb-3">
-                                        <h6 class="fw-bold text-primary mb-2">Banking Details</h6>
-                                        <ul class="list-unstyled small mb-0">
-                                            <li class="mb-1"><strong>Bank:</strong> FNB Zambia</li>
-                                            <li class="mb-1"><strong>Account Name:</strong> Solchart Ltd</li>
-                                            <li class="mb-1"><strong>Account Number:</strong> 62000000000</li>
-                                            <li class="mb-1"><strong>Branch Code:</strong> 260000</li>
-                                            <li><strong>Reference:</strong> Use your Name or Phone Number</li>
-                                        </ul>
+                                    <!-- Coming Soon Placeholder -->
+                                    <div class="alert alert-info border-info bg-opacity-10 mb-4">
+                                        <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle me-1"></i> Bank Transfers Coming Soon</h6>
+                                        <p class="mb-3 small">
+                                            We're currently in the development stage. Direct bank transfers will be available once our final product is fully launched. 
+                                            This will provide you with a secure and streamlined banking experience.
+                                        </p>
                                     </div>
 
-                                    <!-- Bank Payment Form -->
-                                    <form method="POST" action="{% url 'process_order' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="payment_method" value="bank">
-                                        <div class="mb-3">
-                                            <label class="form-label small fw-bold">Enter Depositor Name / Reference</label>
-                                            <input type="text" name="payment_reference" class="form-control" placeholder="e.g. John Doe Payment" required>
+                                    <!-- WhatsApp & Email Contact Section -->
+                                    <div class="card card-body border-0 shadow-sm mb-3 bg-white">
+                                        <h6 class="fw-bold text-primary mb-3">Request Bank Transfer Payment</h6>
+                                        <p class="small text-muted mb-3">
+                                            If you'd like to proceed with a bank transfer payment, please reach out to us via WhatsApp or email. 
+                                            Our team will provide you with the banking details and assist you through the payment process.
+                                        </p>
+                                        
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <a href="https://wa.me/260976778519?text=Hi%20Solchart%2C%20I%20would%20like%20to%20make%20payment%20via%20bank%20transfer%20for%20my%20order%20totaling%20ZMK%20{{ total|floatformat:2 }}%20Please%20provide%20the%20banking%20details." 
+                                               class="btn btn-success btn-sm" target="_blank">
+                                                <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                                            </a>
+                                            <a href="mailto:support@solchart.com?subject=Bank%20Transfer%20Payment%20Request&body=Hi%20Solchart%2C%0A%0AI%20would%20like%20to%20make%20payment%20via%20bank%20transfer%20for%20my%20order%20totaling%20ZMK%20{{ total|floatformat:2 }}.%0A%0APlease%20provide%20the%20banking%20details.%0A%0AThank%20you"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-envelope me-1"></i> Email
+                                            </a>
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-100 fw-bold">
-                                            Confirm Bank Transfer <i class="bi bi-arrow-right ms-2"></i>
-                                        </button>
-                                    </form>
+                                    </div>
+
+                                    <!-- How It Works -->
+                                    <div class="card card-body border-0 shadow-sm bg-white">
+                                        <h6 class="fw-bold text-secondary mb-2">How It Will Work</h6>
+                                        <ol class="mb-0 small ps-3 text-muted">
+                                            <li>Contact us via WhatsApp or email with your bank transfer request</li>
+                                            <li>We'll provide you with secure banking details</li>
+                                            <li>Complete the transfer and share the transaction reference with us</li>
+                                            <li>We'll confirm receipt and process your order immediately</li>
+                                        </ol>
+                                    </div>
                                 </div>
                             </div>
                         </div>

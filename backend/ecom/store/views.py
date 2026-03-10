@@ -1,13 +1,14 @@
 # store/views.py
 """
-Store views for Helios e-commerce platform.
+Store views for Solchart e-commerce platform.
 Handles product browsing, search, authentication, user profiles, notifications, and quote requests.
 """
 
 from decimal import Decimal
 import json
+from io import BytesIO
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -19,6 +20,12 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db.models import Q, Sum
 from django.views.decorators.http import require_POST
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
 from cart.cart import Cart
 from .models import Product, Category, Profile, QuoteRequest, ContactMessage
@@ -202,7 +209,7 @@ def newsletter_subscribe(request):
     if form.is_valid():
         try:
             form.save()
-            messages.success(request, "Success! Thank you for subscribing to the Helios Project Newsletter.")
+            messages.success(request, "Success! Thank you for subscribing to the Solchart Newsletter.")
         except Exception:
             messages.warning(request, "It looks like you are already subscribed!")
         return redirect(redirect_to)
@@ -461,7 +468,7 @@ def store_home(request):
     
     context = {
         'products': products,
-        'page_title': 'Solar Products Store - HELIOS',
+        'page_title': 'Solar Products Store - Solchart',
     }
     return render(request, 'store.html', context)
 
@@ -551,31 +558,98 @@ def register_user(request):
 
 def request_quote(request):
     """
-    Handle quote requests from customers/prospects.
-    Admin will be notified when a new quote request is submitted.
+    Display quote request form.
+    On POST: Save form data to session and redirect to confirmation page.
+    This allows users to review their input before final submission.
     """
     if request.method == 'POST':
         form = QuoteRequestForm(request.POST)
         if form.is_valid():
-            quote_request = form.save(commit=False)
+            # SECURITY: Convert form data to JSON-serializable format for session storage
+            # Decimal fields need to be converted to strings since Django sessions can't serialize Decimal
+            quote_data = form.cleaned_data.copy()
+            
+            # Convert Decimal to string for JSON serialization
+            if quote_data.get('daily_energy_usage_kwh'):
+                quote_data['daily_energy_usage_kwh'] = str(quote_data['daily_energy_usage_kwh'])
+            
+            # Store form data in session for confirmation page
+            # Do NOT save to database yet - user must confirm first
+            request.session['quote_request_data'] = quote_data
+            return redirect('confirm_quote_request')
+    else:
+        form = QuoteRequestForm()
+        # Pre-fill with user info if authenticated
+        if request.user.is_authenticated:
+            form.initial = {
+                'contact_name': f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
+                'contact_email': request.user.email,
+            }
+    
+    return render(request, 'store/request_quote.html', {'form': form})
+
+
+@login_required
+def confirm_quote_request(request):
+    """
+    SECURITY: Confirmation page for quote requests.
+    User reviews their input before final submission to database.
+    
+    GET: Display confirmation page with quote data from session
+    POST: Save quote to database after user confirmation
+    """
+    # SECURITY: Only process if quote data exists in session
+    quote_data = request.session.get('quote_request_data')
+    if not quote_data:
+        messages.warning(request, 'No quote data found. Please start over.')
+        return redirect('request_quote')
+    
+    if request.method == 'POST':
+        # User confirmed - now save to database
+        try:
+            # Convert Decimal strings back from session storage
+            daily_energy_kwh = quote_data.get('daily_energy_usage_kwh')
+            if daily_energy_kwh and isinstance(daily_energy_kwh, str):
+                daily_energy_kwh = Decimal(daily_energy_kwh)
+            
+            # Create QuoteRequest from session data
+            quote_request = QuoteRequest(
+                contact_name=quote_data.get('contact_name'),
+                contact_email=quote_data.get('contact_email'),
+                contact_phone=quote_data.get('contact_phone'),
+                location_city=quote_data.get('location_city'),
+                location_province=quote_data.get('location_province', 'Lusaka'),
+                project_type=quote_data.get('project_type', 'residential'),
+                system_type=quote_data.get('system_type', 'hybrid'),
+                daily_energy_usage_kwh=daily_energy_kwh,
+                current_voltage=quote_data.get('current_voltage'),
+                appliances_to_run=quote_data.get('appliances_to_run'),
+                roof_type=quote_data.get('roof_type'),
+                budget_range=quote_data.get('budget_range'),
+                timeline=quote_data.get('timeline', '1_month'),
+                additional_notes=quote_data.get('additional_notes'),
+                payment_method=quote_data.get('payment_method', 'Cash'),
+                status='open'
+            )
             
             # Link to authenticated user if available
             if request.user.is_authenticated:
                 quote_request.buyer = request.user
             
+            # Save to database
             quote_request.save()
-
-            # --- 1. NOTIFY ADMINS (Navbar Bell) ---
-            # Get all superusers (admins)
+            
+            # --- NOTIFY ADMINS ---
+            # Create notification in navbar for admins
             admins = User.objects.filter(is_superuser=True)
             for admin in admins:
                 Notification.objects.create(
                     user=admin,
                     message=f"New Quote Request from {quote_request.contact_name}",
-                    quote_request=quote_request  # Link the specific quote object
+                    quote_request=quote_request
                 )
             
-            # Notify admin via email
+            # --- SEND ADMIN EMAIL NOTIFICATION ---
             try:
                 send_mail(
                     subject='New Quote Request Submitted',
@@ -605,26 +679,65 @@ Quote Request ID: {quote_request.id}
                     """,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[admin_email for admin_email, _ in settings.ADMINS],
-                    fail_silently=False,
+                    fail_silently=True,
                 )
             except Exception as e:
-                print(f"Error sending admin notification: {e}")
+                print(f"Error sending admin notification email: {e}")
             
-            messages.success(request, 'Your quote request has been submitted successfully! We will get back to you soon.')
-            return redirect('home')
-    else:
-        form = QuoteRequestForm()
-        # Pre-fill with user info if authenticated
-        if request.user.is_authenticated:
-            form.initial = {
-                'contact_name': f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
-                'contact_email': request.user.email,
-            }
+            # --- SEND CUSTOMER CONFIRMATION EMAIL ---
+            try:
+                send_mail(
+                    subject='Quote Request Confirmation - Solchart',
+                    message=f"""
+Thank you for submitting your quote request!
+
+We have received the following information:
+
+Customer Information:
+- Name: {quote_request.contact_name}
+- Email: {quote_request.contact_email}
+- Phone: {quote_request.contact_phone}
+- Location: {quote_request.location_city}, {quote_request.location_province}
+
+Project Details:
+- Project Type: {quote_request.get_project_type_display()}
+- System Type: {quote_request.get_system_type_display()}
+- Daily Energy Usage: {quote_request.daily_energy_usage_kwh} kWh
+- Appliances: {quote_request.appliances_to_run}
+- Budget Range: {quote_request.budget_range or 'Not specified'}
+- Timeline: {quote_request.get_timeline_display()}
+
+Your Quote Request ID: {quote_request.id}
+
+Our team will review your request and get back to you shortly with customized solutions and pricing.
+
+Best regards,
+Solchart Team
+                    """,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[quote_request.contact_email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(f"Error sending customer confirmation email: {e}")
+            
+            # Clear session data after successful save
+            if 'quote_request_data' in request.session:
+                del request.session['quote_request_data']
+            
+            messages.success(request, 'Your quote request has been submitted successfully! Check your email for confirmation.')
+            return redirect('quote_request_list')
+        
+        except Exception as e:
+            messages.error(request, f'Error submitting quote: {str(e)}')
+            return redirect('request_quote')
     
-    return render(request, 'store/request_quote.html', {'form': form})
+    # GET: Display confirmation page with quote data from session
+    return render(request, 'store/confirm_quote_request.html', {
+        'quote_data': quote_data
+    })
 
 
-@login_required
 def quote_request_details(request, quote_request_id):
     """
     Display details of a specific quote request.
@@ -660,3 +773,211 @@ def quote_request_list(request):
         'quotes': quotes,
         'page_title': page_title
     })
+
+
+@login_required
+def export_quote_request_pdf(request, quote_request_id):
+    """
+    Generate and download a PDF of a specific quote request.
+    
+    Features:
+    # Professional PDF formatting with Solchart branding
+    - Detailed quote information with all technical requirements
+    - Accessible only by Admin or the quote owner
+    - Uses ReportLab for PDF generation
+    
+    Args:
+        request: HTTP request object
+        quote_request_id: ID of the quote request to export
+        
+    Returns:
+        HTTP response with PDF file as attachment
+    """
+    # Fetch the quote request from database
+    quote = get_object_or_404(QuoteRequest, id=quote_request_id)
+    
+    # Security check: Only Admin or the owner can export
+    if not request.user.is_superuser and quote.buyer != request.user:
+        messages.error(request, "You do not have permission to export this quote.")
+        return redirect('quote_request_list')
+    
+    try:
+        # Create BytesIO object to hold PDF data in memory
+        pdf_buffer = BytesIO()
+        
+        # Initialize PDF document with A4 page size
+        doc = SimpleDocTemplate(
+            pdf_buffer,
+            pagesize=A4,
+            rightMargin=0.75*inch,
+            leftMargin=0.75*inch,
+            topMargin=0.75*inch,
+            bottomMargin=0.75*inch,
+            title=f"Quote Request #{quote.id}"
+        )
+        
+        # Create story list to hold all PDF elements
+        story = []
+        
+        # Define custom styles for professional formatting
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#0D6EFD'),  # Bootstrap blue
+            spaceAfter=6,
+            fontName='Helvetica-Bold',
+            alignment=TA_CENTER
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=11,
+            textColor=colors.HexColor('#0D6EFD'),
+            spaceAfter=6,
+            fontName='Helvetica-Bold',
+            spaceBefore=10
+        )
+        
+        normal_style = ParagraphStyle(
+            'CustomNormal',
+            parent=styles['Normal'],
+            fontSize=9,
+            spaceAfter=4,
+            leading=12
+        )
+        
+        # --- HEADER SECTION ---
+        story.append(Paragraph("SOLCHART QUOTE REQUEST", title_style))
+        story.append(Paragraph(f"Quote ID: #{quote.id}", normal_style))
+        story.append(Spacer(1, 0.15*inch))
+        
+        # --- CUSTOMER INFORMATION SECTION ---
+        story.append(Paragraph("CUSTOMER INFORMATION", heading_style))
+        
+        customer_data = [
+            ['Field', 'Information'],
+            ['Contact Name', quote.contact_name or 'N/A'],
+            ['Email', quote.contact_email or 'N/A'],
+            ['Phone Number', quote.contact_phone or 'N/A'],
+            ['City', quote.location_city or 'N/A'],
+            ['Province', quote.location_province or 'N/A'],
+            ['Requested Date', quote.created_at.strftime('%B %d, %Y') if quote.created_at else 'N/A'],
+        ]
+        
+        customer_table = Table(customer_data, colWidths=[1.8*inch, 3.2*inch])
+        customer_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E7F1FF')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0D6EFD')),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
+        ]))
+        story.append(customer_table)
+        story.append(Spacer(1, 0.2*inch))
+        
+        # --- PROJECT SPECIFICATIONS SECTION ---
+        story.append(Paragraph("PROJECT SPECIFICATIONS", heading_style))
+        
+        project_data = [
+            ['Field', 'Details'],
+            ['Project Type', quote.get_project_type_display() or 'Not specified'],
+            ['System Type', quote.get_system_type_display() or 'Not specified'],
+            ['Daily Energy Usage', f"{quote.daily_energy_usage_kwh} kWh" if quote.daily_energy_usage_kwh else 'Not specified'],
+            ['Current Voltage', quote.current_voltage or 'Not specified'],
+            ['Roof Type', quote.roof_type or 'Not specified'],
+        ]
+        
+        project_table = Table(project_data, colWidths=[1.8*inch, 3.2*inch])
+        project_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E7F1FF')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0D6EFD')),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
+        ]))
+        story.append(project_table)
+        story.append(Spacer(1, 0.2*inch))
+        
+        # --- APPLIANCES AND REQUIREMENTS SECTION ---
+        story.append(Paragraph("APPLIANCES & EQUIPMENT", heading_style))
+        story.append(Paragraph(
+            quote.appliances_to_run if quote.appliances_to_run else "No appliances specified",
+            normal_style
+        ))
+        story.append(Spacer(1, 0.2*inch))
+        
+        # --- BUDGET AND TIMELINE SECTION ---
+        story.append(Paragraph("BUDGET & TIMELINE", heading_style))
+        
+        budget_data = [
+            ['Field', 'Information'],
+            ['Budget Range', quote.budget_range or 'Not specified'],
+            ['Timeline', quote.get_timeline_display() or 'Not specified'],
+            ['Preferred Payment Method', quote.payment_method or 'Not specified'],
+            ['Status', quote.get_status_display() or 'Not specified'],
+        ]
+        
+        budget_table = Table(budget_data, colWidths=[1.8*inch, 3.2*inch])
+        budget_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E7F1FF')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0D6EFD')),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('TOPPADDING', (0, 0), (-1, 0), 6),
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
+        ]))
+        story.append(budget_table)
+        story.append(Spacer(1, 0.2*inch))
+        
+        # --- ADDITIONAL NOTES SECTION (if any) ---
+        if quote.additional_notes:
+            story.append(Paragraph("ADDITIONAL NOTES", heading_style))
+            story.append(Paragraph(quote.additional_notes, normal_style))
+            story.append(Spacer(1, 0.2*inch))
+        
+        # --- FOOTER ---
+        story.append(Spacer(1, 0.3*inch))
+        footer_text = "This quote request has been exported from Solchart E-Commerce Platform. For more information, visit www.solchart.com"
+        story.append(Paragraph(footer_text, ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.grey,
+            alignment=TA_CENTER,
+            borderPadding=10
+        )))
+        
+        # Build the PDF document with all elements
+        doc.build(story)
+        
+        # Get the PDF data from buffer
+        pdf_buffer.seek(0)
+        
+        # Create HTTP response with PDF file
+        response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+        # Set filename for download as "Quote_ID_QuoteRequestID.pdf"
+        response['Content-Disposition'] = f'attachment; filename="Quote_{quote.id}_{quote.contact_name.replace(" ", "_")}.pdf"'
+        
+        return response
+        
+    except Exception as e:
+        # Handle errors gracefully and display user-friendly message
+        messages.error(request, f"Error generating PDF: {str(e)}")
+        return redirect('quote_request_details', quote_request_id=quote_request_id)

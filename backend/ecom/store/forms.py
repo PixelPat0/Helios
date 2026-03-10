@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django import forms
-from .models import Profile, Product, QuoteRequest, ContactMessage
+from .models import Profile, Product, ProductImage, QuoteRequest, ContactMessage
 from payment.models import NewsletterSubscriber
 
 class ContactForm(forms.ModelForm):
@@ -59,6 +59,47 @@ class ProductForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-control'}),
             'image': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+
+class ProductImageForm(forms.ModelForm):
+    """Form for uploading additional product images"""
+    class Meta:
+        model = ProductImage
+        fields = ['image', 'alt_text', 'order', 'is_primary']
+        widgets = {
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'alt_text': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Describe the image for accessibility'
+            }),
+            'order': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'placeholder': 'Display order (0 = first)'
+            }),
+            'is_primary': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+        labels = {
+            'image': 'Image File',
+            'alt_text': 'Alt Text',
+            'order': 'Display Order',
+            'is_primary': 'Set as Primary Image'
+        }
+
+
+class ProductImageFormSet(forms.BaseInlineFormSet):
+    """Formset for managing multiple product images"""
+    def clean(self):
+        super().clean()
+        # Ensure only one primary image (optional but recommended)
+        primary_count = sum(1 for form in self.forms if form.cleaned_data and form.cleaned_data.get('is_primary'))
+        if primary_count > 1:
+            raise forms.ValidationError("Only one image can be set as primary.")
 
 
 

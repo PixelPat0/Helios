@@ -45,6 +45,7 @@
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Payment Method</th>
+                <th>Payment Reference</th>
                 <th>Date Ordered</th>
                 <th>Actions</th>
             </tr>
@@ -63,6 +64,7 @@
                     </span>
                 </td>
                 <td>{{ order.get_payment_method_display|default:"Not specified" }}</td>
+                <td><code class="text-primary">{{ order.payment_reference|default:"—" }}</code></td>
                 <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
                 <td>
                     {% if order.status != 'cancelled' %}
@@ -92,7 +94,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center py-4">
+                <td colspan="8" class="text-center py-4">
                     <div class="text-muted">
                         <i class="bi bi-inbox h4"></i>
                         <p>No orders found</p>

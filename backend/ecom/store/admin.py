@@ -1,6 +1,6 @@
 # store/admin.py
 from django.contrib import admin
-from .models import Category, Customer, Product, Profile, QuoteRequest, SellerQuote, ContactMessage
+from .models import Category, Customer, Product, Profile, QuoteRequest, SellerQuote, ContactMessage, ProductImage
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 
@@ -19,10 +19,27 @@ class ContactMessageAdmin(admin.ModelAdmin):
     actions = [mark_as_read]
 
 # ---------------------------
+# Product Image Management
+# ---------------------------
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 3
+    fields = ('image', 'alt_text', 'order', 'is_primary', 'created_at')
+    readonly_fields = ('created_at',)
+    ordering = ('order',)
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price', 'category', 'seller', 'is_sale', 'is_available')
+    list_filter = ('category', 'is_sale', 'is_available', 'seller')
+    search_fields = ('name', 'description')
+    inlines = [ProductImageInline]
+
+# ---------------------------
 # Register store models safely
 # ---------------------------
 # Register only store-owned models here. Order is registered in payment.admin.
-for model in (Category, Customer, Product, Profile, QuoteRequest, SellerQuote):
+for model in (Category, Customer, Profile, QuoteRequest, SellerQuote, ProductImage):
     if model not in admin.site._registry:
         admin.site.register(model)
 

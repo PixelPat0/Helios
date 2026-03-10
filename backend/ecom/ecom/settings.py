@@ -13,6 +13,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-please-change')
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
+# HTTPS/SSL Settings (enforce in production)
+# Only enforce HTTPS when not in DEBUG mode (i.e., in production)
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year in production
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+
 # ALLOWED_HOSTS: read comma-separated env var; when empty default to localhost for local dev only.
 _raw_allowed = os.getenv('ALLOWED_HOSTS', '')
 if _raw_allowed:
@@ -131,9 +140,35 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@helios.example')
 ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
 TEST_SELLER_EMAIL = os.getenv('TEST_SELLER_EMAIL', 'test.seller@example.com')
 
-# MVP Payment System Settings
-BROTHER_PHONE_NUMBER = os.getenv('BROTHER_PHONE_NUMBER', '+260977XXXXXX')
-BROTHER_NAME = os.getenv('BROTHER_NAME', 'Helios Zambia (Brother Account)')
-BUSINESS_CONTACT_EMAIL = os.getenv('BUSINESS_CONTACT_EMAIL', 'helios.zambia@example.com')
+# ============================================================================
+# TEMPORARY MVP PAYMENT SYSTEM SETTINGS
+# ============================================================================
+# WARNING: This is a temporary manual payment system for MVP phase.
+# FUTURE IMPROVEMENTS:
+# 1. Integrate with proper payment gateway (Stripe, Flutterwave, PayPal, etc.)
+# 2. Implement automated payment verification and webhook handling
+# 3. Remove manual bank account details and use API-driven payment processing
+# 4. Add PCI compliance and secure payment tokenization
+# 5. Implement real-time payment status updates
+# 6. Add automated email notifications on payment success/failure
+#
+# WHEN READY TO UPGRADE:
+# - Remove BUSINESS_ACCOUNT_NAME and BUSINESS_BANK_ACCOUNT settings
+# - Replace payment_pending.html with payment gateway integration
+# - Update payment/views.py to handle webhook callbacks
+# - Implement payment.models.Payment for tracking transactions
+# - Add payment retry logic and reconciliation
+# ============================================================================
+
+# Business account details for temporary manual payment system
+BUSINESS_ACCOUNT_NAME = os.getenv('BUSINESS_ACCOUNT_NAME', 'Solchart (Zambia) Ltd')
+BUSINESS_BANK_ACCOUNT = os.getenv('BUSINESS_BANK_ACCOUNT', 'XXXXX-XXXXX-XXXXX')  # Update with actual bank account
+BUSINESS_CONTACT_EMAIL = os.getenv('BUSINESS_CONTACT_EMAIL', 'solchartzm@gmail.com')
+
+# Payment system configuration
+# TODO: Replace these with actual payment gateway credentials when upgrading
+# PAYMENT_GATEWAY = 'stripe'  # or 'flutterwave', 'paypal', etc.
+# STRIPE_API_KEY = os.getenv('STRIPE_API_KEY', '')
+# STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

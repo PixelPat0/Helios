@@ -19,8 +19,8 @@ from django.db import transaction
 from django.db.models import Q, Sum, F, ExpressionWrapper, DecimalField
 
 from cart.cart import Cart
-from store.models import Product, Profile, QuoteRequest
-from store.forms import ProductForm
+from store.models import Product, ProductImage, Profile, QuoteRequest
+from store.forms import ProductForm, ProductImageForm
 from .email_utils import send_order_notifications
 from .decorators import seller_required
 from .utils import PaymentProcessor, PaymentConfirmation, log_payment_attempt
@@ -231,6 +231,58 @@ def product_delete(request, pk):
     return render(request, 'payment/product_confirm_delete.html', {'product': product})
 
 
+@seller_required
+def product_images(request, pk):
+    """Manage images for a product"""
+    product = get_object_or_404(Product, pk=pk, seller=request.user.seller_profile)
+    images = product.product_images.all()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'upload':
+            form = ProductImageForm(request.POST, request.FILES)
+            if form.is_valid():
+                image = form.save(commit=False)
+                image.product = product
+                image.save()
+                message.success(request, "Image uploaded successfully!")
+                return redirect('product_images', pk=product.id)
+        
+        elif action == 'delete':
+            image_id = request.POST.get('image_id')
+            image = get_object_or_404(ProductImage, id=image_id, product=product)
+            image.delete()
+            message.success(request, "Image deleted successfully!")
+            return redirect('product_images', pk=product.id)
+        
+        elif action == 'set_primary':
+            image_id = request.POST.get('image_id')
+            image = get_object_or_404(ProductImage, id=image_id, product=product)
+            # Unset all other primary images
+            product.product_images.exclude(id=image_id).update(is_primary=False)
+            image.is_primary = True
+            image.save()
+            message.success(request, "Primary image updated!")
+            return redirect('product_images', pk=product.id)
+        
+        elif action == 'reorder':
+            import json
+            order_data = json.loads(request.POST.get('order_data', '[]'))
+            for item in order_data:
+                ProductImage.objects.filter(id=item['id'], product=product).update(order=item['order'])
+            message.success(request, "Image order updated!")
+            return redirect('product_images', pk=product.id)
+    else:
+        form = ProductImageForm()
+    
+    return render(request, 'payment/product_images.html', {
+        'product': product,
+        'images': images,
+        'form': form
+    })
+
+
 # -------------------------
 # Seller account lifecycle (signup/login/logout/profile)
 # -------------------------
@@ -411,7 +463,7 @@ def not_shipped_dash(request):
     elif status_filter == 'all':
         orders_qs = Order.objects.exclude(status__in=['shipped', 'delivered'])
     else:
-        orders_qs = Order.objects.filter(status__in=['paid', 'processing'])
+        orders_qs = Order.objects.filter(status__in=['pending', 'paid', 'processing'])
 
     if search_query:
         orders_qs = orders_qs.filter(full_name__icontains=search_query) | orders_qs.filter(id__icontains=search_query) | orders_qs.filter(email__icontains=search_query)
@@ -527,6 +579,19 @@ def process_order(request):
     with transaction.atomic():
         user = request.user if request.user.is_authenticated else None
 
+        # Create order in pending state; we'll verify payment manually later
+        order = Order.objects.create(
+            user=user,
+            full_name=full_name,
+            email=email,
+            shipping_address=shipping_address,
+            amount_paid=amount_paid,
+            phone_number=phone_number if hasattr(Order, 'phone_number') else None,
+            status='pending',
+            payment_method=payment_method,
+            payment_reference=payment_reference
+        )
+
         # =====================================================================
         # PAYMENT PROCESSING
         # =====================================================================
@@ -547,19 +612,6 @@ def process_order(request):
         # Log the payment attempt for auditing
         log_payment_attempt(order, payment_method, amount_paid)
         # =====================================================================
-
-        # Create order in pending state; we'll verify payment manually later
-        order = Order.objects.create(
-            user=user,
-            full_name=full_name,
-            email=email,
-            shipping_address=shipping_address,
-            amount_paid=amount_paid,
-            phone_number=phone_number if hasattr(Order, 'phone_number') else None,
-            status='pending',
-            payment_method=payment_method,
-            payment_reference=payment_reference
-        )
 
         # create order items
         for product in cart_products:
@@ -906,8 +958,8 @@ def payment_pending(request, order_id):
     context = {
         'order': order,
         'payment_code': order.payment_code,
-        'brother_number': settings.BROTHER_PHONE_NUMBER,
-        'brother_name': settings.BROTHER_NAME,
+        'business_account': settings.BUSINESS_ACCOUNT_NAME,
+        'business_bank_account': settings.BUSINESS_BANK_ACCOUNT,
         'business_email': settings.BUSINESS_CONTACT_EMAIL,
     }
     

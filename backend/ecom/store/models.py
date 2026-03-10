@@ -105,6 +105,36 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    def get_primary_image(self):
+        """Returns the primary image (first image if exists, else fallback to main image field)"""
+        product_images = self.product_images.all()
+        if product_images.exists():
+            return product_images.first()
+        return None
+
+
+class ProductImage(models.Model):
+    """
+    Additional images for a product. Allows multiple images per product with ordering.
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images')
+    image = models.ImageField(upload_to='uploads/products/')
+    alt_text = models.CharField(max_length=200, blank=True, help_text="Alternative text for accessibility")
+    is_primary = models.BooleanField(default=False, help_text="Set as primary image for the product")
+    order = models.PositiveIntegerField(default=0, help_text="Order of display (lower numbers appear first)")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = "Product Image"
+        verbose_name_plural = "Product Images"
+        indexes = [
+            models.Index(fields=['product', 'order']),
+        ]
+
+    def __str__(self):
+        return f"{self.product.name} - Image {self.order}"
+
 
 # ---------------------------------------------------------
 # QUOTE REQUEST SYSTEM

@@ -213,17 +213,14 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         """Auto-generate payment code on first save."""
-        if not self.pk:
-            # First save — let Django assign the ID
-            super().save(*args, **kwargs)
-            # Now generate code with the ID
+        is_new = not self.pk
+        # Save first to get the ID
+        super().save(*args, **kwargs)
+        # Now generate code with the ID if it's a new instance
+        if is_new and not self.payment_code:
             self.generate_payment_code()
-            super().save(*args, **kwargs)
-        else:
-            # Subsequent saves
-            if not self.payment_code:
-                self.generate_payment_code()
-            super().save(*args, **kwargs)
+            # Update only the payment_code field to avoid re-inserting
+            Order.objects.filter(pk=self.pk).update(payment_code=self.payment_code)
 
     def __str__(self):
         return f'Order - {self.id}'

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <!-- Header with Icon -->
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="text-center">
+                        <i class="bi bi-check-circle-fill fs-1 mb-3 d-block"></i>
+                        <h2 class="mb-0">Review Your Quote Request</h2>
+                        <p class="text-white-50 mt-2">Please verify the information below before submitting</p>
+                    </div>
+                </div>
+
+                <div class="card-body p-5">
+                    <!-- Customer Information Section -->
+                    <div class="mb-5">
+                        <h5 class="text-primary fw-bold mb-3">
+                            <i class="bi bi-person-circle"></i> Customer Information
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Full Name</label>
+                                <p class="mb-0"><strong>{{ quote_data.contact_name }}</strong></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Email Address</label>
+                                <p class="mb-0"><strong>{{ quote_data.contact_email }}</strong></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Phone Number</label>
+                                <p class="mb-0"><strong>{{ quote_data.contact_phone }}</strong></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">City</label>
+                                <p class="mb-0"><strong>{{ quote_data.location_city }}</strong></p>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="text-muted small">Province</label>
+                                <p class="mb-0"><strong>{{ quote_data.location_province }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Project Specifications Section -->
+                    <div class="mb-5">
+                        <h5 class="text-primary fw-bold mb-3">
+                            <i class="bi bi-lightning-charge"></i> Project Specifications
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Project Type</label>
+                                <p class="mb-0"><strong>{{ quote_data.project_type }}</strong></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">System Type</label>
+                                <p class="mb-0"><strong>{{ quote_data.system_type }}</strong></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Daily Energy Usage</label>
+                                <p class="mb-0"><strong>{% if quote_data.daily_energy_usage_kwh %}{{ quote_data.daily_energy_usage_kwh }} kWh{% else %}Not specified{% endif %}</strong></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Current Voltage</label>
+                                <p class="mb-0"><strong>{{ quote_data.current_voltage|default:"Not specified" }}</strong></p>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="text-muted small">Roof Type</label>
+                                <p class="mb-0"><strong>{{ quote_data.roof_type|default:"Not specified" }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Appliances Section -->
+                    <div class="mb-5">
+                        <h5 class="text-primary fw-bold mb-3">
+                            <i class="bi bi-tools"></i> Appliances & Equipment
+                        </h5>
+                        <div class="bg-light p-3 rounded">
+                            <p class="mb-0">{{ quote_data.appliances_to_run }}</p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Budget & Timeline Section -->
+                    <div class="mb-5">
+                        <h5 class="text-primary fw-bold mb-3">
+                            <i class="bi bi-calendar-check"></i> Budget & Timeline
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Budget Range</label>
+                                <p class="mb-0"><strong>{{ quote_data.budget_range|default:"Not specified" }}</strong></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small">Timeline</label>
+                                <p class="mb-0"><strong>{{ quote_data.timeline }}</strong></p>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="text-muted small">Preferred Payment Method</label>
+                                <p class="mb-0"><strong>{{ quote_data.payment_method }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes (if present) -->
+                    {% if quote_data.additional_notes %}
+                    <hr class="my-4">
+                    <div class="mb-5">
+                        <h5 class="text-primary fw-bold mb-3">
+                            <i class="bi bi-chat-dots"></i> Additional Notes
+                        </h5>
+                        <div class="bg-light p-3 rounded">
+                            <p class="mb-0">{{ quote_data.additional_notes }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <hr class="my-4">
+
+                    <!-- Info Alert -->
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>What happens next?</strong>
+                        <p class="mt-2 mb-0">
+                            We will review your quote request and send you customized solutions and pricing to your email address within 24-48 hours.
+                            You will receive a confirmation email immediately after submitting this form.
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'request_quote' %}" class="btn btn-lg btn-outline-secondary" title="Go back and edit">
+                            <i class="bi bi-pencil-square"></i> Edit Information
+                        </a>
+                        <form method="POST" class="d-inline w-100">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-lg btn-primary w-100" title="Confirm and submit quote request">
+                                <i class="bi bi-check-lg"></i> Confirm & Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="card-footer bg-light text-center py-3">
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check"></i> Your information is secure and will only be used to process your quote request.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

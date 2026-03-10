@@ -55,7 +55,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'payment_code', 'full_name', 'email', 'amount_paid', 'status', 'date_ordered')
     list_filter = ('status', 'date_ordered')
     search_fields = ('full_name', 'email', 'id', 'payment_code')
-    readonly_fields = ('date_ordered', 'payment_code')
+    readonly_fields = ('id', 'date_ordered', 'payment_code')
     inlines = [OrderItemInline]
     actions = ['confirm_payment_received', 'mark_processing', 'mark_shipped']
     
