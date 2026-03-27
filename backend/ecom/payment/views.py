@@ -447,6 +447,14 @@ def not_shipped_dash(request):
                 order.cancellation_notes = cancellation_reason
                 order.save()
                 message.success(request, f"Order #{order_id} has been cancelled")
+            elif action == 'change_status':
+                new_status = request.POST.get('new_status')
+                valid_statuses = dict(Order.ORDER_STATUS)
+                if new_status in valid_statuses:
+                    order.update_status(new_status)
+                    message.success(request, f"Order #{order_id} status updated to {order.get_status_display()}")
+                else:
+                    message.error(request, "Invalid status selected")
         except Order.DoesNotExist:
             message.error(request, "Order not found")
 
@@ -491,6 +499,14 @@ def shipped_dash(request):
                 order.status = 'processing'
                 order.save()
                 message.success(request, f"Order #{order_id} returned to processing")
+            elif action == 'change_status':
+                new_status = request.POST.get('new_status')
+                valid_statuses = dict(Order.ORDER_STATUS)
+                if new_status in valid_statuses:
+                    order.update_status(new_status)
+                    message.success(request, f"Order #{order_id} status updated to {order.get_status_display()}")
+                else:
+                    message.error(request, "Invalid status selected")
         except Order.DoesNotExist:
             message.error(request, "Order not found")
 
@@ -512,7 +528,8 @@ def shipped_dash(request):
     if search_query:
         orders_qs = orders_qs.filter(full_name__icontains=search_query) | orders_qs.filter(id__icontains=search_query) | orders_qs.filter(email__icontains=search_query)
 
-    orders_qs = orders_qs.select_related('user').order_by('-date_shipped')
+    # Order by most recently updated (delivered first, then by shipped date)
+    orders_qs = orders_qs.select_related('user').order_by('-date_delivered', '-date_shipped')
     return render(request, 'payment/shipped_dash.html', {"orders": orders_qs, "current_filter": status_filter, "search_query": search_query})
 
 

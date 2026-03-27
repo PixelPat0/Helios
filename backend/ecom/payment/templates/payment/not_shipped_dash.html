@@ -68,15 +68,22 @@
                 <td>{{ order.date_ordered|date:"Y-m-d H:i" }}</td>
                 <td>
                     {% if order.status != 'cancelled' %}
-                        <div class="btn-group">
-                            {# 💡 FIX 1: Set the form action to the update_order_status view and pass the pk #}
-                            <form method="POST" action="{% url 'update_order_status' pk=order.id %}" class="d-inline me-2">
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <form method="POST" class="d-inline">
                                 {% csrf_token %}
-                                {# Removed: <input type="hidden" name="num" value="{{ order.id }}"> as pk is in URL #}
-                                <input type="hidden" name="action" value="shipped">
-                                <button type="submit" class="btn btn-success btn-sm">
-                                    <i class="bi bi-truck"></i> Ship
-                                </button>
+                                <div class="input-group input-group-sm" style="width: auto;">
+                                    <select name="new_status" class="form-select form-select-sm" required>
+                                        <option value="">-- Select Status --</option>
+                                        <option value="processing">Processing</option>
+                                        <option value="shipped">Shipped</option>
+                                        <option value="paid">Paid</option>
+                                    </select>
+                                    <input type="hidden" name="num" value="{{ order.id }}">
+                                    <input type="hidden" name="action" value="change_status">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-check"></i> Save
+                                    </button>
+                                </div>
                             </form>
                             <button type="button" class="btn btn-danger btn-sm" 
                                     data-bs-toggle="modal" 
@@ -109,15 +116,14 @@
         <div class="modal fade" id="cancelModal{{ order.id }}" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    {# 💡 FIX 2: Set the form action to the update_order_status view and pass the pk #}
-                    <form method="POST" action="{% url 'update_order_status' pk=order.id %}">
+                    <form method="POST">
                         {% csrf_token %}
                         <div class="modal-header">
                             <h5 class="modal-title">Cancel Order #{{ order.id }}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            {# Removed: <input type="hidden" name="num" value="{{ order.id }}"> as pk is in URL #}
+                            <input type="hidden" name="num" value="{{ order.id }}">
                             <input type="hidden" name="action" value="cancel">
                             <div class="mb-3">
                                 <label for="reason{{ order.id }}" class="form-label">Cancellation Reason</label>

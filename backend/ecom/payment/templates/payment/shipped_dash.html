@@ -55,26 +55,24 @@
                 </td>
                 <td>{{ order.date_shipped|date:"Y-m-d H:i" }}</td>
                 <td>
-                    <div class="btn-group">
-                        {% if order.status == 'shipped' %}
-                        <form method="POST" class="d-inline me-2">
-                            {% csrf_token %}
-                            <input type="hidden" name="num" value="{{ order.id }}">
-                            <input type="hidden" name="action" value="deliver">
-                            <button type="submit" class="btn btn-success btn-sm">
-                                <i class="bi bi-check2-circle"></i> Mark Delivered
-                            </button>
-                        </form>
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
                         <form method="POST" class="d-inline">
                             {% csrf_token %}
-                            <input type="hidden" name="num" value="{{ order.id }}">
-                            <input type="hidden" name="action" value="process">
-                            <button type="submit" class="btn btn-warning btn-sm">
-                                <i class="bi bi-arrow-repeat"></i> Return to Processing
-                            </button>
+                            <div class="input-group input-group-sm" style="width: auto;">
+                                <select name="new_status" class="form-select form-select-sm" required>
+                                    <option value="">-- Select Status --</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                </select>
+                                <input type="hidden" name="num" value="{{ order.id }}">
+                                <input type="hidden" name="action" value="change_status">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-check"></i> Save
+                                </button>
+                            </div>
                         </form>
-                        {% endif %}
-                        <button class="btn btn-info btn-sm ms-2" onclick="exportOrderDetails('{{ order.id }}')">
+                        <button class="btn btn-info btn-sm" onclick="exportOrderDetails('{{ order.id }}')">
                             <i class="bi bi-download"></i> Export
                         </button>
                     </div>
