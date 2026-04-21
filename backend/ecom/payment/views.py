@@ -434,6 +434,20 @@ def not_shipped_dash(request):
     if request.method == "POST":
         order_id = request.POST.get('num')
         action = request.POST.get('action')
+        
+        # Validate order_id is a valid integer
+        try:
+            order_id = int(order_id)
+        except (ValueError, TypeError):
+            message.error(request, "Invalid order ID")
+            return redirect('not_shipped_dash')
+        
+        # Validate action parameter
+        valid_actions = ['ship', 'cancel', 'change_status']
+        if action not in valid_actions:
+            message.error(request, "Invalid action")
+            return redirect('not_shipped_dash')
+        
         try:
             order = Order.objects.get(id=order_id)
             if action == 'ship':
@@ -442,13 +456,16 @@ def not_shipped_dash(request):
                 order.save()
                 message.success(request, f"Order #{order_id} marked as shipped")
             elif action == 'cancel':
-                cancellation_reason = request.POST.get('reason', 'Cancelled by admin')
+                cancellation_reason = request.POST.get('reason', 'Cancelled by admin').strip()
+                if not cancellation_reason:
+                    message.error(request, "Cancellation reason is required")
+                    return redirect('not_shipped_dash')
                 order.status = 'cancelled'
                 order.cancellation_notes = cancellation_reason
                 order.save()
                 message.success(request, f"Order #{order_id} has been cancelled")
             elif action == 'change_status':
-                new_status = request.POST.get('new_status')
+                new_status = request.POST.get('new_status', '').strip()
                 valid_statuses = dict(Order.ORDER_STATUS)
                 if new_status in valid_statuses:
                     order.update_status(new_status)
@@ -489,6 +506,20 @@ def shipped_dash(request):
     if request.method == "POST":
         order_id = request.POST.get('num')
         action = request.POST.get('action')
+        
+        # Validate order_id is a valid integer
+        try:
+            order_id = int(order_id)
+        except (ValueError, TypeError):
+            message.error(request, "Invalid order ID")
+            return redirect('shipped_dash')
+        
+        # Validate action parameter
+        valid_actions = ['deliver', 'process', 'change_status']
+        if action not in valid_actions:
+            message.error(request, "Invalid action")
+            return redirect('shipped_dash')
+        
         try:
             order = Order.objects.get(id=order_id)
             if action == 'deliver':
@@ -500,7 +531,7 @@ def shipped_dash(request):
                 order.save()
                 message.success(request, f"Order #{order_id} returned to processing")
             elif action == 'change_status':
-                new_status = request.POST.get('new_status')
+                new_status = request.POST.get('new_status', '').strip()
                 valid_statuses = dict(Order.ORDER_STATUS)
                 if new_status in valid_statuses:
                     order.update_status(new_status)

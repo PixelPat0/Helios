@@ -22,6 +22,22 @@ SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year in production
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
 
+# Additional Security Headers
+X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking by denying framing in iframes
+SECURE_CONTENT_SECURITY_POLICY = {
+    'default-src': ("'self'",),
+    'script-src': ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "code.jquery.com"),
+    'style-src': ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "fonts.googleapis.com"),
+    'img-src': ("'self'", "data:", "https:"),
+    'font-src': ("'self'", "fonts.gstatic.com", "cdn.jsdelivr.net"),
+    'connect-src': ("'self'",),
+    'object-src': ("'none'",),
+    'frame-ancestors': ("'none'",),
+} if not DEBUG else {}
+
+SECURE_BROWSER_XSS_FILTER = True  # Enable browser XSS protection header
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'  # Control referrer information
+
 # ALLOWED_HOSTS: read comma-separated env var; when empty default to localhost for local dev only.
 _raw_allowed = os.getenv('ALLOWED_HOSTS', '')
 if _raw_allowed:
@@ -124,6 +140,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = ['static/']
 
 MEDIA_URL = 'media/'
